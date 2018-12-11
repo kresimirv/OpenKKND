@@ -1,3 +1,5 @@
+#include <list>
+
 #include "src/kknd.h"
 
 #include "src/_unsorted_functions.h"
@@ -8,26 +10,27 @@
 
 
 
-ScriptEvent *script_event_list_free_pool;
-ScriptEvent *script_event_list;
+//std::list<ScriptEvent*> script_event_list_free_pool;
+std::list<ScriptEvent*>  script_event_list;
 
 
 //----- (004237F0) --------------------------------------------------------
 bool script_event_list_alloc()
 {
-    script_event_list = (ScriptEvent *)malloc(0x3E80u);
-    if (script_event_list)
-    {
-        int v1 = 0;
-        do
-        {
-            script_event_list[v1].next = &script_event_list[v1 + 1];
-            ++v1;
-        } while (v1 < 999);
-        script_event_list[999].next = 0;
-        script_event_list_free_pool = script_event_list;
-    }
-    return script_event_list != nullptr;
+    //script_event_list = (ScriptEvent *)malloc(0x3E80u);
+    //if (script_event_list)
+    //{
+    //    int v1 = 0;
+    //    do
+    //    {
+    //        script_event_list[v1].next = &script_event_list[v1 + 1];
+    //        ++v1;
+    //    } while (v1 < 999);
+    //    script_event_list[999].next = 0;
+    //    script_event_list_free_pool = script_event_list;
+    //}
+    //return script_event_list != nullptr;
+    return true;
 }
 
 //----- (00423840) --------------------------------------------------------
@@ -35,12 +38,17 @@ bool script_trigger_event(Script *sender, enum SCRIPT_EVENT event, void *param, 
 {
     if (receiver->routine_type == SCRIPT_FUNCTION && receiver->event_handler) {
         receiver->event_handler(receiver, sender, event, param);
-    } else {
-        ScriptEvent *result = script_event_list_free_pool;
-        if (!script_event_list_free_pool)
-            return false;
+    }
+    else {
+        //ScriptEvent *result = script_event_list_free_pool;
+        //if (!script_event_list_free_pool)
+        //    return false;
 
-        script_event_list_free_pool = script_event_list_free_pool->next;
+        //script_event_list_free_pool = script_event_list_free_pool->next;*/
+        ScriptEvent *result = new ScriptEvent();
+        script_event_list.push_back(result);
+        memset(result, 0, sizeof(ScriptEvent));
+
         result->next = 0;
         result->sender = 0;
         result->event = (SCRIPT_EVENT)0;
@@ -67,16 +75,25 @@ bool script_trigger_event_group(Script *sender, enum SCRIPT_EVENT event, void *p
     {
         for (auto self : script_execute_list)
         {
-            v7 = script_event_list_free_pool;
+            //v7 = script_event_list_free_pool;
+            if (script_event_list.empty())
+            {
+                v7 = new ScriptEvent();
+                memset(v7, 0, sizeof(v7));
+            }
+            v7 = *script_event_list.begin();
+
+
             if (self->routine_type == SCRIPT_FUNCTION && self->event_handler)
             {
                 self->event_handler(self, sender, event, param);
             }
             else
             {
-                if (!script_event_list_free_pool)
-                    return 0;
-                script_event_list_free_pool = script_event_list_free_pool->next;
+                //if (!script_event_list_free_pool)
+                //    return 0;
+                //script_event_list_free_pool = script_event_list_free_pool->next;
+
                 v7->next = 0;
                 v7->sender = 0;
                 v7->event = (SCRIPT_EVENT)0;
@@ -90,7 +107,7 @@ bool script_trigger_event_group(Script *sender, enum SCRIPT_EVENT event, void *p
             self->flags_20 |= SCRIPT_FLAGS_20_EVENT_TRIGGER;
             self->flags_24 |= self->flags_20;
             //self = self->next;
-        } 
+        }
     }
     else
     {
@@ -104,10 +121,18 @@ bool script_trigger_event_group(Script *sender, enum SCRIPT_EVENT event, void *p
                 }
                 else
                 {
-                    v9 = script_event_list_free_pool;
-                    if (!script_event_list_free_pool)
-                        return 0;
-                    script_event_list_free_pool = script_event_list_free_pool->next;
+                    //v9 = script_event_list_free_pool;
+                    //if (!script_event_list_free_pool)
+                    //    return 0;
+                    //script_event_list_free_pool = script_event_list_free_pool->next;
+                    //v7 = script_event_list_free_pool;
+                    if (script_event_list.empty())
+                    {
+                        v9 = new ScriptEvent();
+                        memset(v9, 0, sizeof(v9));
+                    }
+                    v9 = *script_event_list.begin();
+
                     v9->next = 0;
                     v9->sender = 0;
                     v9->event = (SCRIPT_EVENT)0;
@@ -143,8 +168,9 @@ ScriptEvent *script_get_next_event(Script *a1)
 //----- (00423A20) --------------------------------------------------------
 void script_discard_event(ScriptEvent *a1)
 {
-    a1->next = script_event_list_free_pool;
-    script_event_list_free_pool = a1;
+    //a1->next = script_event_list_free_pool;
+    //script_event_list_free_pool = a1;
+    script_event_list.push_front(a1);
 }
 
 //----- (00423A30) --------------------------------------------------------
@@ -154,14 +180,21 @@ void script_discard_all_events(Script *a1)
 
     for (i = a1->event_list; i; i = a1->event_list)
     {
-        a1->event_list = i->next;
-        i->next = script_event_list_free_pool;      // INLINED  423A20  script_discard_event
-        script_event_list_free_pool = i;
+        //a1->event_list = i->next;
+        //i->next = script_event_list_free_pool;      // INLINED  423A20  script_discard_event
+        //script_event_list_free_pool = i;
     }
+
 }
 
 //----- (00423A60) --------------------------------------------------------
 void script_event_list_free()
 {
-    free(script_event_list);
+    //free(script_event_list);
+    for (auto event : script_event_list)
+    {
+        delete event;
+    }
+   
+    script_event_list.clear();
 }
