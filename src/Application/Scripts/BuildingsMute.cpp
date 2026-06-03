@@ -90,8 +90,8 @@ void EventHandler_BeastEnclosure(Script *receiver, Script *sender, enum SCRIPT_E
                 v7->num_upgrades = 4;
             if (v6->player_side != player_side)
                 goto LABEL_26;
-            --__477318_beastenclosure_negindex[v7->num_upgrades];
-            ++_477318_beastenclosure.num_buildings_by_level[v7->num_upgrades];
+            --__477318_beastenclosure_negindex[v7->num_upgrades - 1];
+            ++_477318_beastenclosure.num_buildings_by_level[v7->num_upgrades - 1];
             if (v7->num_upgrades > max_beastenclosure_level)
                 max_beastenclosure_level = v7->num_upgrades;
             tech_level = v7->num_upgrades - 2;
@@ -229,7 +229,7 @@ void entity_mode_beastenclosure_set_default_production(Entity *a1)
         }
         if (!(levels[v6].disabled_units_mask & 0x10000))
             production_group_enable(v5, UNIT_STATS_MUTE_GIANT_SCORPION, 2528);
-        ++_477318_beastenclosure.num_buildings_by_level[1];
+        ++_477318_beastenclosure.num_buildings_by_level[0];
     }
     else if (v2 == 0)
     {
@@ -252,13 +252,13 @@ void entity_mode_402350_beastenclosure(Entity *a1)
     if (player_side == a1->player_side)
     {
         v2 = max_beastenclosure_level;
-        --_477318_beastenclosure.num_buildings_by_level[*((_DWORD *)v1 + 1)];
+        --_477318_beastenclosure.num_buildings_by_level[*((_DWORD *)v1 + 1) - 1];
         v3 = *((_DWORD *)v1 + 1);
-        if (v3 == v2 && !_477318_beastenclosure.num_buildings_by_level[v3])
+        if (v3 == v2 && !_477318_beastenclosure.num_buildings_by_level[v3 - 1])
         {
             if (v3 > 0)
             {
-                v4 = (char *)& _477318_beastenclosure + 4 * v3;
+                v4 = (char *)& _477318_beastenclosure + 4 * (v3 - 1);
                 do
                 {
                     v5 = *((_DWORD *)v4 - 1);
@@ -294,13 +294,13 @@ void entity_mode_beastenclosure_on_death(Entity *a1)
     if (player_side == a1->player_side)
     {
         v3 = max_beastenclosure_level;
-        --_477318_beastenclosure.num_buildings_by_level[*((_DWORD *)v2 + 1)];
+        --_477318_beastenclosure.num_buildings_by_level[*((_DWORD *)v2 + 1) - 1];
         v4 = *((_DWORD *)v2 + 1);
-        if (v4 == v3 && !_477318_beastenclosure.num_buildings_by_level[v4])
+        if (v4 == v3 && !_477318_beastenclosure.num_buildings_by_level[v4 - 1])
         {
             if (v4 > 0)
             {
-                v5 = (char *)& _477318_beastenclosure + 4 * v4;
+                v5 = (char *)& _477318_beastenclosure + 4 * (v4 - 1);
                 do
                 {
                     v6 = *((_DWORD *)v5 - 1);

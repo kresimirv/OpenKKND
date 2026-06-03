@@ -554,7 +554,7 @@ void entity_clanhall_on_upgrade_complete(Script *receiver, Script *sender, enum 
 	{
 		can_unlock_towers = 0;
         --_477378_clanhall.num_buildings_by_level[v6->num_upgrades - 1];
-		++_477378_clanhall.num_buildings_by_level[v6->num_upgrades];
+		++_477378_clanhall.num_buildings_by_level[v6->num_upgrades - 1];
 		if (v6->num_upgrades > max_clanhall_level)
 		{
 			max_clanhall_level = v6->num_upgrades;
@@ -793,7 +793,7 @@ void entity_mode_clanhall_on_building_completed(Entity *a1)
 				v7 = current_level_idx;
 			}
 		}
-		++_477378_clanhall.num_buildings_by_level[1];
+		++_477378_clanhall.num_buildings_by_level[0];
 	}
 	else if (v2 == 0)
 	{
@@ -844,9 +844,9 @@ void entity_mode_clanhall_on_death_reset_production_options(Entity *a1)
 	v3 = (EntityBuildingState *)a1->state;
 	if (player_side != v2)
 		return;
-	--_477378_clanhall.num_buildings_by_level[v3->num_upgrades];
+	--_477378_clanhall.num_buildings_by_level[v3->num_upgrades - 1];
 	v4 = v3->num_upgrades;
-	if (v4 != max_clanhall_level || _477378_clanhall.num_buildings_by_level[v4])
+	if (v4 != max_clanhall_level || _477378_clanhall.num_buildings_by_level[v4 - 1])
 		goto LABEL_22;
 	if (v4 <= 0)
 		goto LABEL_21;
@@ -8105,8 +8105,8 @@ void entity_outpost_on_upgrade_complete(Script *receiver, Script *sender, enum S
 	if (v5->player_side == player_side)
 	{
 		can_unlock_towers = 0;
-		--__47B3E0_outpost_levels_negindex[v6->num_upgrades];
-		++_47B3E0_outpost_levels.num_buildings_by_level[v6->num_upgrades];
+		--__47B3E0_outpost_levels_negindex[v6->num_upgrades - 1];
+		++_47B3E0_outpost_levels.num_buildings_by_level[v6->num_upgrades - 1];
 		if (v6->num_upgrades > max_outpost_level)
 		{
 			max_outpost_level = v6->num_upgrades;
@@ -8363,7 +8363,7 @@ void entity_mode_outpost_set_default_production(Entity *a1)
 				v7 = current_level_idx;
 			}
 		}
-		++_47B3E0_outpost_levels.num_buildings_by_level[1];
+		++_47B3E0_outpost_levels.num_buildings_by_level[0];
 	}
 	else if (v2 == 0)
 	{
@@ -8420,9 +8420,9 @@ void entity_mode_outpost_on_death_update_production(Entity *a1)
 	v3 = (EntityBuildingState *)a1->state;
 	if (player_side != v2)
 		return;
-	--_47B3E0_outpost_levels.num_buildings_by_level[v3->num_upgrades];
+	--_47B3E0_outpost_levels.num_buildings_by_level[v3->num_upgrades - 1];
 	v4 = v3->num_upgrades;
-	if (v4 != max_outpost_level || _47B3E0_outpost_levels.num_buildings_by_level[v4])
+	if (v4 != max_outpost_level || _47B3E0_outpost_levels.num_buildings_by_level[v4 - 1])
 		goto LABEL_22;
 	if (v4 <= 0)
 		goto LABEL_21;
@@ -8455,7 +8455,7 @@ void entity_mode_outpost_on_death_update_production(Entity *a1)
 			goto LABEL_17;
 		}
 	LABEL_18:
-		v7 = __47B3E0_outpost_levels_negindex[v4--];
+		v7 = __47B3E0_outpost_levels_negindex[v4-- - 1];
 	} while (!v7 && v4 > 0);
 	v1 = v13;
 LABEL_21:

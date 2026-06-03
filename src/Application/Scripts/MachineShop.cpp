@@ -42,8 +42,8 @@ void entity_machineshop_on_upgrade_complete(Script *receiver, Script *sender, en
         v7->num_upgrades = 5;
     if (v6->player_side == player_side)
     {
-        --__47739C_machineshop_negindex[v7->num_upgrades];
-        ++_47739C_machineshop.num_buildings_by_level[v7->num_upgrades];
+        --__47739C_machineshop_negindex[v7->num_upgrades - 1];
+        ++_47739C_machineshop.num_buildings_by_level[v7->num_upgrades - 1];
         if (v7->num_upgrades > max_machineshop_level)
             max_machineshop_level = v7->num_upgrades;
         switch (v7->num_upgrades)
@@ -229,7 +229,7 @@ void entity_mode_machineshop_set_default_production(Entity *a1)
         }
         if (!(levels[v6].disabled_units_mask & 0x20000))
             production_group_enable(v5, UNIT_STATS_SURV_MOBILE_DERRICK, 2228);
-        ++_47739C_machineshop.num_buildings_by_level[1];
+        ++_47739C_machineshop.num_buildings_by_level[0];
     }
     else if (v2 == 0)
     {
@@ -252,13 +252,13 @@ void entity_mode_machineshop_on_death_no_default(Entity *a1)
     if (player_side == a1->player_side)
     {
         v2 = max_machineshop_level;                 // INLINED recalc new max level
-        --_47739C_machineshop.num_buildings_by_level[v1->num_upgrades];
+        --_47739C_machineshop.num_buildings_by_level[v1->num_upgrades - 1];
         v3 = v1->num_upgrades;
-        if (v3 == v2 && !_47739C_machineshop.num_buildings_by_level[v3])
+        if (v3 == v2 && !_47739C_machineshop.num_buildings_by_level[v3 - 1])
         {
             if (v3 > 0)
             {
-                v4 = &_47739C_machineshop.num_buildings_by_level[v3];
+                v4 = &_47739C_machineshop.num_buildings_by_level[v3 - 1];
                 do
                 {
                     v5 = *(v4 - 1);
@@ -319,13 +319,13 @@ void entity_mode_machineshop_on_death(Entity *a1)
     if (player_side == a1->player_side)
     {
         v3 = max_machineshop_level;                 // INLINED recalc new max level
-        --_47739C_machineshop.num_buildings_by_level[v2->num_upgrades];
+        --_47739C_machineshop.num_buildings_by_level[v2->num_upgrades - 1];
         v4 = v2->num_upgrades;
-        if (v4 == v3 && !_47739C_machineshop.num_buildings_by_level[v4])
+        if (v4 == v3 && !_47739C_machineshop.num_buildings_by_level[v4 - 1])
         {
             if (v4 > 0)
             {
-                v5 = &_47739C_machineshop.num_buildings_by_level[v4];
+                v5 = &_47739C_machineshop.num_buildings_by_level[v4 - 1];
                 do
                 {
                     v6 = *(v5 - 1);
