@@ -232,4 +232,4 @@ extern char aDirectxModem[]; // idb
 extern char aDirectxSerial[]; // idb
 extern char aDirectxIpx[]; // idb
 extern char *netz_468CD8_datetime[2];
-extern char netz_default_player_name[7];
+extern char netz_default_player_name[9];

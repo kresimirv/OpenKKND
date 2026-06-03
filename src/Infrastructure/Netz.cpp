@@ -117,7 +117,7 @@ char aDirectxModem[] = "DirectX modem"; // idb
 char aDirectxSerial[] = "DirectX serial"; // idb
 char aDirectxIpx[] = "DirectX IPX"; // idb
 char *netz_468CD8_datetime[2] = { "Oct 23 1997", "17:00:00" };
-char netz_default_player_name[7] = "PLAYER";
+char netz_default_player_name[9] = "PLAYER";
 
 
 
