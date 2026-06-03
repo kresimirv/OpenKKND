@@ -152,8 +152,11 @@ void Game::Run() {
                     input_update_mouse();
                     _43A370_process_sound();
                     stru1_animate();
-                    boxd_40EA20_gameloop_update();
-                    _44C4B0_mess_with_turrets();
+                    if (!single_player_game || !is_async_execution_supported)
+                    {
+                        boxd_40EA20_gameloop_update();
+                        _44C4B0_mess_with_turrets();
+                    }
                     script_list_update();
                     _4393F0_call_mapd();
                     draw_list_update_and_draw();

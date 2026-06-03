@@ -1877,6 +1877,9 @@ void cursor_group_orders(CursorHandler *a1)
     if (a1->_18_script)
         return;
 
+    if (single_player_game && is_async_execution_supported)
+        return;
+
 
     v12 = 1;
     if (!a1->cursor_target_ai || !is_map_revealed_at(a1->_70_sprite->x, a1->_70_sprite->y))

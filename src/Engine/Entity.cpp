@@ -177,6 +177,9 @@ void entity_load_attack_mobd(Entity *entity, int idx)
 //----- (0041A270) --------------------------------------------------------
 void entity_move(Entity *a1, _47CAF0_task_attachment1_move_task *a2)
 {
+    if (single_player_game && is_async_execution_supported)
+        return;
+
     int v4; // eax@5
     int v5; // eax@9
     int v6; // eax@11
