@@ -108,7 +108,7 @@ void Game::Run() {
                 {
                     if (current_level_idx < LEVEL_SURV_16 || current_level_idx > LEVEL_MUTE_25)
                     {
-                        //VIDEO_Play(1);
+                        VIDEO_Play(1);
                     }
                     else
                     {

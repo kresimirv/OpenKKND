@@ -147,6 +147,23 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
   - KKND.SVE update path: `"%s\\%s"` → `"%s/%s"` (`SaveLoad.cpp:1326`)
 - Save files now created as e.g. `bin/game0.sav`, `bin/save.lst`, `bin/KKND.SVE`.
 
+### Video Decoder Fix — Visual Artifacts in VBC Frames (Global Motion + Op 0)
+
+- **Root cause**: Two issues in the 8-bit and 16-bit VBC frame decoders (`Video.cpp`):
+  1. **Missing pre-copy of previous frame**: The C# reference decoder (`ApplyFrame`) creates a zeroed new frame, then `BlockCopy`s the old frame into it with a byte offset (global motion). Our decoder wrote directly to `front_buf` without first copying the old frame — uncovered pixels stayed as stale garbage instead of the correct previous-frame content (or zero).
+  2. **Op 0 was not a no-op**: In both decoders, op 0 was implemented as a reference copy (like op 1 with flag=0), but in C# op 0 does nothing — the tile is already covered by the pre-copy.
+
+- **Fix 1 (pre-copy)**: Added `memcpy` from `back_buf` to `front_buf` before tile decode, matching C# `Buffer.BlockCopy`:
+  - 8-bit: `memcpy(front_buf, back_buf + offset, frame_size - offset)` for offset≥0, `memcpy(front_buf - offset, back_buf, frame_size + offset)` for offset<0. Frame size = `width * tile_rows * 4`.
+  - 16-bit: Same logic with byte offset = `2 * offset` and frame size = `2 * width * tile_rows * 4`.
+
+- **Fix 2 (op 0 no-op)**: Changed op 0 in both decoders from reference copy to `break;` (no-op), matching C# behavior. The pre-copy already handles the old frame data.
+
+### Crash Fix — Mission Briefing Video Negative-Size-Param in memcpy
+
+- Root cause: `render_draw_tile()` (`Render.cpp:1252`) declared `v9` as `char` (signed 8-bit). When drawing the 320px-wide mission briefing VBC frame, `this_row_x_pixels` values > 127 were truncated to negative (e.g., 160 → -96). Passing this as the `size` argument to `memcpy` triggered ASan `negative-size-param`.
+- Fix: Changed `char v9` to `int v9`. The original two-step `qmemcpy` approach (4-byte chunks + remainder) was immune to this truncation, but was replaced with a single `memcpy` without fixing the type.
+
 ### Crash Fix — AI Player List Off-by-One on Load (heap-buffer-overflow)
 - Root cause: `GAME_Load_UnpackAiPlayers` advanced read pointers (`v6 += 4`, `a2 += 4`, `++v56`) *before* reading entity IDs, but the pack code writes the ID before advancing (`*((_DWORD *)i19 - 1) = id; i19 += 4`). First entry at offset 0 was skipped, and the last iteration read one DWORD past the allocated buffer.
 - **Fix**: moved all pointer-advance operations to *after* the entity-ID reads in 7 loops:
@@ -267,3 +284,14 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
   - `aSLevelsSSupspr`: `"%S//LEVELS//%S//SUPSPR.LVL"` → `"%s//LEVELS//%s//SUPSPR.LVL"`
   - `aSFmvMh_fmv_vbc`: `"%S//FMV//MH_FMV.VBC"` → `"%s//FMV//MH_FMV.VBC"`
 - **Fix** (`Render.cpp: _408550_multi_pal()`): Refined the single-player guard — only early-return in the `!is_demo_build` branch (campaign mode) when no active network players exist, preventing `MULTI.PAL` from overwriting the campaign palette. The `is_demo_build` branch (Kaos mode) is not guarded since it needs `MULTI.PAL` for player-selected colors.
+
+### Crash Fix — Mission Briefing Video Heap-Use-After-Free (SIGSEGV)
+- **Root cause**: `VIDEO_DoFrame()` set `_18_img_data` on the video draw job's `DetailedDrawHandler_VideoPlayer` structs. The second draw job (`stru_477D90`, subtitle overlay) computed its pointer as `v24 + height * width` (line 237). When `v24` (`video->header.field_10`) was NULL on the first frame (from `memset` in `VIDEO_ReadFile`), the result was `0 + 240*320 = 76800` — a non-null pointer into unmapped memory. `render_video_draw_handler` checked `_18_img_data != NULL` (line 917) and passed this invalid pointer to `render_draw_tile`, causing SIGSEGV in `memcpy`.
+- Timing detail: the first `VIDEO_DoFrame()` call's timing check always passes immediately because both `v15` and `dword_477940` are `SDL_GetTicks()` on frame 0, propagating the NULL `field_10` to `_18_img_data`.
+- **Fix 1** (`Video.cpp:237-240`): Added NULL guard — `stru_477D90._18_img_data` is set to `NULL` when `v24` is NULL, instead of computing a non-null-but-invalid offset.
+- **Fix 2** (`Render.cpp:1252`): Changed `char v9` to `int v9` in `render_draw_tile()` — prevents ASan `negative-size-param` for video widths > 127px (truncation when `this_row_x_pixels` > 127).
+- **Fix 3** (`Video.cpp:420`): Changed `memcpy` → `memmove` in subtitle scroll buffer for overlapping copy safety.
+
+### Visual Fix — Mission Briefing Background / Subtitles (Survivors vs Evolved)
+- **Root cause**: Survivors missions used `MAPD_Draw(MAPD_FOG_OF_WAR, 0, -10)` with palette from `items[1]`, while Evolved used `MAPD_Draw(MAPD_MAP, 0, 0)` with palette from `items[0]`. The `FOG_OF_WAR` renderer produced white pixels around the video frame, and the `items[1]` palette lacked correct colors for subtitle text rendering.
+- **Fix** (`Video.cpp:1410-1419`): Unified both branches — Survivors now uses `MAPD_MAP` + `items[0]` palette, matching the Evolved path that already worked perfectly.

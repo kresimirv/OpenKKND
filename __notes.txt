@@ -33,3 +33,40 @@ mobile derrick:
 
 NICE TEXT BOX (3 sec):
 	GAME_OnSaveFailed + script_421D60_on_savegame_failed
+
+## VIDEO CRASH FIXES (SIGSEGV in mission briefing)
+
+### Root Cause
+When `VIDEO_DoFrame` is called for the first time on a new video, `video->header.field_10`
+(the frame buffer pointer) is NULL (from `memset` in `VIDEO_ReadFile`). Line 237 computed:
+
+    stru_477D90._18_img_data = v24 + height * width
+
+When v24=NULL, this produced `0 + 240*320 = 76800` — a non-null pointer into unmapped
+memory. The render handler checked `_18_img_data != NULL` (line 917) and passed this
+invalid pointer to `render_draw_tile`, causing SIGSEGV in memcpy.
+
+### Fixes applied
+1. **Render.cpp:1252** — `char v9` → `int v9` in `render_draw_tile`
+   (ASAN `negative-size-param` when video width > 127px).
+
+2. **Video.cpp:237-240** — Added NULL guard for `stru_477D90._18_img_data`:
+   when `v24` (field_10) is NULL, set `_18_img_data = NULL` instead of
+   computing a non-null-but-invalid offset.
+
+3. **Video.cpp:94** — Keep `field_14 = 1` for `VIDEO_ReadAndAllocDrawJob`
+   (Melbourne House/Intro, uses `render_434EA0` which handles transparency).
+
+4. **Video.cpp:340,354** — Keep `field_14 = 0` for `VIDEO_ReadAndAllocDrawJob_2`
+   (mission briefing, uses `render_draw_tile` which renders correctly on 8-bit
+   surface). The `render_434EA0` function copies each row twice (interlaced),
+   producing "upper half only" output on sub-rectangle targets.
+
+5. **Video.cpp:420** — `memcpy` → `memmove` in subtitle scroll buffer (overlapping
+   copy fix).
+
+### Key insight
+The `dword_477DF4` global prevents `_18_img_data` from being set until after
+the first frame decode. But the first call to `VIDEO_DoFrame` passes the timing
+check immediately (both `v15` and `dword_477940` are set to `SDL_GetTicks()` on
+frame 0), causing the NULL `field_10` to be propagated to `_18_img_data`.

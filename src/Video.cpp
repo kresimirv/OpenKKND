@@ -4,16 +4,19 @@
 #include "src/DirectSoundSdl2.h"
 
 #include "src/_unsorted_data.h"
+#include "src/_unsorted_functions.h"
 #include "src/Render.h"
 #include "src/Sound.h"
 #include "src/Infrastructure/PlatformSpecific/OsTools.h"
+
+static SDL_AudioDeviceID sdl_video_audio_dev = 0;
+static Uint32 sdl_video_audio_play_start = 0;
 
 DetailedDrawHandler_VideoPlayer stru_477D90; // weak
 int dword_477DB8; // weak
 int dword_477DBC; // weak
 DrawJob *video_477DC0;
 int video_477DC4_current_sound_position; // weak
-int dword_477DC8; // weak
 VideoFile *video;
 int video_477DEC_is_sound_playing; // weak
 int video_477DF0; // weak
@@ -28,16 +31,22 @@ DetailedDrawHandler_VideoPlayer _477948_video_draw_details;
 int _477970_video_header_field_6; // weak
 int _477974_video_header_field_8; // weak
 DrawJob *video_477978_draw_job;
-WAVEFORMATEX video_477DE4_dsb_waveformatex; // weak
 int dword_477940; // weak
-int dword_477944; // weak
 Palette _477990_video_palette; // idb
 
-
-extern IDirectSound *pds;
-extern DSBUFFERDESC video_477DE4_dsb_desc;
-extern IDirectSoundBuffer *video_477DE4_dsb;
-
+// 64 pattern masks for VBC op 3 (sub_45A556 through sub_45B498)
+// 16-bit mask: bit (y*4+x) = 1 means pixel uses c1 (high byte of color word)
+// Extracted by simulating the original pattern functions
+static const unsigned short vbc_pattern_masks[64] = {
+    0x0660, 0xFF00, 0xCCCC, 0xF000, 0x8888, 0x000F, 0x1111, 0xFEC8,
+    0x8CEF, 0x137F, 0xF731, 0xC800, 0x008C, 0x0013, 0x3100, 0xCC00,
+    0x00CC, 0x0033, 0x3300, 0x0FF0, 0x6666, 0x00F0, 0x0F00, 0x2222,
+    0x4444, 0xF600, 0x8CC8, 0x006F, 0x1331, 0x318C, 0xC813, 0x33CC,
+    0x6600, 0x0CC0, 0x0066, 0x0330, 0xF900, 0xC88C, 0x009F, 0x3113,
+    0x6000, 0x0880, 0x0006, 0x0110, 0xCC88, 0xFC00, 0x00CF, 0x88CC,
+    0x003F, 0x1133, 0x3311, 0xF300, 0x6FF6, 0x0603, 0x08C6, 0x8C63,
+    0xC631, 0x6310, 0xC060, 0x0136, 0x136C, 0x36C8, 0x6C80, 0x324C,
+};
 
 //----- (0040CAE0) --------------------------------------------------------
 int VIDEO_IsAllocated()
@@ -99,71 +108,39 @@ int VIDEO_ReadAndAllocDrawJob(const char *a1, int x, int y, int z_index)
 //----- (0040CBD0) --------------------------------------------------------
 int VIDEO_DoFrame()
 {
-    VideoFile *v0; // ecx@1
-    VideoFile *v1; // edi@4
-    signed __int64 v2; // rax@5
-    int v3; // ecx@6
-    int v4; // esi@6
-    int v5; // eax@9
-    int result; // eax@19
-    int v7; // eax@20
-    VideoFile *v8; // ebx@21
-    DWORD v9; // eax@24
-    DWORD v10; // ecx@26
-    DWORD v11; // ecx@33
-    char *v12; // eax@35
-    DWORD v13; // eax@41
-    VideoFile *v14; // edi@45
-    signed __int64 v15; // rax@46
-    int v16; // ecx@47
-    int v17; // esi@47
-    int v18; // eax@50
-    VideoFile *v19; // eax@57
-    int v20; // edx@60
-    int v21; // ecx@60
-    int v22; // esi@60
-    char v23; // dl@61
-    int v24; // ecx@64
-    unsigned int v25; // [sp+68h] [bp-10h]@23
-    void *v26; // [sp+6Ch] [bp-Ch]@23
-    char *v27; // [sp+70h] [bp-8h]@8
-    short *current_play_position; // [sp+74h] [bp-4h]@8
+    signed __int64 v2;
+    int v5;
+    int result;
+    int v7;
+    VideoFile *v8;
+    Uint32 v13;
+    VideoFile *v14;
+    signed __int64 v15;
+    int v18;
+    VideoFile *v19;
+    int v20;
+    int v21;
+    char v23;
+    int v24;
 
-    v0 = video;
     if (!video)
         return 0;
     if (!dword_477DF4)
     {
         if (video->header.current_frame >= video->header.num_frames - 1)
         {
-            v1 = video;
-            if (video_477DEC_is_sound_playing)
-            {
-                v3 = video->header.field_18;
-                v4 = ((_BYTE)v3 != 8) + 1;
-                if (BYTE1(v3) & 1)
-                    v4 *= 2;
-                if (!sound_video_get_position((int *)&current_play_position, (int *)&v27)) {
-                    v5 = 0;
-                    goto LABEL_14;
-                }
-                if ((int)current_play_position < video_477DC4_current_sound_position)
-                    dword_477DC8 += 0x10000;
-                video_477DC4_current_sound_position = (int)current_play_position;
-                current_play_position = (__int16 *)(((int)current_play_position + dword_477DC8) / v4);
-                v2 = (signed __int64)((double)(int)current_play_position * 1000.0 / (double)v1->header._14_looks_like_fps);
-            }
-            else
-            {
-                LODWORD(v2) = SDL_GetTicks();
-            }
+            v2 = sdl_video_audio_dev ? (signed __int64)(SDL_GetTicks() - sdl_video_audio_play_start) : (signed __int64)SDL_GetTicks();
             v5 = (unsigned int)v2 < dword_477940;
-        LABEL_14:
             if (!v5 && video)
             {
                 if (video_477DEC_is_sound_playing)
                 {
-                    sound_video_stop();
+                    if (sdl_video_audio_dev)
+                    {
+                        SDL_PauseAudioDevice(sdl_video_audio_dev, 1);
+                        SDL_CloseAudioDevice(sdl_video_audio_dev);
+                        sdl_video_audio_dev = 0;
+                    }
                     video_477DEC_is_sound_playing = 0;
                 }
                 VIDEO_Clean(video);
@@ -182,75 +159,20 @@ int VIDEO_DoFrame()
             return 0;
         }
         VIDEO_ReadNextFrame(video);
-        v0 = video;
         v7 = video->header.num_sound_bytes;
         if (v7)
         {
             v8 = video;
-            if (video_477DEC_is_sound_playing)
+            if (video_477DEC_is_sound_playing && sdl_video_audio_dev)
             {
-                if (S_OK == video_477DE4_dsb->Lock(
-                    (((unsigned __int64)dword_477944 >> 32) ^ abs(dword_477944)) - ((unsigned __int64)dword_477944 >> 32),
-                    v7,
-                    (LPVOID *)&current_play_position,
-                    (LPDWORD)&v25,
-                    (LPVOID *)&v27,
-                    (LPDWORD)&v26,
-                    0))
-                {
-                    v9 = v25;
-                    if (v25)
-                    {
-                        memcpy(current_play_position, v8->header.ptr_20, v25);
-                        v9 = v25;
-                    }
-                    v10 = (DWORD)v26;
-                    if (v26)
-                    {
-                        memcpy(v27, (char *)v8->header.ptr_20 + v9, (unsigned int)v26);
-                        v10 = (DWORD)v26;
-                        v9 = v25;
-                    }
-                    dword_477944 += v8->header.num_sound_bytes;
-                    video_477DE4_dsb->Unlock(current_play_position, v9, v27, v10);
-                }
+                SDL_QueueAudio(sdl_video_audio_dev, (const void *)v8->header.ptr_20, v7);
             }
-            else
+            else if (!video_477DEC_is_sound_playing)
             {
                 VIDEO_40D090(video);
             }
-            v0 = video;
         }
-        if (v0->header.current_frame >= v0->header.num_frames - 1 && video_477DEC_is_sound_playing)
-        {
-            if (!video_477DE4_dsb->Lock(
-                (((unsigned __int64)dword_477944 >> 32) ^ abs(dword_477944)) - ((unsigned __int64)dword_477944 >> 32),
-                0x10000,
-                &v26,
-                (LPDWORD)&v25,
-                (LPVOID *)&v27,
-                (LPDWORD)&current_play_position,
-                0))
-            {
-                v11 = v25;
-                if (v25)
-                {
-                    memset(v26, 0x80u, v25);
-                    v11 = v25;
-                }
-                v12 = (char *)current_play_position;
-                if (current_play_position)
-                {
-                    memset(v27, 0x80u, (unsigned int)current_play_position);
-                    v12 = (char *)current_play_position;
-                    v11 = v25;
-                }
-                dword_477944 += (int)&v12[v11];
-                video_477DE4_dsb->Unlock(v26, v11, v27, (DWORD)v12);
-            }
-            v0 = video;
-        }
-        if (v0->header.current_frame)
+        if (video->header.current_frame)
         {
             video_477DF0 = 1;
         }
@@ -261,35 +183,20 @@ int VIDEO_DoFrame()
         else
         {
             v13 = SDL_GetTicks();
-            v0 = video;
             dword_477940 = v13;
         }
         dword_477DF4 = 1;
     }
-    v14 = v0;
-    if (video_477DEC_is_sound_playing)
+    v14 = video;
+    if (video_477DEC_is_sound_playing && sdl_video_audio_dev)
     {
-        v16 = v0->header.field_18;
-        v17 = ((_BYTE)v16 != 8) + 1;
-        if (BYTE1(v16) & 1)
-            v17 *= 2;
-        if (video_477DE4_dsb->GetCurrentPosition((LPDWORD)&current_play_position, (LPDWORD)&v27))
-        {
-            v18 = 0;
-            goto LABEL_55;
-        }
-        if ((int)current_play_position < video_477DC4_current_sound_position)
-            dword_477DC8 += 0x10000;
-        video_477DC4_current_sound_position = (int)current_play_position;
-        current_play_position = (__int16 *)(((int)current_play_position + dword_477DC8) / v17);
-        v15 = (signed __int64)((double)(int)current_play_position * 1000.0 / (double)v14->header._14_looks_like_fps);
+        LODWORD(v15) = (signed __int64)(SDL_GetTicks() - sdl_video_audio_play_start);
     }
     else
     {
         LODWORD(v15) = SDL_GetTicks();
     }
     v18 = (unsigned int)v15 < dword_477940;
-LABEL_55:
     if (v18)
     {
         video_477DF0 = 0;
@@ -307,17 +214,17 @@ LABEL_55:
     {
         v20 = *(_WORD *)&v19->gap2C[2];
         v21 = 3 * v20;
-        v22 = 4 * v20 + 4684177;
+        PaletteEntry *pal_entry = &_477990_video_palette.entires[v20];
         do
         {
             v23 = v19->gap2C[v21 + 4];
             v21 += 3;
-            *(_BYTE *)(v22 - 1) = v23;
-            *(_BYTE *)v22 = v19->gap2C[v21 + 2];
-            *(_BYTE *)(v22 + 1) = v19->gap2C[v21 + 3];
+            pal_entry->peRed = v23;
+            pal_entry->peGreen = v19->gap2C[v21 + 2];
+            pal_entry->peBlue = v19->gap2C[v21 + 3];
             --*(_WORD *)&v19->gap2C[0];
             v19 = video;
-            v22 += 4;
+            ++pal_entry;
         } while (*(_WORD *)&video->gap2C[0]);
         _40E400_set_palette(&_477990_video_palette);
         v19 = video;
@@ -327,61 +234,44 @@ LABEL_55:
         _477948_video_draw_details._18_img_data = (void *)v19->header.field_10;
         v24 = v19->header.field_10;
         result = 1;
-        stru_477D90._18_img_data = (void *)(v24 + _477948_video_draw_details.height * _477948_video_draw_details.width);
+        if (v24)
+            stru_477D90._18_img_data = (void *)(v24 + _477948_video_draw_details.height * _477948_video_draw_details.width);
+        else
+            stru_477D90._18_img_data = NULL;
         return result;
     }
     return 0;
 }
 // 477940: using guessed type int dword_477940;
-// 477944: using guessed type int dword_477944;
 // 477D90: using guessed type DetailedDrawHandler_VideoPlayer stru_477D90;
-// 477DC4: using guessed type int video_477DC4_current_sound_position;
-// 477DC8: using guessed type int dword_477DC8;
 // 477DEC: using guessed type int video_477DEC_is_sound_playing;
 // 477DF0: using guessed type int video_477DF0;
 // 477DF4: using guessed type int dword_477DF4;
 
 //----- (0040D090) --------------------------------------------------------
-void VIDEO_40D090(VideoFile *a1)
+void VIDEO_40D090(VideoFile *video)
 {
-    VideoFile *v1; // ebx@1
-    int v2; // ecx@1
-    __int16 v3; // ax@1
-    __int16 *v4; // [sp+30h] [bp-10h]@5
-    DWORD v5; // [sp+34h] [bp-Ch]@5
-    void *v6; // [sp+38h] [bp-8h]@5
-    DWORD v7; // [sp+3Ch] [bp-4h]@5
+    int bits_per_sample = (video->header.field_18 & 0xFF) != 8 ? 16 : 8;
+    int channels = (video->header.field_18 & 0x100) ? 2 : 1;
 
-    v1 = a1;
-    v2 = a1->header.field_18;
-    v3 = ((_BYTE)v2 != 8) + 1;
-    if (BYTE1(v2) & 1)
-        v3 *= 2;
-    memset(&video_477DE4_dsb_waveformatex, 0, sizeof(video_477DE4_dsb_waveformatex));
-    video_477DE4_dsb_waveformatex.wFormatTag = 1;
-    *(_DWORD *)&video_477DE4_dsb_waveformatex.nChannels = (unsigned __int16)(((v1->header.field_18 & 0x100) != 0) + 1);
-    video_477DE4_dsb_waveformatex.nSamplesPerSec = v1->header._14_looks_like_fps;
-    video_477DE4_dsb_waveformatex.nBlockAlign = v3;
-    video_477DE4_dsb_waveformatex.nAvgBytesPerSec = v1->header._14_looks_like_fps * v3;
-    video_477DE4_dsb_waveformatex.wBitsPerSample = (unsigned __int8)v1->header.field_18 != 8 ? 16 : 8;
+    SDL_AudioSpec desired;
+    SDL_zero(desired);
+    desired.freq = video->header._14_looks_like_fps;
+    desired.format = (bits_per_sample == 8) ? AUDIO_U8 : AUDIO_S16SYS;
+    desired.channels = channels;
+    desired.samples = 4096;
 
-    video_477DE4_dsb_desc.dwReserved = 0;
-    video_477DE4_dsb_desc.dwSize = 20;
-    video_477DE4_dsb_desc.dwFlags = 0;
-    video_477DE4_dsb_desc.dwBufferBytes = 0x10000;
-    video_477DE4_dsb_desc.lpwfxFormat = &video_477DE4_dsb_waveformatex;
-    if (pds
-        && S_OK == pds->CreateSoundBuffer(&video_477DE4_dsb_desc, &video_477DE4_dsb, 0)
-        && S_OK == video_477DE4_dsb->Lock(0, 0x10000, (LPVOID *)&v4, &v7, &v6, &v5, 0))
+    sdl_video_audio_dev = SDL_OpenAudioDevice(nullptr, 0, &desired, nullptr, SDL_AUDIO_ALLOW_ANY_CHANGE);
+    if (!sdl_video_audio_dev)
     {
-        memcpy(v4, v1->header.ptr_20, v1->header.num_sound_bytes);
-        dword_477944 = v1->header.num_sound_bytes;
-        dword_477DC8 = 0;
-        video_477DC4_current_sound_position = 0;
-        video_477DE4_dsb->Unlock(v4, v7, v6, v5);
-        video_477DE4_dsb->Play(0, 0, 1);
-        video_477DEC_is_sound_playing = 1;
+        fprintf(stderr, "VIDEO_40D090: SDL_OpenAudioDevice failed: %s\n", SDL_GetError());
+        return;
     }
+
+    SDL_QueueAudio(sdl_video_audio_dev, (const void *)video->header.ptr_20, video->header.num_sound_bytes);
+    sdl_video_audio_play_start = SDL_GetTicks();
+    SDL_PauseAudioDevice(sdl_video_audio_dev, 0);
+    video_477DEC_is_sound_playing = 1;
 }
 
 //----- (0040D230) --------------------------------------------------------
@@ -391,8 +281,12 @@ void VIDEO_free()
     {
         if (video_477DEC_is_sound_playing)
         {
-            video_477DE4_dsb->Stop();
-            video_477DE4_dsb->Release();
+            if (sdl_video_audio_dev)
+            {
+                SDL_PauseAudioDevice(sdl_video_audio_dev, 1);
+                SDL_CloseAudioDevice(sdl_video_audio_dev);
+                sdl_video_audio_dev = 0;
+            }
             video_477DEC_is_sound_playing = 0;
         }
         VIDEO_Clean(video);
@@ -526,7 +420,7 @@ void VIDEO_40D450(char *a1, int a2)
                     v7 = strchr(video_477DF8_subtitles, '\n') + 1;
                     video_4780F0 -= v7 - video_477DF8_subtitles;
                     --video_4780EC;
-                    memcpy(video_477DF8_subtitles, v7, 675 - (v7 - video_477DF8_subtitles));
+                    memmove(video_477DF8_subtitles, v7, 675 - (v7 - video_477DF8_subtitles));
                     render_string_445AE0(video_4780F8_subtitles);
                 }
             }
@@ -583,8 +477,8 @@ VideoFile *VIDEO_ReadFile(const char *video_name)
             v3->data_offset = v4;
             v6 = v3->header.height * v3->header.width * (v5 & 0xF);
             v3->field_332 = 1;
-            v3->frame_front_buffer = malloc(v6);
-            v7 = malloc(v6);
+            v3->frame_front_buffer = calloc(1, v6);
+            v7 = calloc(1, v6);
             v8 = v3->frame_front_buffer;
             v3->frame_back_buffer = v7;
             v9 = !v8 || !v7;
@@ -662,6 +556,610 @@ int VIDEO_ReadNextFrame(VideoFile *a1)
     return result;
 }
 
+//----- (0045A48E) --------------------------------------------------------
+// 8-bit VBC decoder
+// Each control byte encodes 4 operations for 4 consecutive 4x4 tiles.
+_BYTE *sub_45A48E(unsigned __int16 tile_cols, __int16 tile_rows, _BYTE *data, int front_buf, int back_buf, int offset, int width, int palette_ptr)
+{
+    dword_476AC4 = palette_ptr;
+    dword_476AC0 = offset + back_buf - front_buf;
+
+    // Pre-copy back buffer to front buffer with global motion (matching C# ApplyFrame)
+    int frame_size_8 = width * tile_rows * 4;
+    if (offset >= 0)
+    {
+        int copy_size = frame_size_8 - offset;
+        if (copy_size > 0)
+            memcpy((void *)front_buf, (void *)(back_buf + offset), copy_size);
+    }
+    else
+    {
+        int copy_size = frame_size_8 + offset;
+        if (copy_size > 0)
+            memcpy((void *)(front_buf - offset), (void *)back_buf, copy_size);
+    }
+
+    _BYTE *in = data;
+    _BYTE *out = (_BYTE *)front_buf;
+    int stride = width;
+    int group_adv = 4 * 4;  // 4 tiles × 4 bytes
+    int row_adv = 12 * tile_cols;
+    int pair_cnt = tile_cols >> 1;
+    _BYTE *mid;
+
+    while (1)
+    {
+        unsigned char ctl = *in++;
+
+        // tile 0: op = (ctl >> 6) & 3
+        switch ((ctl >> 6) & 3)
+        {
+        case 0:
+        {
+            break;
+        }
+        case 1:
+        {
+            unsigned char flag = *in++;
+            if (flag == 0)
+            {
+                *(unsigned int *)out = *(unsigned int *)in; in += 4;
+                *(unsigned int *)(out + stride) = *(unsigned int *)in; in += 4;
+                *(unsigned int *)(out + 2 * stride) = *(unsigned int *)in; in += 4;
+                *(unsigned int *)(out + 3 * stride) = *(unsigned int *)in; in += 4;
+            }
+            else
+            {
+                int adj = ((int *)palette_ptr)[flag];
+                _BYTE *ref_tile = out + dword_476AC0 + adj;
+                *(unsigned int *)out = *(unsigned int *)ref_tile;
+                *(unsigned int *)(out + stride) = *(unsigned int *)(ref_tile + stride);
+                *(unsigned int *)(out + 2 * stride) = *(unsigned int *)(ref_tile + 2 * stride);
+                *(unsigned int *)(out + 3 * stride) = *(unsigned int *)(ref_tile + 3 * stride);
+            }
+            break;
+        }
+        case 2:
+        {
+            unsigned char color = *in++;
+            unsigned int d = color | (color << 8) | (color << 16) | (color << 24);
+            *(unsigned int *)out = d;
+            *(unsigned int *)(out + stride) = d;
+            *(unsigned int *)(out + 2 * stride) = d;
+            *(unsigned int *)(out + 3 * stride) = d;
+            break;
+        }
+        case 3:
+        {
+            unsigned char sel = *in++;
+            unsigned short mask = vbc_pattern_masks[sel & 0x3F];
+            switch (sel >> 6)
+            {
+            case 0:
+            {
+                unsigned short val = *(unsigned short *)in; in += 2;
+                unsigned char c0 = val & 0xFF;
+                unsigned char c1 = (val >> 8) & 0xFF;
+                out[0] = (mask & 0x0001) ? c1 : c0;
+                out[1] = (mask & 0x0002) ? c1 : c0;
+                out[2] = (mask & 0x0004) ? c1 : c0;
+                out[3] = (mask & 0x0008) ? c1 : c0;
+                out[stride] = (mask & 0x0010) ? c1 : c0;
+                out[stride + 1] = (mask & 0x0020) ? c1 : c0;
+                out[stride + 2] = (mask & 0x0040) ? c1 : c0;
+                out[stride + 3] = (mask & 0x0080) ? c1 : c0;
+                out[2 * stride] = (mask & 0x0100) ? c1 : c0;
+                out[2 * stride + 1] = (mask & 0x0200) ? c1 : c0;
+                out[2 * stride + 2] = (mask & 0x0400) ? c1 : c0;
+                out[2 * stride + 3] = (mask & 0x0800) ? c1 : c0;
+                out[3 * stride] = (mask & 0x1000) ? c1 : c0;
+                out[3 * stride + 1] = (mask & 0x2000) ? c1 : c0;
+                out[3 * stride + 2] = (mask & 0x4000) ? c1 : c0;
+                out[3 * stride + 3] = (mask & 0x8000) ? c1 : c0;
+                break;
+            }
+            case 1:
+            {
+                unsigned char color = *in++;
+                for (int y = 0; y < 4; y++)
+                    for (int x = 0; x < 4; x++)
+                        if (mask & (1 << (y * 4 + x)))
+                            out[y * stride + x] = color;
+                break;
+            }
+            case 2:
+            {
+                unsigned char color = *in++;
+                for (int y = 0; y < 4; y++)
+                    for (int x = 0; x < 4; x++)
+                        if (!(mask & (1 << (y * 4 + x))))
+                            out[y * stride + x] = color;
+                break;
+            }
+            case 3:
+            {
+                unsigned char color = *in++;
+                unsigned int d = color | (color << 8) | (color << 16) | (color << 24);
+                *(unsigned int *)out = d;
+                *(unsigned int *)(out + stride) = d;
+                *(unsigned int *)(out + 2 * stride) = d;
+                *(unsigned int *)(out + 3 * stride) = d;
+                break;
+            }
+            }
+            break;
+        }
+        }
+
+        // tile 1: op = (ctl >> 4) & 3
+        switch ((ctl >> 4) & 3)
+        {
+        case 0:
+        {
+            break;
+        }
+        case 1:
+        {
+            unsigned char flag = *in++;
+            if (flag == 0)
+            {
+                *(unsigned int *)(out + 4) = *(unsigned int *)in; in += 4;
+                *(unsigned int *)(out + 4 + stride) = *(unsigned int *)in; in += 4;
+                *(unsigned int *)(out + 4 + 2 * stride) = *(unsigned int *)in; in += 4;
+                *(unsigned int *)(out + 4 + 3 * stride) = *(unsigned int *)in; in += 4;
+            }
+            else
+            {
+                int adj = ((int *)palette_ptr)[flag];
+                _BYTE *ref_tile = out + 4 + dword_476AC0 + adj;
+                *(unsigned int *)(out + 4) = *(unsigned int *)ref_tile;
+                *(unsigned int *)(out + 4 + stride) = *(unsigned int *)(ref_tile + stride);
+                *(unsigned int *)(out + 4 + 2 * stride) = *(unsigned int *)(ref_tile + 2 * stride);
+                *(unsigned int *)(out + 4 + 3 * stride) = *(unsigned int *)(ref_tile + 3 * stride);
+            }
+            break;
+        }
+        case 2:
+        {
+            unsigned char color = *in++;
+            unsigned int d = color | (color << 8) | (color << 16) | (color << 24);
+            *(unsigned int *)(out + 4) = d;
+            *(unsigned int *)(out + 4 + stride) = d;
+            *(unsigned int *)(out + 4 + 2 * stride) = d;
+            *(unsigned int *)(out + 4 + 3 * stride) = d;
+            break;
+        }
+        case 3:
+        {
+            unsigned char sel = *in++;
+            unsigned short mask = vbc_pattern_masks[sel & 0x3F];
+            _BYTE *t = out + 4;
+            switch (sel >> 6)
+            {
+            case 0:
+            {
+                unsigned short val = *(unsigned short *)in; in += 2;
+                unsigned char c0 = val & 0xFF;
+                unsigned char c1 = (val >> 8) & 0xFF;
+                t[0] = (mask & 0x0001) ? c1 : c0;
+                t[1] = (mask & 0x0002) ? c1 : c0;
+                t[2] = (mask & 0x0004) ? c1 : c0;
+                t[3] = (mask & 0x0008) ? c1 : c0;
+                t[stride] = (mask & 0x0010) ? c1 : c0;
+                t[stride + 1] = (mask & 0x0020) ? c1 : c0;
+                t[stride + 2] = (mask & 0x0040) ? c1 : c0;
+                t[stride + 3] = (mask & 0x0080) ? c1 : c0;
+                t[2 * stride] = (mask & 0x0100) ? c1 : c0;
+                t[2 * stride + 1] = (mask & 0x0200) ? c1 : c0;
+                t[2 * stride + 2] = (mask & 0x0400) ? c1 : c0;
+                t[2 * stride + 3] = (mask & 0x0800) ? c1 : c0;
+                t[3 * stride] = (mask & 0x1000) ? c1 : c0;
+                t[3 * stride + 1] = (mask & 0x2000) ? c1 : c0;
+                t[3 * stride + 2] = (mask & 0x4000) ? c1 : c0;
+                t[3 * stride + 3] = (mask & 0x8000) ? c1 : c0;
+                break;
+            }
+            case 1:
+            {
+                unsigned char color = *in++;
+                for (int y = 0; y < 4; y++)
+                    for (int x = 0; x < 4; x++)
+                        if (mask & (1 << (y * 4 + x)))
+                            t[y * stride + x] = color;
+                break;
+            }
+            case 2:
+            {
+                unsigned char color = *in++;
+                for (int y = 0; y < 4; y++)
+                    for (int x = 0; x < 4; x++)
+                        if (!(mask & (1 << (y * 4 + x))))
+                            t[y * stride + x] = color;
+                break;
+            }
+            case 3:
+            {
+                unsigned char color = *in++;
+                unsigned int d = color | (color << 8) | (color << 16) | (color << 24);
+                *(unsigned int *)t = d;
+                *(unsigned int *)(t + stride) = d;
+                *(unsigned int *)(t + 2 * stride) = d;
+                *(unsigned int *)(t + 3 * stride) = d;
+                break;
+            }
+            }
+            break;
+        }
+        }
+
+        mid = out + 8;
+        int v20 = pair_cnt - 1;
+        if (!v20)
+        {
+            v20 = tile_cols >> 1;
+            mid += row_adv;
+            if (!--tile_rows) return in;
+        }
+
+        // tile 2: op = (ctl >> 2) & 3
+        switch ((ctl >> 2) & 3)
+        {
+        case 0:
+        {
+            break;
+        }
+        case 1:
+        {
+            unsigned char flag = *in++;
+            if (flag == 0)
+            {
+                *(unsigned int *)mid = *(unsigned int *)in; in += 4;
+                *(unsigned int *)(mid + stride) = *(unsigned int *)in; in += 4;
+                *(unsigned int *)(mid + 2 * stride) = *(unsigned int *)in; in += 4;
+                *(unsigned int *)(mid + 3 * stride) = *(unsigned int *)in; in += 4;
+            }
+            else
+            {
+                int adj = ((int *)palette_ptr)[flag];
+                _BYTE *ref_tile = mid + dword_476AC0 + adj;
+                *(unsigned int *)mid = *(unsigned int *)ref_tile;
+                *(unsigned int *)(mid + stride) = *(unsigned int *)(ref_tile + stride);
+                *(unsigned int *)(mid + 2 * stride) = *(unsigned int *)(ref_tile + 2 * stride);
+                *(unsigned int *)(mid + 3 * stride) = *(unsigned int *)(ref_tile + 3 * stride);
+            }
+            break;
+        }
+        case 2:
+        {
+            unsigned char color = *in++;
+            unsigned int d = color | (color << 8) | (color << 16) | (color << 24);
+            *(unsigned int *)mid = d;
+            *(unsigned int *)(mid + stride) = d;
+            *(unsigned int *)(mid + 2 * stride) = d;
+            *(unsigned int *)(mid + 3 * stride) = d;
+            break;
+        }
+        case 3:
+        {
+            unsigned char sel = *in++;
+            unsigned short mask = vbc_pattern_masks[sel & 0x3F];
+            switch (sel >> 6)
+            {
+            case 0:
+            {
+                unsigned short val = *(unsigned short *)in; in += 2;
+                unsigned char c0 = val & 0xFF;
+                unsigned char c1 = (val >> 8) & 0xFF;
+                mid[0] = (mask & 0x0001) ? c1 : c0;
+                mid[1] = (mask & 0x0002) ? c1 : c0;
+                mid[2] = (mask & 0x0004) ? c1 : c0;
+                mid[3] = (mask & 0x0008) ? c1 : c0;
+                mid[stride] = (mask & 0x0010) ? c1 : c0;
+                mid[stride + 1] = (mask & 0x0020) ? c1 : c0;
+                mid[stride + 2] = (mask & 0x0040) ? c1 : c0;
+                mid[stride + 3] = (mask & 0x0080) ? c1 : c0;
+                mid[2 * stride] = (mask & 0x0100) ? c1 : c0;
+                mid[2 * stride + 1] = (mask & 0x0200) ? c1 : c0;
+                mid[2 * stride + 2] = (mask & 0x0400) ? c1 : c0;
+                mid[2 * stride + 3] = (mask & 0x0800) ? c1 : c0;
+                mid[3 * stride] = (mask & 0x1000) ? c1 : c0;
+                mid[3 * stride + 1] = (mask & 0x2000) ? c1 : c0;
+                mid[3 * stride + 2] = (mask & 0x4000) ? c1 : c0;
+                mid[3 * stride + 3] = (mask & 0x8000) ? c1 : c0;
+                break;
+            }
+            case 1:
+            {
+                unsigned char color = *in++;
+                for (int y = 0; y < 4; y++)
+                    for (int x = 0; x < 4; x++)
+                        if (mask & (1 << (y * 4 + x)))
+                            mid[y * stride + x] = color;
+                break;
+            }
+            case 2:
+            {
+                unsigned char color = *in++;
+                for (int y = 0; y < 4; y++)
+                    for (int x = 0; x < 4; x++)
+                        if (!(mask & (1 << (y * 4 + x))))
+                            mid[y * stride + x] = color;
+                break;
+            }
+            case 3:
+            {
+                unsigned char color = *in++;
+                unsigned int d = color | (color << 8) | (color << 16) | (color << 24);
+                *(unsigned int *)mid = d;
+                *(unsigned int *)(mid + stride) = d;
+                *(unsigned int *)(mid + 2 * stride) = d;
+                *(unsigned int *)(mid + 3 * stride) = d;
+                break;
+            }
+            }
+            break;
+        }
+        }
+
+        // tile 3: op = ctl & 3
+        switch (ctl & 3)
+        {
+        case 0:
+        {
+            break;
+        }
+        case 1:
+        {
+            unsigned char flag = *in++;
+            if (flag == 0)
+            {
+                *(unsigned int *)(mid + 4) = *(unsigned int *)in; in += 4;
+                *(unsigned int *)(mid + 4 + stride) = *(unsigned int *)in; in += 4;
+                *(unsigned int *)(mid + 4 + 2 * stride) = *(unsigned int *)in; in += 4;
+                *(unsigned int *)(mid + 4 + 3 * stride) = *(unsigned int *)in; in += 4;
+            }
+            else
+            {
+                int adj = ((int *)palette_ptr)[flag];
+                _BYTE *ref_tile = mid + 4 + dword_476AC0 + adj;
+                *(unsigned int *)(mid + 4) = *(unsigned int *)ref_tile;
+                *(unsigned int *)(mid + 4 + stride) = *(unsigned int *)(ref_tile + stride);
+                *(unsigned int *)(mid + 4 + 2 * stride) = *(unsigned int *)(ref_tile + 2 * stride);
+                *(unsigned int *)(mid + 4 + 3 * stride) = *(unsigned int *)(ref_tile + 3 * stride);
+            }
+            break;
+        }
+        case 2:
+        {
+            unsigned char color = *in++;
+            unsigned int d = color | (color << 8) | (color << 16) | (color << 24);
+            *(unsigned int *)(mid + 4) = d;
+            *(unsigned int *)(mid + 4 + stride) = d;
+            *(unsigned int *)(mid + 4 + 2 * stride) = d;
+            *(unsigned int *)(mid + 4 + 3 * stride) = d;
+            break;
+        }
+        case 3:
+        {
+            unsigned char sel = *in++;
+            unsigned short mask = vbc_pattern_masks[sel & 0x3F];
+            _BYTE *t = mid + 4;
+            switch (sel >> 6)
+            {
+            case 0:
+            {
+                unsigned short val = *(unsigned short *)in; in += 2;
+                unsigned char c0 = val & 0xFF;
+                unsigned char c1 = (val >> 8) & 0xFF;
+                t[0] = (mask & 0x0001) ? c1 : c0;
+                t[1] = (mask & 0x0002) ? c1 : c0;
+                t[2] = (mask & 0x0004) ? c1 : c0;
+                t[3] = (mask & 0x0008) ? c1 : c0;
+                t[stride] = (mask & 0x0010) ? c1 : c0;
+                t[stride + 1] = (mask & 0x0020) ? c1 : c0;
+                t[stride + 2] = (mask & 0x0040) ? c1 : c0;
+                t[stride + 3] = (mask & 0x0080) ? c1 : c0;
+                t[2 * stride] = (mask & 0x0100) ? c1 : c0;
+                t[2 * stride + 1] = (mask & 0x0200) ? c1 : c0;
+                t[2 * stride + 2] = (mask & 0x0400) ? c1 : c0;
+                t[2 * stride + 3] = (mask & 0x0800) ? c1 : c0;
+                t[3 * stride] = (mask & 0x1000) ? c1 : c0;
+                t[3 * stride + 1] = (mask & 0x2000) ? c1 : c0;
+                t[3 * stride + 2] = (mask & 0x4000) ? c1 : c0;
+                t[3 * stride + 3] = (mask & 0x8000) ? c1 : c0;
+                break;
+            }
+            case 1:
+            {
+                unsigned char color = *in++;
+                for (int y = 0; y < 4; y++)
+                    for (int x = 0; x < 4; x++)
+                        if (mask & (1 << (y * 4 + x)))
+                            t[y * stride + x] = color;
+                break;
+            }
+            case 2:
+            {
+                unsigned char color = *in++;
+                for (int y = 0; y < 4; y++)
+                    for (int x = 0; x < 4; x++)
+                        if (!(mask & (1 << (y * 4 + x))))
+                            t[y * stride + x] = color;
+                break;
+            }
+            case 3:
+            {
+                unsigned char color = *in++;
+                unsigned int d = color | (color << 8) | (color << 16) | (color << 24);
+                *(unsigned int *)t = d;
+                *(unsigned int *)(t + stride) = d;
+                *(unsigned int *)(t + 2 * stride) = d;
+                *(unsigned int *)(t + 3 * stride) = d;
+                break;
+            }
+            }
+            break;
+        }
+        }
+
+        out = mid + 8;
+        pair_cnt = v20 - 1;
+        if (!pair_cnt)
+        {
+            out += row_adv;
+            if (!--tile_rows) return in;
+            pair_cnt = tile_cols >> 1;
+        }
+    }
+}
+
+//----- (0045D3B8) --------------------------------------------------------
+// 16-bit VBC decoder
+// Each control byte encodes 4 operations for 4 consecutive 4x4 tiles.
+// Operations (same mapping as 8-bit):
+//   0: reference copy (0 extra bytes)
+//   1: raw/palette copy (1 flag byte; if 0: 32 inline bytes, else: palette-mod ref)
+//   2: solid fill (2 bytes color)
+//   3: pattern dispatch (1 selector byte; if bit6|bit7: 2 byte operand, else: 4 byte operand)
+_BYTE *sub_45D3B8(unsigned __int16 tile_cols, __int16 tile_rows, _BYTE *data, int front_buf, int back_buf, int offset, int width, int palette_ptr, int mode)
+{
+    dword_476DDC = palette_ptr;
+    dword_476DD8 = 2 * offset + back_buf - front_buf;
+
+    // Pre-copy back buffer to front buffer with global motion (matching C# ApplyFrame)
+    int frame_size_16 = 2 * width * tile_rows * 4;
+    int byte_offset_16 = 2 * offset;
+    if (byte_offset_16 >= 0)
+    {
+        int copy_size = frame_size_16 - byte_offset_16;
+        if (copy_size > 0)
+            memcpy((void *)front_buf, (void *)(back_buf + byte_offset_16), copy_size);
+    }
+    else
+    {
+        int copy_size = frame_size_16 + byte_offset_16;
+        if (copy_size > 0)
+            memcpy((void *)(front_buf - byte_offset_16), (void *)back_buf, copy_size);
+    }
+
+    unsigned char *in = data;
+    unsigned char *out = (unsigned char *)front_buf;
+    unsigned char *ref = (unsigned char *)front_buf + dword_476DD8;
+    int stride = 2 * width;
+    int groups = tile_cols / 4;
+
+    for (int row = 0; row < tile_rows; row++)
+    {
+        for (int g = 0; g < groups; g++)
+        {
+            unsigned char ctl = *in++;
+            unsigned char ops[4] = {
+                (unsigned char)((ctl >> 6) & 3),
+                (unsigned char)((ctl >> 4) & 3),
+                (unsigned char)((ctl >> 2) & 3),
+                (unsigned char)((ctl >> 0) & 3)
+            };
+
+            for (int i = 0; i < 4; i++)
+            {
+                unsigned short *tile = (unsigned short *)out;
+
+                switch (ops[i])
+                {
+                case 0:
+                {
+                    break;
+                }
+                case 1:
+                {
+                    unsigned char flag = *in++;
+                    if (flag == 0)
+                    {
+                        for (int y = 0; y < 4; y++)
+                            for (int x = 0; x < 4; x++)
+                            {
+                                tile[y * width + x] = ((unsigned short *)in)[0];
+                                in += 2;
+                            }
+                    }
+                    else
+                    {
+                        int adj = ((int *)palette_ptr)[flag];
+                        unsigned short *ref_tile = (unsigned short *)(out + dword_476DD8 + adj);
+                        for (int y = 0; y < 4; y++)
+                            for (int x = 0; x < 4; x++)
+                                tile[y * width + x] = ref_tile[y * width + x];
+                    }
+                    break;
+                }
+                case 2:
+                {
+                    unsigned short color = ((unsigned short *)in)[0];
+                    in += 2;
+                    for (int y = 0; y < 4; y++)
+                        for (int x = 0; x < 4; x++)
+                            tile[y * width + x] = color;
+                    break;
+                }
+                case 3:
+                {
+                    unsigned char sel = *in++;
+                    unsigned short mask = vbc_pattern_masks[sel & 0x3F];
+                    switch (sel >> 6)
+                    {
+                    case 0:
+                    {
+                        unsigned short c0 = ((unsigned short *)in)[0];
+                        unsigned short c1 = ((unsigned short *)in)[1];
+                        in += 4;
+                        for (int y = 0; y < 4; y++)
+                            for (int x = 0; x < 4; x++)
+                                tile[y * width + x] = (mask & (1 << (y * 4 + x))) ? c1 : c0;
+                        break;
+                    }
+                    case 1:
+                    {
+                        unsigned short color = ((unsigned short *)in)[0];
+                        in += 2;
+                        for (int y = 0; y < 4; y++)
+                            for (int x = 0; x < 4; x++)
+                                if (mask & (1 << (y * 4 + x)))
+                                    tile[y * width + x] = color;
+                        break;
+                    }
+                    case 2:
+                    {
+                        unsigned short color = ((unsigned short *)in)[0];
+                        in += 2;
+                        for (int y = 0; y < 4; y++)
+                            for (int x = 0; x < 4; x++)
+                                if (!(mask & (1 << (y * 4 + x))))
+                                    tile[y * width + x] = color;
+                        break;
+                    }
+                    case 3:
+                    {
+                        unsigned short color = ((unsigned short *)in)[0];
+                        in += 2;
+                        for (int y = 0; y < 4; y++)
+                            for (int x = 0; x < 4; x++)
+                                tile[y * width + x] = color;
+                        break;
+                    }
+                    }
+                    break;
+                }
+                }
+
+                out += 8;
+            }
+        }
+        out += 3 * stride;
+    }
+
+    return in;
+}
+
 //----- (0045A110) --------------------------------------------------------
 __int16 video_45A110(VideoFile *a1, VideoFileFrame *frame)
 {
@@ -726,30 +1224,28 @@ __int16 video_45A110(VideoFile *a1, VideoFileFrame *frame)
             {
                 v7 = 2;
             }
-            __debugbreak(); // video codec
-                            /*sub_45D3B8(
-                            a1->header.width / 4,
-                            a1->header.height / 4,
-                            v5 + 4,
-                            *((_DWORD *)&a1->frame_front_buffer + a1->field_332),
-                            *((_DWORD *)&a1->frame_front_buffer + (a1->field_332 ^ 1)),
-                            v3,
-                            a1->header.width,
-                            (int)a1->_344_prolly_palette,
-                            v7);*/
+            sub_45D3B8(
+                a1->header.width / 4,
+                a1->header.height / 4,
+                v5 + 4,
+                *((int *)&a1->frame_front_buffer + a1->field_332),
+                *((int *)&a1->frame_front_buffer + (a1->field_332 ^ 1)),
+                v3,
+                a1->header.width,
+                (int)a1->_344_prolly_palette,
+                v7);
         }
         else
         {
-            __debugbreak(); // video codec
-                            /*sub_45A48E(
-                            a1->header.width / 4,
-                            a1->header.height / 4,
-                            v5 + 4,
-                            *((_DWORD *)&a1->frame_front_buffer + a1->field_332),
-                            *((_DWORD *)&a1->frame_front_buffer + (a1->field_332 ^ 1)),
-                            v3,
-                            a1->header.width,
-                            (int)a1->_344_prolly_palette);*/
+            sub_45A48E(
+                a1->header.width / 4,
+                a1->header.height / 4,
+                v5 + 4,
+                *((int *)&a1->frame_front_buffer + a1->field_332),
+                *((int *)&a1->frame_front_buffer + (a1->field_332 ^ 1)),
+                v3,
+                a1->header.width,
+                (int)a1->_344_prolly_palette);
         }
         v11 = a1->field_332;
         v12 = *((_DWORD *)&a1->frame_front_buffer + v11);
@@ -809,7 +1305,6 @@ int VIDEO_Play(int id)
     char a1[80]; // [sp+24h] [bp-1A4h]@7
     char v14[80]; // [sp+74h] [bp-154h]@7
                   //char v15[260]; // [sp+C4h] [bp-104h]@16
-    return 1;
     v1 = id;
     VIDEO_IsAllocated();
     stru1_408480_reset_animation();
@@ -912,16 +1407,8 @@ int VIDEO_Play(int id)
             render_default_stru1->clip_z = render_width;
             render_default_stru1->clip_y = 0;
             render_default_stru1->clip_w = render_height;
-            if (current_level_idx >= LEVEL_MUTE_01)
-            {
-                _47A010_mapd_item_being_drawn[0] = MAPD_Draw(MAPD_MAP, 0, 0);
-                v8 = &LVL_FindMapd()->items[0];
-            }
-            else
-            {
-                _47A010_mapd_item_being_drawn[0] = MAPD_Draw(MAPD_FOG_OF_WAR, 0, -10);
-                v8 = &LVL_FindMapd()->items[1];
-            }
+            _47A010_mapd_item_being_drawn[0] = MAPD_Draw(MAPD_MAP, 0, 0);
+            v8 = &LVL_FindMapd()->items[0];
             _40E400_set_palette(v8->GetPalette());
             render_copy_palette(&_477990_video_palette, GetSysPalette());
             sprite_47A400.pstru7 = array_466028;

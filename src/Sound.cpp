@@ -62,8 +62,6 @@ struct sound_stru_2
 };
 
 
-DSBUFFERDESC video_477DE4_dsb_desc; // weak
-IDirectSoundBuffer *video_477DE4_dsb;
 LPDIRECTSOUND pds; // idb
 
 bool sound_suspended = false;
@@ -166,16 +164,11 @@ void sound_end_video_playback()
 
 bool sound_video_get_position(int *play, int *write)
 {
-    return S_OK == video_477DE4_dsb->GetCurrentPosition(
-        (LPDWORD)play,
-        (LPDWORD)write
-    );
+    return false;
 }
 
 void sound_video_stop()
 {
-    video_477DE4_dsb->Stop();
-    video_477DE4_dsb->Release();
 }
 
 //----- (00439440) --------------------------------------------------------

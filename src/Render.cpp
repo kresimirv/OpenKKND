@@ -224,7 +224,7 @@ void render_draw_list(DrawJobList *list)
 
         // 8/16 bpp are hardcoded, introduce a walkaround for ordinary bpp
         //static auto pixels_8bpp = new unsigned char[ddsd_primary.dwWidth * ddsd_primary.dwHeight];
-        static auto pixels_8bpp = new unsigned char[render_width * render_height];
+        static auto pixels_8bpp = new unsigned char[render_width * render_height]();
         auto pixels_32bpp = new unsigned int[render_width * render_height];
 
         //render_locked_surface_ptr = ddsd_primary.lpSurface;
@@ -1249,7 +1249,7 @@ void render_draw_tile(void *data, int image_off_x, int image_off_y, int image_x_
     unsigned __int8 *dst; // edi@17
     int v7; // edx@17
     unsigned int this_row_x_pixels; // ecx@18
-    char v9; // al@24
+    int v9;
     unsigned int v10; // ecx@24
     int v11; // eax@24
     unsigned __int8 *v12; // edi@24
