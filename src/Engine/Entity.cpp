@@ -17,7 +17,7 @@ using Engine::Infrastructure::EntityRepository;
 
 void Entity::SetMode(EntityMode mode) {
 if (unit_id == UNIT_STATS_SURV_MOBILE_DERRICK)
-log("SetMode: %s", get_handler_name(mode));
+log("SetMode: %s", get_handler_name((void *)mode));
     this->mode = mode;
 }
 bool Entity::IsMode(EntityMode mode) const {
@@ -25,7 +25,7 @@ bool Entity::IsMode(EntityMode mode) const {
 }
 void Entity::ExecMode() {
 if (unit_id == UNIT_STATS_SURV_MOBILE_DERRICK)
-log("ExecMode: %s", get_handler_name(mode));
+log("ExecMode: %s", get_handler_name((void *)mode));
     (mode)(this);
 }
 int Entity::ModeHandlerId() const {

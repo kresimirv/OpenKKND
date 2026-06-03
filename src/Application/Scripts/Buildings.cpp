@@ -158,7 +158,7 @@ void script_403230_building_mini_explosion(Script *a1)
     int v3; // edx@1
 
     v1 = a1->sprite;
-    v1->pstru7 = &_479D48_stru7;
+    v1->pstru7 = _479D48_stru7;
     sprite_408800_play_sound(v1, SOUND_3, _4690A8_sfx_volume, 0);
     v1->field_88_unused = 1;
     v2 = kknd_rand_debug(__FILE__, __LINE__);
@@ -181,7 +181,7 @@ void script_4032F0_building_grand_explosion(Script *a1)
     int v2; // ecx@1
 
     v1 = a1->sprite;
-    v1->pstru7 = &_479D48_stru7;
+    v1->pstru7 = _479D48_stru7;
     script_sleep(a1, 130);
     sprite_408800_play_sound(v1, SOUND_3, _4690A8_sfx_volume, 0);
     sprite_load_mobd(v1, SPRITE_EXPLOSION_MOBD_OFFSET_BIG);

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstring>
+
 #include "src/hexrays-defs.h"
 #include "src/Render.h"
 #include "src/Script.h"
@@ -376,8 +378,8 @@ struct __declspec(align(4)) LevelDesc
 /* 270 */
 struct CustomMission
 {
-    const char* briefing[20] = { 0 };
-    const char *wav_filename = 0;
+    const char* briefing[20];
+    const char *wav_filename;
 };
 
 
@@ -1672,11 +1674,11 @@ struct EntityOilTankerAttachment_stru70
 	int field_8;
 	char gap_C[63];
 	char field_4B[28];
-	__declspec(align(1)) int field_67;
+	__declspec_align_1 int field_67;
 	char field_6B[28];
 	char gap87[36];
 	char array_AB[28];
-	__declspec(align(1)) int field_C7;
+	__declspec_align_1 int field_C7;
 	char array_CB[28];
 	char gapE7[65];
 	char field_128;
@@ -2094,3 +2096,19 @@ struct Sprite
     __int16 field_90_building_damage;
     __int16 field_92;
 };
+
+#if defined(__GNUC__)
+#include <cstring>
+#define _stricmp strcasecmp
+static inline char *_itoa(int value, char *buffer, int radix) {
+    snprintf(buffer, 32, "%d", value);
+    return buffer;
+}
+static inline unsigned char _BitScanReverse(unsigned long *index, unsigned long mask) {
+    if (mask == 0) { *index = 0; return 0; }
+    *index = (unsigned long)(sizeof(mask) * 8 - 1 - __builtin_clzl(mask));
+    return 1;
+}
+#define _byteswap_ulong __builtin_bswap32
+#define _strcmpi strcasecmp
+#endif

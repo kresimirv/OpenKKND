@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cstdint>
 
 #include <list>
 
@@ -44,7 +45,7 @@ FilesWatchdog files_watchdog;
 
 File *File::open(const char *filename) {
     auto *file = new StdioFile();
-  fopen_s(&file->handle, filename, "rb");
+  file->handle = fopen(filename, "rb");
   if (file->handle) {
     files.push_back(file);
   } else {

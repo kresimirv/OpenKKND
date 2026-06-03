@@ -1109,9 +1109,9 @@ Script *script_create_coroutine(enum SCRIPT_TYPE type, void(*task_main)(Script *
         script->script_type = type;
         script->routine_type = SCRIPT_COROUTINE;
 
-        auto coroutine = couroutine_create(coroutine_main, get_handler_name(task_main));
+        auto coroutine = couroutine_create(coroutine_main, get_handler_name((void *)task_main));
         script->handler = (void(*)(Script *))coroutine;
-        script->debug_handler_name = get_handler_name(task_main);
+        script->debug_handler_name = get_handler_name((void *)task_main);
 
         if (coroutine)
         {
@@ -1141,7 +1141,7 @@ Script *script_create_function(enum SCRIPT_TYPE type, void(*function)(Script *))
         script->script_type = type;
         script->routine_type = SCRIPT_FUNCTION;
         script->handler = function;
-        script->debug_handler_name = get_handler_name(function);
+        script->debug_handler_name = get_handler_name((void *)function);
         if (function)
         {
             //add script to script_execute_list head

@@ -459,9 +459,9 @@ void cursor_process_user_actions(CursorHandler *a1, int a2)
     a1a = &_47A010_mapd_item_being_drawn[0]->draw_job->job_details;
     a1->_18_script = 0;
     a1->cursor_target_ai = nullptr;
-    v3 = stru13construct_list_47A638;
+    v3 = stru13construct_sentinel.next;
     v96 = a2;
-    if ((stru13construct **)stru13construct_list_47A638 != &stru13construct_list_47A638)
+    if (stru13construct_sentinel.next != (stru13construct *)&stru13construct_sentinel)
     { // building is being built
         while (1)
         {
@@ -500,7 +500,7 @@ void cursor_process_user_actions(CursorHandler *a1, int a2)
             }
         LABEL_26:
             v3 = v3->next;
-            if ((stru13construct **)v3 == &stru13construct_list_47A638)
+            if (v3 == (stru13construct *)&stru13construct_sentinel)
                 goto LABEL_27;
         }
         if (v11 > 171 || v3->field_10 >= 1)
@@ -781,11 +781,11 @@ LABEL_82:
                         0,
                         0,
                         -1);
-                    v58 = stru13construct_list_47A638;
-                    v54->prev = (stru13construct *)&stru13construct_list_47A638;
+                    v58 = stru13construct_sentinel.next;
+                    v54->prev = (stru13construct *)&stru13construct_sentinel;
                     v54->next = v58;
-                    stru13construct_list_47A638->prev = v54;
-                    stru13construct_list_47A638 = v54;
+                    stru13construct_sentinel.next->prev = v54;
+                    stru13construct_sentinel.next = v54;
                 }
                 break;
             case EVT_MSG_1519:
@@ -821,15 +821,15 @@ LABEL_82:
                 }
                 break;
             case EVT_MSG_DESELECTED:
-                v60 = stru13construct_list_47A638;
+                v60 = stru13construct_sentinel.next;
                 v61 = j->sender->param;
                 dword_468980 = -1;
-                if ((stru13construct **)stru13construct_list_47A638 != &stru13construct_list_47A638)
+                if (stru13construct_sentinel.next != (stru13construct *)&stru13construct_sentinel)
                 {
                     while (v60->field_8 != *((_DWORD *)v61 + 76))
                     {
                         v60 = v60->next;
-                        if ((stru13construct **)v60 == &stru13construct_list_47A638)
+                        if (v60 == (stru13construct *)&stru13construct_sentinel)
                             goto LABEL_162;
                     }
                     stru38_list_427FD0(&v60->_18_cost, 0);

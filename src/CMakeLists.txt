@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 
 add_subdirectory(Application)
@@ -49,21 +48,16 @@ set(UNSORTED_HEADERS
 
 add_library(Unsorted STATIC ${UNSORTED_SOURCES} ${UNSORTED_HEADERS})
 
-add_library(Audio "")
-add_library(Video "")
-if(WIN32)
-    target_sources(Audio
-        INTERFACE
-            "${CMAKE_CURRENT_LIST_DIR}/Sound.h"
-        PRIVATE
-            "${CMAKE_CURRENT_LIST_DIR}/Sound.cpp"
-    )
+add_library(Audio ${CMAKE_CURRENT_LIST_DIR}/Sound.h ${CMAKE_CURRENT_LIST_DIR}/Sound.cpp)
+add_library(Video ${CMAKE_CURRENT_LIST_DIR}/Video.h ${CMAKE_CURRENT_LIST_DIR}/Video.cpp)
 
-    target_sources(Video
-        INTERFACE
-            "${CMAKE_CURRENT_LIST_DIR}/Video.h"
-        PRIVATE
-            "${CMAKE_CURRENT_LIST_DIR}/Video.cpp"
-    )
-else()
+if(WIN32)
+  target_link_libraries(Audio winmm.lib dsound.lib)
 endif()
+
+target_link_libraries(Audio ${SDL2_LIBRARY})
+target_link_libraries(Video ${SDL2_LIBRARY})
+
+target_link_libraries(Audio Engine Infrastructure)
+target_link_libraries(Video Unsorted Engine Infrastructure)
+target_link_libraries(Unsorted Engine Infrastructure Audio Video)

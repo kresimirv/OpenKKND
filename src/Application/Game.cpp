@@ -263,10 +263,11 @@ void Game::WaitScreen() {
 
     REND_SetRoutines();
 
-    if (true)//if (nocd)
-        strcpy(app_root_dir, ".");
-    else
-        sprintf(app_root_dir, aC, game_installation_drive_letter);
+    {
+        std::string exe_dir = OsGetExecutableDirectory();
+        strncpy(app_root_dir, exe_dir.c_str(), sizeof(app_root_dir) - 1);
+        app_root_dir[sizeof(app_root_dir) - 1] = '\0';
+    }
 
     v0 = netz_init(-1, nullsub_1, (int(*)(int))netz_42E820);
     if (v0)
@@ -275,10 +276,10 @@ void Game::WaitScreen() {
         Terminate();
     }
 
-    wait_lvl = LVL_LoadLevel("wait.lvl");
+    wait_lvl = LVL_LoadLevel("WAIT.LVL");
     if (!wait_lvl)
     {
-        log("LVL_LoadLevel(wait.lvl) failed\n");
+        log("LVL_LoadLevel(WAIT.LVL) failed\n");
         Terminate();
     }
     _47A010_mapd_item_being_drawn[0] = 0;

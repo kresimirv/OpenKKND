@@ -1,18 +1,16 @@
-#include <dsound.h>
-#include <process.h>    // _beginthread, _endthread
 #include <list>
 #include <thread>
 
 #include "src/Sound.h"
+#include "src/DirectSoundSdl2.h"
 #include "src/kknd.h"
 #include "src/Random.h"
 #include "src/ScriptEvent.h"
 #include "src/_unsorted_functions.h"
+#include "src/_unsorted_data.h"
 #include "src/Engine/Entity.h"
 
 #include "src/Infrastructure/PlatformSpecific/OsTools.h"
-
-#pragma comment(lib, "Dsound.lib") // DirectSoundCreate
 
 
 /* 262 */
@@ -65,8 +63,8 @@ int _47C5D4_sound_threaded_snd_id; // idb
 sound_stru_2 **_47C4E0_sounds;
 bool sound_initialized = false;
 int _47C4E8_num_sounds; // weak
-int sound_volumes[17];
-int sound_pans[17];
+int sound_volumes[33];
+int sound_pans[33];
 int _47C5C0_can_sound; // weak
 void *faction_slv; // idb
 int dword_47C5D0; // weak
@@ -152,7 +150,7 @@ void sound_video_stop()
 bool sound_initialize()
 {
     //init sound volumes & sound pans
-    for (int i = 0; i < 17; ++i)
+    for (int i = 0; i < 33; ++i)
     {
         sound_volumes[i] = sound_pans[i] = 1000.0 * 0.69314718055994528623 * log2((double)(i + 1) * 0.05882352941176471);
     }
@@ -565,8 +563,8 @@ int sound_play_threaded(const char *name_, int a2, int sound_volume_offset, int 
     char name[1024];
     sprintf(
         name,
-        "%s\\LEVELS\\%s",
-        OsGetCurrentDirectory().c_str(),
+        "%s/LEVELS/%s",
+        game_data_installation_dir,
         name_
     );
 
@@ -788,7 +786,7 @@ void _439C10_sound_thread(std::shared_ptr<Sound> sound)
             else
                 (*sound_buffer)->Play(0, 0, 1);
             sound->flags &= 0xFFFFFFF7;
-            Sleep(0xAu);
+            SDL_Delay(10);
         }
     }
     v18 = v51;
@@ -879,7 +877,7 @@ void _439C10_sound_thread(std::shared_ptr<Sound> sound)
                 LOBYTE_HEXRAYS(v32) = v32 & 0xF7;
                 sound->flags = v32;
             }
-            Sleep(0x64u);
+            SDL_Delay(100);
         }
         v33 = sound->flags;
         if (!(v33 & 0x20))
@@ -940,7 +938,7 @@ void _439C10_sound_thread(std::shared_ptr<Sound> sound)
                 sound->pdsb->Unlock(v48, (DWORD)a1, v47, num_bytes);
             }
             sound->flags &= 0xFFFFFFF7;
-            Sleep(0x64u);
+            SDL_Delay(100);
             ++v35;
         } while (v35 < 50);
     }
@@ -1229,7 +1227,7 @@ void sound_cleanup(std::shared_ptr<Sound> snd)
             if (!(flags & 0x40))
             {
                 do
-                    Sleep(0x14u);
+                    SDL_Delay(20);
                 while (!(sound->flags & 0x40));
             }
             sound_file = sound->file;

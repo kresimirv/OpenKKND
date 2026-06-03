@@ -199,7 +199,7 @@ void script_438F50_explosions(Script *a1)
     v3 = (unsigned __int8)((char)kknd_rand_debug("k/Scripts/Schrap.cpp", 293) % -8);
     if (v3 < 4)
         v2 = 60;
-    v1->pstru7 = &_479D48_stru7;
+    v1->pstru7 = _479D48_stru7;
     v1->x += ((unsigned __int8)kknd_rand_debug("k/Scripts/Schrap.cpp", 300) - 128) << 8;
     v4 = kknd_rand_debug("k/Scripts/Schrap.cpp", 301);
     v5 = v1->y;

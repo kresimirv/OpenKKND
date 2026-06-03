@@ -2,6 +2,13 @@
 
 #include <memory>
 
+#ifndef __int8
+#define __int8 char
+#endif
+#ifndef __int16
+#define __int16 short
+#endif
+
 #include "src/Infrastructure/Renderer/Renderer.h"
 #include "src/Infrastructure/Window/Window.h"
 

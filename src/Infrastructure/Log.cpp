@@ -16,7 +16,7 @@ void log(const char *fmt, ...)
     char msg[4096];
 
     va_start(args, fmt);
-    vsprintf_s(msg, fmt, args);
+    vsnprintf(msg, sizeof(msg), fmt, args);
     va_end(args);
 
     OsDebugString(msg);
@@ -28,7 +28,7 @@ void Log::Info(const char *format, ...) {
     char msg[4096];
 
     va_start(args, format);
-    vsprintf_s(msg, format, args);
+    vsnprintf(msg, sizeof(msg), format, args);
     va_end(args);
 
     OsDebugString(msg);

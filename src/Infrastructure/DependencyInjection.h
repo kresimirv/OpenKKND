@@ -12,17 +12,17 @@ namespace Infrastructure {
             return nullptr;
         }
 
-        template<>
-        static std::shared_ptr<Log> Resolve() {
-            if (log == nullptr) {
-                log = std::make_shared<Log>();
-            }
-            return log;
-        }
-
     private:
         static std::shared_ptr<Log> log;
     };
+
+    template<>
+    inline std::shared_ptr<Log> DependencyInjection::Resolve<Log>() {
+        if (DependencyInjection::log == nullptr) {
+            DependencyInjection::log = std::make_shared<Log>();
+        }
+        return DependencyInjection::log;
+    }
 };
 
 using InfrastructureDependencies = Infrastructure::DependencyInjection;

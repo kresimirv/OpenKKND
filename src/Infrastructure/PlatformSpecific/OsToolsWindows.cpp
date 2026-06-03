@@ -35,6 +35,19 @@ std::string OsGetCurrentDirectory() {
     );
 }
 
+std::string OsGetExecutableDirectory() {
+    char buffer[MAX_PATH + 1];
+    DWORD len = GetModuleFileNameA(NULL, buffer, MAX_PATH);
+    if (len == 0) {
+        return OsGetCurrentDirectory();
+    }
+    char *slash = strrchr(buffer, '\\');
+    if (slash) {
+        *slash = '\0';
+    }
+    return std::string(buffer);
+}
+
 std::string OsGetCommandLine() {
     return std::string(
         GetCommandLineA()

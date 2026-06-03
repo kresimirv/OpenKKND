@@ -152,13 +152,13 @@ OilDepositSaveStruct *GAME_Save_PackOilData(size_t *oil_data_size)
     int *v5; // ecx@6
 
     *oil_data_size = 4;
-    for (i = oilspot_list_head; (OilDeposit **)i != &oilspot_list_head; i = i->next)
+    for (i = oilspot_sentinel.next; i != (OilDeposit *)&oilspot_sentinel; i = i->next)
         *oil_data_size += 16;
     result = (OilDepositSaveStruct *)malloc(*oil_data_size);
     if (result)
     {
-        v3 = oilspot_list_head;
-        for (j = result; (OilDeposit **)v3 != &oilspot_list_head; j = (OilDepositSaveStruct *)(v5 + 1))
+        v3 = oilspot_sentinel.next;
+        for (j = result; v3 != (OilDeposit *)&oilspot_sentinel; j = (OilDepositSaveStruct *)(v5 + 1))
         {
             j->field_0 = v3->oil_left;
             v5 = &j->width_x256;
@@ -227,9 +227,9 @@ int GAME_Load_UnpackOilData(OilDepositSaveStruct *a1)
         v9 = *v7;
         v1 = (OilDepositSaveStruct *)(v7 + 1);
         v2->drillrig_entity_id = v9;
-        v10 = oildeposit_list_end;
-        v11 = oildeposit_list_end->next;
-        v2->prev = oildeposit_list_end;
+        v10 = (OilDeposit *)&oilspot_sentinel;
+        v11 = oilspot_sentinel.next;
+        v2->prev = (OilDeposit *)&oilspot_sentinel;
         v2->next = v11;
         v10->next->prev = v2;
         v10->next = v2;
@@ -691,9 +691,9 @@ LABEL_156:
         v103 = (OilDeposit *)v3->state;
         if (v82 == 46 || v82 == 47)
         {
-            v104 = oilspot_list_head;
+            v104 = oilspot_sentinel.next;
             v105 = 0;
-            if ((OilDeposit **)oilspot_list_head == &oilspot_list_head)
+            if (oilspot_sentinel.next == (OilDeposit *)&oilspot_sentinel)
             {
             LABEL_197:
                 v105 = -1;
@@ -704,7 +704,7 @@ LABEL_156:
                 {
                     v104 = v104->next;
                     ++v105;
-                    if ((OilDeposit **)v104 == &oilspot_list_head)
+                    if (v104 == (OilDeposit *)&oilspot_sentinel)
                         goto LABEL_197;
                 }
             }

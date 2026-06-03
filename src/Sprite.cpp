@@ -22,8 +22,8 @@ bool sprite_list_alloc(const int num_sprites)
                 sprite_list[i].next = &sprite_list[i + 1];
             }
             sprite_list[num_sprites - 1].next = (Sprite *)&sprite_list_free_pool;
-            sprite_list_47A4A4 = (Sprite *)&sprite_list_47A4A0;
-            sprite_list_47A4A0 = (Sprite *)&sprite_list_47A4A0;
+            sprite_list_sentinel.prev = &sprite_list_sentinel;
+            sprite_list_sentinel.next = &sprite_list_sentinel;
             sprite_init_47A400();
             j_drawjob_update_handler_426C40_default_sprite_handler = drawjob_update_handler_426C40_mobd;
             return true;
@@ -101,10 +101,10 @@ Sprite *sprite_create(enum MOBD_ID mobd_item_idx, Script *script, Sprite *parent
         {
             sprite_list_free_pool = v5->next;
             memcpy(v5, &sprite_47A400, sizeof(Sprite));
-            v5->next = (Sprite *)&sprite_list_47A4A0;
-            v5->prev = sprite_list_47A4A4;
-            sprite_list_47A4A4->next = v5;
-            sprite_list_47A4A4 = v5;
+            v5->next = &sprite_list_sentinel;
+            v5->prev = sprite_list_sentinel.prev;
+            sprite_list_sentinel.prev->next = v5;
+            sprite_list_sentinel.prev = v5;
             v5->mobd_id = v6;
             v5->script = v3;
             if (v3)
@@ -162,7 +162,7 @@ Sprite *sprite_create_scripted(
     else
     {
         __debugbreak();
-        result = false;
+        result = nullptr;
     }
     if (result)
         goto LABEL_8;
@@ -229,8 +229,8 @@ Sprite *sprite_list_find_by_mobd_id(enum MOBD_ID mobd_id)
 {
     Sprite *result; // eax@1
 
-    result = sprite_list_47A4A0;
-    if ((Sprite **)sprite_list_47A4A0 == &sprite_list_47A4A0)
+    result = sprite_list_sentinel.next;
+    if (result == &sprite_list_sentinel)
     {
     LABEL_4:
         result = 0;
@@ -240,7 +240,7 @@ Sprite *sprite_list_find_by_mobd_id(enum MOBD_ID mobd_id)
         while (result->mobd_id != mobd_id)
         {
             result = result->next;
-            if ((Sprite **)result == &sprite_list_47A4A0)
+            if (result == &sprite_list_sentinel)
                 goto LABEL_4;
         }
     }
@@ -449,8 +449,8 @@ void sprite_list_update_positions()
 
     if (currently_running_lvl_mobd_valid)
     {
-        bodx_404D50_sprite_list((Sprite *)&sprite_list_47A4A0);
-        for (i = sprite_list_47A4A0; i != (Sprite *)&sprite_list_47A4A0; i = i->next)
+        bodx_404D50_sprite_list(&sprite_list_sentinel);
+        for (i = sprite_list_sentinel.next; i != &sprite_list_sentinel; i = i->next)
         {
             if (is_async_execution_supported && (v1 = i->script) != 0)
                 v2 = v1->field_1C & 1;
@@ -884,7 +884,7 @@ void sprite_list_init_mobd_items()
 
     if (currently_running_lvl_mobd_valid)
     {
-        for (i = sprite_list_47A4A0; (Sprite **)i != &sprite_list_47A4A0; i = i->next)
+        for (i = sprite_list_sentinel.next; i != &sprite_list_sentinel; i = i->next)
         {
             if (is_async_execution_supported && (v1 = i->script) != 0)
                 v2 = v1->field_1C & 1;
@@ -903,7 +903,7 @@ void sprite_list_free()
     {
         if (sprite_list)
         {
-            free(sprite_list);
+            delete[] sprite_list;
             currently_running_lvl_mobd_valid = 0;
             sprite_list = 0;
         }

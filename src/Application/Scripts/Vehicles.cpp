@@ -991,8 +991,8 @@ void entity_mode_406DC0_mobilederrick(Entity *a1)
 
     v1 = a1;
     a1->sprite->field_88_unused = 1;
-    v2 = oilspot_list_head;
-    if ((OilDeposit **)oilspot_list_head == &oilspot_list_head)
+    v2 = oilspot_sentinel.next;
+    if (oilspot_sentinel.next == (OilDeposit *)&oilspot_sentinel)
     {
     LABEL_7:
         v2 = 0;
@@ -1006,7 +1006,7 @@ void entity_mode_406DC0_mobilederrick(Entity *a1)
             if (map_is_same_tile(v3->x, v4->x) && map_is_same_tile(v3->y, v4->y) && !(v4->drawjob->flags & 0x40000000))
                 break;
             v2 = v2->next;
-            if ((OilDeposit **)v2 == &oilspot_list_head)
+            if (v2 == (OilDeposit *)&oilspot_sentinel)
                 goto LABEL_7;
         }
     }

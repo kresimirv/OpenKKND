@@ -1,5 +1,12 @@
 #pragma once
 
+#ifndef __stdcall
+#define __stdcall
+#endif
+#ifndef __int32
+#define __int32 int
+#endif
+
 struct Script;
 
 

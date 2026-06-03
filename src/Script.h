@@ -1,6 +1,14 @@
 #pragma once
 #include <list>
 
+// Forward declarations for enums used in function params
+#ifndef __int32
+#define __int32 int
+#endif
+enum SCRIPT_EVENT : __int32;
+enum UNIT_ID : __int32;
+enum MOBD_ID : __int32;
+
 
 #define SCRIPT_FLAGS_20_1               0x00000001 // oil related
 #define SCRIPT_FLAGS_20_2               0x00000002

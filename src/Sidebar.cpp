@@ -45,12 +45,10 @@ int _4704A8_per_sidebar_button_mobd_lookup_table_offsets[2][11] =
     { 2920, 2944, 2928, 2936, 2464, 2648, 2480, 2472, 2268, 2252, 2252 },
 { 2896, 2944, 2904, 2912, 2440, 2640, 2456, 2448, 2260, 2244, 2244 }
 };
-Sidebar *stru22_list_479548;
-Sidebar *stru22_list_47954C;
+Sidebar sidebar_sentinel;
 Sidebar *sidebar_list;
 Sidebar *sidebar_list_head;
-SidebarButton *sidebar_button_list_4795A0;
-SidebarButton *sidebar_button_list_4795A4;
+SidebarButton sidebar_button_sentinel;
 SidebarButton *sidebar_button_list;
 SidebarButton *sidebar_button_list_head;
 int sidebar_button_list_sidebar_height; // weak
@@ -106,8 +104,8 @@ bool sidebar_initialize()
         ++v1;
     } while (v1 < 255);
     production_option_list[255].next = 0;
-    production_option_list_47C9C8 = (ProductionOption *)&production_option_list_47C9C8;
-    production_option_list_47C9CC = (ProductionOption *)&production_option_list_47C9C8;
+    production_option_sentinel.next = (ProductionOption *)&production_option_sentinel;
+    production_option_sentinel.prev = (ProductionOption *)&production_option_sentinel;
     v2 = (ProductionGroup *)malloc(0x980u);
     production_group_list = v2;
     if (!v2)
@@ -719,11 +717,11 @@ Sidebar *sidebar_list_create(Sprite *sprite, Script *script, int width, int heig
         v5->sprite->param = v5;
         v5->button_list_head = (SidebarButton *)&v5->button_list_free_pool;
         v5->button_list_free_pool = (SidebarButton *)&v5->button_list_free_pool;
-        v5->next = stru22_list_479548;
-        v5->prev = (Sidebar *)&stru22_list_479548;
+        v5->next = sidebar_sentinel.next;
+        v5->prev = (Sidebar *)&sidebar_sentinel;
         result = v5;
-        stru22_list_479548->prev = v5;
-        stru22_list_479548 = v5;
+        sidebar_sentinel.next->prev = v5;
+        sidebar_sentinel.next = v5;
     }
     else
     {
@@ -753,8 +751,8 @@ bool sidebar_button_list_alloc()
         ++v1;
     } while (v1 < 15);
     sidebar_list[15].next = 0;
-    stru22_list_479548 = (Sidebar *)&stru22_list_479548;
-    stru22_list_47954C = (Sidebar *)&stru22_list_479548;
+    sidebar_sentinel.next = (Sidebar *)&sidebar_sentinel;
+    sidebar_sentinel.prev = (Sidebar *)&sidebar_sentinel;
     v2 = (SidebarButton *)malloc(0x7D0u);
     sidebar_button_list = v2;
     if (v2)
@@ -768,8 +766,8 @@ bool sidebar_button_list_alloc()
             ++v3;
         } while (v3 < 49);
         sidebar_button_list[49].next = 0;
-        sidebar_button_list_4795A0 = (SidebarButton *)&sidebar_button_list_4795A0;
-        sidebar_button_list_4795A4 = (SidebarButton *)&sidebar_button_list_4795A0;
+        sidebar_button_sentinel.next = (SidebarButton *)&sidebar_button_sentinel;
+        sidebar_button_sentinel.prev = (SidebarButton *)&sidebar_button_sentinel;
         sidebar_button_list_item_width = 0x2000;
         sidebar_button_list_sidebar_height = 0x2000;
         return true;
@@ -1589,16 +1587,10 @@ SidebarButton *sidebar_add_buttton_internal(
 //----- (00446ED0) --------------------------------------------------------
 void script_446ED0_sidebar_buttons(Script *a1)
 {
-    SidebarButton **v1; // esi@1
-
     _44A6B0_minimap(render_width - 32, 32);
     script_sleep(a1, 2);
-    v1 = _47CA18_sidebar_production_buttons;
-    do
-    {
-        script_trigger_event(0, EVT_MSG_1548_sidebar, 0, (*v1)->task);
-        ++v1;
-    } while ((int)v1 < (int)& _47CA2C_should_airstrike_mess_with_sidebar);
+    for (int i = 0; i < 5; i++)
+        script_trigger_event(0, EVT_MSG_1548_sidebar, 0, _47CA18_sidebar_production_buttons[i]->task);
     script_trigger_event(0, EVT_MSG_1548_sidebar, 0, _47CA10_sidebar_button_minimap->task);
     script_trigger_event(0, EVT_MSG_1548_sidebar, 0, _47CA08_sidebar_buttons[1]->task);
     while (1)

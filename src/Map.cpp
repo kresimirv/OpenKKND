@@ -369,7 +369,7 @@ bool minimap_init()
                                         v17 = 0;
                                         v18 = 1;
                                         v44 = 0;
-                                        for (int v19 = 1; v19 < sizeof(_47CBC0_fow); ++v19)
+                                        for (int v19 = 1; v19 < (int)(sizeof(_47CBC0_fow) / sizeof(_47CBC0_fow[0])); ++v19)
                                         {
                                             if (_47CBC0_fow[v19] > _47CBC0_fow[(unsigned __int8)v44])
                                             {

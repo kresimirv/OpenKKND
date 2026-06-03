@@ -4,8 +4,9 @@
 
 #if defined(FIX_WINDOWS_BLOCKING_WINDOW)
 #include <Windows.h>
-#include <SDL2/SDL_syswm.h>
 #endif
+
+#include <SDL2/SDL_syswm.h>
 
 #include "src/Infrastructure/Window/SdlWindow.h"
 
@@ -140,12 +141,14 @@ void SdlWindow::SetFullscreen() {
 }
 
 void *SdlWindow::GetHwnd() const {
+#if defined(_WINDOWS)
     SDL_SysWMinfo info;
     SDL_VERSION(&info.version);
 
     if (SDL_GetWindowWMInfo(window, &info)) {
         return info.info.win.window;
     }
+#endif
     return nullptr;
 }
 
@@ -323,7 +326,13 @@ int SdlWindow::GetMouseY() const {
 }
 
 void SdlWindow::SetMousePos(int x, int y) {
+    unsigned short cw;
+    __asm__ __volatile__ ("fnstcw %0" : "=m" (cw) : : "memory");
+    __asm__ __volatile__ ("fnclex" : : : "memory");
+    unsigned short safe_cw = (cw & 0xFFC0) | 0x003F;
+    __asm__ __volatile__ ("fldcw %0" : : "m" (safe_cw) : "memory");
     SDL_WarpMouseInWindow(window, x, y);
+    __asm__ __volatile__ ("fldcw %0" : : "m" (cw) : "memory");
 }
 
 bool SdlWindow::GetMousePressed(int button) const {

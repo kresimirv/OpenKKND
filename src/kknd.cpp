@@ -103,7 +103,7 @@ void Task_context_0_4019A0(Task_context_0 *a1)
 //----- (00401A40) --------------------------------------------------------
 void Task_context_0_401A40(Task_context_0 *a1)
 {
-	a1->sprite_1->pstru7 = &_479D48_stru7;
+	a1->sprite_1->pstru7 = _479D48_stru7;
 	a1->sprite_1->drawjob->flags |= 0x40000000u;
 	a1->sprite_2->drawjob->flags |= 0x40000000u;
 	a1->handler = Task_context_0_4019A0;
@@ -2771,8 +2771,8 @@ bool oilspot_list_alloc()
 			++v1;
 		} while (v1 < 255);
 		oilspot_list[255].next = 0;
-		oilspot_list_head = (OilDeposit *)&oilspot_list_head;
-		oildeposit_list_end = (OilDeposit *)&oilspot_list_head;
+		oilspot_sentinel.next = (OilDeposit *)&oilspot_sentinel;
+		oilspot_sentinel.prev = (OilDeposit *)&oilspot_sentinel;
         return true;
 	}
     return false;
@@ -2790,8 +2790,8 @@ OilDeposit *oilspot_list_407040_find_by_coordinates(int x, int y)
 	OilDeposit *result; // eax@1
 	Sprite *v3; // esi@2
 
-	result = oilspot_list_head;
-	if ((OilDeposit **)oilspot_list_head == &oilspot_list_head)
+	result = oilspot_sentinel.next;
+	if (oilspot_sentinel.next == (OilDeposit *)&oilspot_sentinel)
 	{
 	LABEL_6:
 		result = 0;
@@ -2804,7 +2804,7 @@ OilDeposit *oilspot_list_407040_find_by_coordinates(int x, int y)
 			if (map_is_same_tile(x, v3->x) && map_is_same_tile(y, v3->y) && !(v3->drawjob->flags & 0x40000000))
 				break;
 			result = result->next;
-			if ((OilDeposit **)result == &oilspot_list_head)
+			if (result == (OilDeposit *)&oilspot_sentinel)
 				goto LABEL_6;
 		}
 	}
@@ -2824,10 +2824,10 @@ OilDeposit *oilspot_list_407090_find_by_sprite_coordinates(int x, int y)
 	int v9; // esi@6
 	int v11; // [sp+4h] [bp-4h]@1
 
-	v2 = oilspot_list_head;
+	v2 = oilspot_sentinel.next;
 	v11 = y;
 	v3 = 81920;
-	for (i = 0; (OilDeposit **)v2 != &oilspot_list_head; v2 = v2->next)
+	for (i = 0; v2 != (OilDeposit *)&oilspot_sentinel; v2 = v2->next)
 	{
 		v5 = v2->sprite;
 		v6 = v5->x - x;
@@ -2914,10 +2914,10 @@ void UNIT_Handler_OilPatch(Script *a1)
 		v4->drillrig = 0;
 		v4->drillrig_entity_id = 0;
 		v4->oil_left = 500 * v1->cplc_ptr1_pstru20->param_1C;
-		v4->next = oilspot_list_head;
-		v4->prev = (OilDeposit *)&oilspot_list_head;
-		oilspot_list_head->prev = v4;
-		oilspot_list_head = v4;
+		v4->next = oilspot_sentinel.next;
+		v4->prev = (OilDeposit *)&oilspot_sentinel;
+		oilspot_sentinel.next->prev = v4;
+		oilspot_sentinel.next = v4;
 	}
 	else
 	{
@@ -3903,7 +3903,7 @@ void stru2_list_remove_elements()
 //----- (00410510) --------------------------------------------------------
 void stru2_list_free()
 {
-	free(stru2_list);
+	delete[] stru2_list;
 }
 
 //----- (00410520) --------------------------------------------------------
@@ -4816,14 +4816,11 @@ bool stru26_array_initialize()
 	int v23; // [sp+14h] [bp-14h]@2
 	unsigned __int8 v24; // [sp+18h] [bp-10h]@1
 	char v25; // [sp+1Ch] [bp-Ch]@1
-	stru26 *v26; // [sp+20h] [bp-8h]@1
 
 	v0 = (stru26_stru0 **)_4795F0_stru26_array;
 	v24 = -1;
 	v25 = -1;
-	v22 = 0;
-	v26 = _4795F0_stru26_array;
-	while (2)
+	for (v22 = 0; v22 < 3; v22++)
 	{
 		v1 = 0;
 		v23 = 0;
@@ -4899,13 +4896,6 @@ bool stru26_array_initialize()
 			memset32(v14, v20, v1 >> 2);
 			memset(&v14[4 * (v1 >> 2)], v25, v1 & 3);
 		} while (v1 != 28);
-		v0 = v26[1].data;
-		v11 = (stru27 *)&v26[1] == _479740_stru27_array;
-		++v22;
-		++v26;
-		if (!v11)
-			continue;
-		break;
 	}
 	return 1;
 }
@@ -5554,8 +5544,8 @@ DataHunk *LVL_LoadLevel(const char *filename_)
 	{
 		sprintf(
 			filename,
-            "%s\\LEVELS\\%s",
-            OsGetCurrentDirectory().c_str(),//game_data_installation_dir,
+            "%s/LEVELS/%s",
+            game_data_installation_dir,
 			filename_);
 	}
 	else if (!_stricmp(ext, ".lvl"))
@@ -5563,7 +5553,7 @@ DataHunk *LVL_LoadLevel(const char *filename_)
 		sprintf(
 			filename,
 			(const char *)aSLevelsSS,
-            OsGetCurrentDirectory().c_str(),//game_data_root_dir,
+            game_data_installation_dir,
 			get_resource_res_subfolder(),
 			filename_
 		);
@@ -6773,8 +6763,8 @@ bool stru37_stru38_list_alloc(const int num_stru37s, const int num_stru38s)
 
         stru37_list[num_stru37s - 1].next = nullptr;
         stru37_list_free_pool = stru37_list;
-        stru37_list_47A500 = (stru37 *)&stru37_list_47A500;
-        stru37_list_47A504 = (stru37 *)&stru37_list_47A500;
+        stru37_list_sentinel.next = &stru37_list_sentinel;
+        stru37_list_sentinel.prev = &stru37_list_sentinel;
     } else {
         return false;
     }
@@ -6787,8 +6777,8 @@ bool stru37_stru38_list_alloc(const int num_stru37s, const int num_stru38s)
 
 		stru38_list[num_stru38s - 1].next = nullptr;
         stru38_list_free_pool = stru38_list;
-		stru38_list_47A4B0 = (stru38 *)&stru38_list_47A4B0;
-		stru38_list_47A4B4 = (stru38 *)&stru38_list_47A4B0;
+		stru38_list_sentinel.next = &stru38_list_sentinel;
+		stru38_list_sentinel.prev = &stru38_list_sentinel;
 
 		return script_create_function(SCRIPT_TYPE_INVALID, script_4280A0_stru38_list__production_loop) != 0;
 	}
@@ -6828,7 +6818,7 @@ void stru37_list_427D80_enqueue_item(int *pcash, int *pcost, int cost, int cost_
 		v7->field_1C = 0;
 		v7->_28_production_task_param = production_task_param;
 		v7->_20_pcost_plus1 = 0;
-		if (a7 == -1 || (v8 = stru38_list_47A4B0, (stru38 **)stru38_list_47A4B0 == &stru38_list_47A4B0))
+		if (a7 == -1 || (v8 = stru38_list_sentinel.next, stru38_list_sentinel.next == &stru38_list_sentinel))
 		{
 		LABEL_9:
 			v9 = stru38_list_free_pool;
@@ -6844,11 +6834,11 @@ void stru37_list_427D80_enqueue_item(int *pcash, int *pcost, int cost, int cost_
 				v9->field_3C = a7;
 				v10->next = v10;
 				v9->field_40 = 1;
-				v11 = stru38_list_47A4B0;
-				v9->prev = (stru38 *)&stru38_list_47A4B0;
+				v11 = stru38_list_sentinel.next;
+				v9->prev = &stru38_list_sentinel;
 				v9->next = v11;
-				stru38_list_47A4B0->prev = v9;
-				stru38_list_47A4B0 = v9;
+				stru38_list_sentinel.next->prev = v9;
+				stru38_list_sentinel.next = v9;
 				v12 = v9->pstru37;
 				v7->prev = v10;
 				v7->next = v12;
@@ -6861,7 +6851,7 @@ void stru37_list_427D80_enqueue_item(int *pcash, int *pcost, int cost, int cost_
 			while (v8->field_3C != a7)
 			{
 				v8 = v8->next;
-				if ((stru38 **)v8 == &stru38_list_47A4B0)
+				if (v8 == &stru38_list_sentinel)
 					goto LABEL_9;
 			}
 			++v8->field_40;
@@ -6914,7 +6904,7 @@ void stru37_list_427EB0_enqueue_infantry(int *pcash, int *pcost, int cost, int c
 		v7->field_1C = 0;
 		v7->_28_production_task = production_task;
 		v7->_28_production_task_param = production_task_param;
-		if (a7 == -1 || (v8 = stru38_list_47A4B0, (stru38 **)stru38_list_47A4B0 == &stru38_list_47A4B0))
+		if (a7 == -1 || (v8 = stru38_list_sentinel.next, stru38_list_sentinel.next == &stru38_list_sentinel))
 		{
 		LABEL_9:
 			v9 = stru38_list_free_pool;
@@ -6930,11 +6920,11 @@ void stru37_list_427EB0_enqueue_infantry(int *pcash, int *pcost, int cost, int c
 				v9->field_3C = a7;
 				v10->next = v10;
 				v9->field_40 = 1;
-				v11 = stru38_list_47A4B0;
-				v9->prev = (stru38 *)&stru38_list_47A4B0;
+				v11 = stru38_list_sentinel.next;
+				v9->prev = &stru38_list_sentinel;
 				v9->next = v11;
-				stru38_list_47A4B0->prev = v9;
-				stru38_list_47A4B0 = v9;
+				stru38_list_sentinel.next->prev = v9;
+				stru38_list_sentinel.next = v9;
 				v12 = v9->pstru37;
 				v7->prev = v10;
 				v7->next = v12;
@@ -6947,7 +6937,7 @@ void stru37_list_427EB0_enqueue_infantry(int *pcash, int *pcost, int cost, int c
 			while (v8->field_3C != a7)
 			{
 				v8 = v8->next;
-				if ((stru38 **)v8 == &stru38_list_47A4B0)
+				if (v8 == &stru38_list_sentinel)
 					goto LABEL_9;
 			}
 			++v8->field_40;
@@ -6973,7 +6963,7 @@ void stru38_list_427FD0(int *pcost, int a2)
 	int v4; // eax@8
 	stru38 *v5; // eax@9
 
-	for (i = stru38_list_47A4B0; (stru38 **)i != &stru38_list_47A4B0; i = i->next)
+	for (i = stru38_list_sentinel.next; i != &stru38_list_sentinel; i = i->next)
 	{
 		v3 = i->pstru37;
 		if ((stru37 **)v3 != &i->pstru37)
@@ -7016,8 +7006,8 @@ void add_integer(int *a1, int a2)
 //----- (00428080) --------------------------------------------------------
 void stru37_stru38_list_free()
 {
-	free(stru37_list);
-	free(stru38_list);
+	delete[] stru37_list;
+	delete[] stru38_list;
 }
 
 //----- (004280A0) --------------------------------------------------------
@@ -7043,8 +7033,8 @@ void script_4280A0_stru38_list__production_loop(Script *task)
 	int v19; // eax@33
 	stru38 *v20; // eax@34
 
-	v2 = stru38_list_47A4B0;
-	for (bool i = _44CDC0_sidebar_is_units_limit(); (stru38 **)v2 != &stru38_list_47A4B0; v2 = v2->next)
+	v2 = stru38_list_sentinel.next;
+	for (bool i = _44CDC0_sidebar_is_units_limit(); v2 != &stru38_list_sentinel; v2 = v2->next)
 	{
 		v3 = v2->pstru37;
 		v4 = 0;
@@ -7206,8 +7196,8 @@ bool stru13construct_list_alloc()
 			++v1;
 		} while (v1 < 31);
 		stru13construct_list[31].next = 0;
-		stru13construct_list_47A638 = (stru13construct *)&stru13construct_list_47A638;
-		stru13construct_list_47A63C = (stru13construct *)&stru13construct_list_47A638;
+		stru13construct_sentinel.next = (stru13construct *)&stru13construct_sentinel;
+		stru13construct_sentinel.prev = (stru13construct *)&stru13construct_sentinel;
         return true;
 	}
     return false;
@@ -7225,8 +7215,8 @@ int stru13construct_list_get_saveload_packed_size()
 	stru13construct *v0; // ecx@1
 	int result; // eax@1
 
-	v0 = stru13construct_list_47A638;
-	for (result = 0; (stru13construct **)v0 != &stru13construct_list_47A638; result += 24)
+	v0 = stru13construct_sentinel.next;
+	for (result = 0; v0 != (stru13construct *)&stru13construct_sentinel; result += 24)
 		v0 = v0->next;
 	return result;
 }
@@ -7237,8 +7227,8 @@ bool stru13construct_list_saveload_pack(stru13constructSaveStruct *a1)
 	stru13construct *v1; // eax@1
 	char *v2; // ecx@2
 
-	v1 = stru13construct_list_47A638;
-	if ((stru13construct **)stru13construct_list_47A638 != &stru13construct_list_47A638)
+	v1 = stru13construct_sentinel.next;
+	if (stru13construct_sentinel.next != (stru13construct *)&stru13construct_sentinel)
 	{
 		v2 = (char *)&a1->field_8;
 		do
@@ -7251,7 +7241,7 @@ bool stru13construct_list_saveload_pack(stru13constructSaveStruct *a1)
 			*((_DWORD *)v2 + 3) = v1->_1C_cost_per_time_step;
 			v1 = v1->next;
 			v2 += 24;
-		} while ((stru13construct **)v1 != &stru13construct_list_47A638);
+		} while (v1 != (stru13construct *)&stru13construct_sentinel);
 	}
 	return 1;
 }
@@ -7278,11 +7268,11 @@ bool stru13construct_list_saveload_unpack(int save_data, int save_data_size)
 				v4 = 0;
 			if (!v4)
 				break;
-			v5 = stru13construct_list_47A638;
-			v4->prev = (stru13construct *)&stru13construct_list_47A638;
+			v5 = stru13construct_sentinel.next;
+			v4->prev = (stru13construct *)&stru13construct_sentinel;
 			v4->next = v5;
-			stru13construct_list_47A638->prev = v4;
-			stru13construct_list_47A638 = v4;
+			stru13construct_sentinel.next->prev = v4;
+			stru13construct_sentinel.next = v4;
 			v4->field_8 = *(_DWORD *)(v3 - 8);
 			v4->field_C = *(_DWORD *)(v3 - 4);
 			v4->field_10 = *(_DWORD *)v3;
@@ -9488,8 +9478,8 @@ bool LVL_InitMapd()
 				v5->next = v3;
 			} while (v4);
 			v3->next = (Bitmap *)&bitmap_list_free_pool;
-			bitmap_list_47C364 = (Bitmap *)&bitmap_list_47C360;
-			bitmap_list_47C360 = (Bitmap *)&bitmap_list_47C360;
+			bitmap_list_sentinel.prev = &bitmap_list_sentinel;
+			bitmap_list_sentinel.next = &bitmap_list_sentinel;
 			_47C390_mapd = 0;
 			_47C380_mapd.mapd_cplc_item0_ptr_field_C = 0;
 			_47C380_mapd.mapd_cplc_render_y = 0;
@@ -9543,10 +9533,10 @@ Bitmap *MAPD_Draw(enum MAPD_ID mapd_idx, unsigned int image_id, int z_index)
 				if (result)
 				{
 					bitmap_list_free_pool = v7->next;
-					v7->next = (Bitmap *)&bitmap_list_47C360;
-					v7->prev = bitmap_list_47C364;
-					bitmap_list_47C364->next = v7;
-					bitmap_list_47C364 = v7;
+					v7->next = &bitmap_list_sentinel;
+					v7->prev = bitmap_list_sentinel.prev;
+					bitmap_list_sentinel.prev->next = v7;
+					bitmap_list_sentinel.prev = v7;
 					v8 = v7->draw_job;
 					img = currently_running_lvl_mapd[mApd_idx].items->images[imAge_id];
 					v7->draw_job_scrl = img;
@@ -12173,7 +12163,7 @@ int script_443380(Script *a1, int lookup_table_offset, bool a3)
 				sprite_4272E0_load_mobd_item(v5, lookup_table_offset, 2);
 		}
 	} while (!(v4 & 2) || v4 & 0x20);
-	v6->pstru7 = &_479D48_stru7;
+	v6->pstru7 = _479D48_stru7;
 	sprite_load_mobd(v6, 24);
 	sprite_4272E0_load_mobd_item(v5, lookup_table_offset, 1);
 	script_yield(v3, SCRIPT_FLAGS_20_10000000, 0);
@@ -12272,7 +12262,7 @@ int script_443570(Script *a1, int a2, int a3, int a4)
 			}
 			if (v9 & 2)
 			{
-				v7->pstru7 = &_479D48_stru7;
+				v7->pstru7 = _479D48_stru7;
 				sprite_4272E0_load_mobd_item(a1a, 1704, a4);
 				sprite_4272E0_load_mobd_item(v5, lookup_table_offset, 1);
 				script_yield(v4, SCRIPT_FLAGS_20_10000000, 0);
@@ -12372,7 +12362,7 @@ int script_443780(Script *a1, int a2, int a3, int a4)
 			}
 			if (v9 & 2)
 			{
-				v7->pstru7 = &_479D48_stru7;
+				v7->pstru7 = _479D48_stru7;
 				sprite_4272E0_load_mobd_item(v15, 1704, a4);
 				sprite_4272E0_load_mobd_item(v5, v14, 1);
 				script_yield(v4, SCRIPT_FLAGS_20_10000000, 0);
@@ -12684,7 +12674,7 @@ bool render_string_list_alloc(const int num_stru8s, const int num_render_strings
 		}
 		else
 		{
-			free(stru8_list);
+			delete[] stru8_list;
 			stru8_list_allocated = 0;
 			return false;
 		}
@@ -12993,8 +12983,8 @@ void render_string_list_free()
 			i->next = render_string_list_free_pool;
 			render_string_list_free_pool = i;
 		}
-		free(stru8_list);
-		free(render_string_list);
+		delete[] stru8_list;
+		delete[] render_string_list;
 		stru8_list_allocated = 0;
 	}
 }
@@ -14232,11 +14222,7 @@ bool _44C010_init_mission_globals()
 	unsigned __int8 *v12; // edi@17
 	int v13; // ecx@18
 	unsigned __int8 *v14; // esi@18
-	int v15; // ecx@23
-	int *v16; // eax@23
-	int v17; // edx@24
 	char *v18; // ecx@26
-	int *v19; // eax@26
 	stru12_game_globals *i; // [sp+10h] [bp-4h]@3
 
 	v0 = 4;
@@ -14302,26 +14288,18 @@ bool _44C010_init_mission_globals()
 			break;
 	}
 
-	v15 = 1;
-	v16 = &player_sprite_color_by_player_side[1];
-	do
-	{
-		v17 = v15++ - 1;
-		*v16 = v17;
-		++v16;
-	} while ((int)v16 < (int) & _47DCC4_entity_id_counter);
+	for (int i = 1; i < 7; i++)
+		player_sprite_color_by_player_side[i] = i - 1;
 	player_sprite_color_by_player_side[0] = 3;
 	if (!single_player_game)
 	{
 		v18 = &netz_47A740[2].field_9;
-		v19 = &player_sprite_color_by_player_side[1];
-		do
+		for (int i = 1; i < 7; i++)
 		{
 			if (*(v18 - 1))
-				*v19 = *v18;
-			++v19;
+				player_sprite_color_by_player_side[i] = *v18;
 			v18 += 28;
-		} while ((int)v19 < (int) & _47DCC4_entity_id_counter);
+		}
 	}
 	_408550_multi_pal();
 	return 1;
@@ -14380,8 +14358,8 @@ int UNIT_Init()
 		++v3;
 	} while (v3 < 499);
 	stru11unit_list[499].next = 0;
-	stru11unit_list_47DC70 = (stru11unit *)&stru11unit_list_47DC70;
-	stru11unit_list_47DC74 = (stru11unit *)&stru11unit_list_47DC70;
+	stru11unit_sentinel.next = (stru11unit *)&stru11unit_sentinel;
+	stru11unit_sentinel.prev = (stru11unit *)&stru11unit_sentinel;
 	dword_47DCE8 = 1;
 	pscript_show_message_ex = script_create_coroutine(SCRIPT_TYPE_INVALID, script_show_message_ex, 0);
 	pscript_show_message = script_create_coroutine(SCRIPT_TYPE_INVALID, script_show_message, 0);
@@ -14474,7 +14452,7 @@ void _44C4B0_mess_with_turrets()
         for (auto i: entityRepo->FindAll())
 		{
 			v1 = &i->stru60;
-			memset32(&i->stru60, (int)&entity_default_stru60_ptr, 6u);
+			memset32(&i->stru60, (int)&entity_default_stru60, 6u);
 			v2 = i->sprite->_54_inside_mobd_ptr4;
 			if (v2)
 			{
@@ -14498,7 +14476,7 @@ void _44C4B0_mess_with_turrets()
 					if (v6 && (v7 = (Entity_stru_dmg_related *)v6->field_18) != 0)
 						v5->ptr_24 = v7;
 					else
-						v5->ptr_24 = (Entity_stru_dmg_related *)&entity_default_stru60_ptr;
+						v5->ptr_24 = (Entity_stru_dmg_related *)&entity_default_stru60;
 					i->turret->turret_sprite->field_88_unused = 1;
 					i->sprite->field_88_unused = 1;
 					i->turret->turret_sprite->x = i->sprite->x + v1->ptr_0->x_offset;

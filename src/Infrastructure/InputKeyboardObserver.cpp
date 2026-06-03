@@ -4,13 +4,12 @@ using Infrastructure::InputKeyboardObserver;
 
 #include "src/Infrastructure/Input.h"
 
-
+extern int combo_pressed_vk;
+extern int input_combo_pressed_vk;
+extern int combo_press_params_map[];
+extern KeyboardInput input_now_pressed_keys;
 
 void InputKeyboardObserver::OnCharUp(int key, bool ctrl_status, bool alt_status) {
-    extern int combo_pressed_vk,
-        input_combo_pressed_vk,
-        combo_press_params_map[];
-    extern KeyboardInput input_now_pressed_keys;
 
     combo_pressed_vk = key;
     input_combo_pressed_vk = key;
@@ -35,10 +34,6 @@ void InputKeyboardObserver::OnCharUp(int key, bool ctrl_status, bool alt_status)
 
 
 void InputKeyboardObserver::OnSpecialKeyUp(int key, bool ctrl_status, bool alt_status) {
-    extern int combo_pressed_vk,
-        input_combo_pressed_vk,
-        combo_press_params_map[];
-    extern KeyboardInput input_now_pressed_keys;
 
     combo_pressed_vk = key;
     input_combo_pressed_vk = key;

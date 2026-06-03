@@ -87,7 +87,7 @@ Entity *EntityFactory::Create(Script *a1)
     v1->hitpoints = v1->stats->hitpoints;
     v1->field_78 = 0;
 
-    memset32(&v1->stru60, (int)&entity_default_stru60_ptr, 6u);
+    memset32(&v1->stru60, (int)&entity_default_stru60, 6u);
 
     v2->drawjob->job_details.palette = per_player_sprite_palettes[player_sprite_color_by_player_side[v1->player_side]];
     v2->drawjob->flags |= 0x10000000u;
@@ -287,7 +287,7 @@ Entity *EntityFactory::Unpack(EntitySerialized *save_data)
             v3->event_handler = (void(*)(Script *, Script *, enum SCRIPT_EVENT, void *))get_handler(v30 - 1);
 
             memset(&v3->_24_ai_node_per_player_side, 0, sizeof(v3->_24_ai_node_per_player_side));
-            memset32(&v3->stru60, (int)&entity_default_stru60_ptr, 6u);
+            memset32(&v3->stru60, (int)&entity_default_stru60, 6u);
             v3->field_78 = v2->entity_field_78;
             v3->SetCurrentAnimFrame(v2->entity_mobd_idx);
             v3->field_80 = v2->entity_field_80;
@@ -444,9 +444,9 @@ Entity *EntityFactory::Unpack(EntitySerialized *save_data)
                 v3->state = v56;
                 if (v57 != 46 && v57 != 47)
                     goto LABEL_143;
-                v58 = oilspot_list_head;
+                v58 = oilspot_sentinel.next;
                 v59 = 0;
-                if ((OilDeposit **)oilspot_list_head == &oilspot_list_head)
+                if (oilspot_sentinel.next == (OilDeposit *)&oilspot_sentinel)
                     goto LABEL_139;
                 break;
             case 0x34u:
@@ -493,7 +493,7 @@ Entity *EntityFactory::Unpack(EntitySerialized *save_data)
             {
                 v58 = v58->next;
                 ++v59;
-                if ((OilDeposit **)v58 == &oilspot_list_head)
+                if (v58 == (OilDeposit *)&oilspot_sentinel)
                 {
                 LABEL_139:
                     v58 = 0;

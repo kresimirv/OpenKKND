@@ -1,6 +1,20 @@
 #pragma once
 
-#include "src/hexrays-defs.h"
+// Types needed from hexrays-defs.h (not included directly to minimize dependencies)
+#if defined(__GNUC__)
+#define __int16 short
+#define __int32 int
+#define __int8  char
+#define _BYTE  char
+#define _WORD  short
+#define _DWORD int
+#endif
+#if !defined(_MSC_VER)
+#define __declspec_align_1 __attribute__((packed))
+#else
+#define __declspec_align_1 __declspec(align(1))
+#endif
+
 #include "src/kknd.h"
 
 
@@ -41,7 +55,7 @@ struct VideoFileFrame
     __int16 field_1C;
     __int16 num_frames;
     __int16 field_20;
-    __declspec(align(1)) int _22_looks_like_fps;
+    __declspec_align_1 int _22_looks_like_fps;
     __int16 field_26;
     __int16 field_28;
     __int16 field_2A;

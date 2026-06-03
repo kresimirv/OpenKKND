@@ -141,7 +141,8 @@ char GAME_ParseCommandLine()
     bool v15; // cf@46
     int v16; // ecx@50
 
-    v0 = (char *)OsGetCommandLine().c_str();
+    std::string cmdline_str = OsGetCommandLine();
+    v0 = (char *)cmdline_str.c_str();
     v1 = v0;
     v2 = global_console_argv;
     auto global_cmd_line = v0;
@@ -380,7 +381,7 @@ bool _424560_parse_unit_stats_table(const char *filename)
                                     else
                                     {
                                         v12 = (int)((unit_stat->cost << 8)
-                                            + ((unsigned __int64)(0xFFFFFFFF88888889i64 * (unit_stat->cost << 8)) >> 32)) >> 5;
+                                            + ((unsigned __int64)(0xFFFFFFFF88888889LL * (unit_stat->cost << 8)) >> 32)) >> 5;
                                         printf(errmsg_unit_out_of_range, v5->unit_name, aProductionTime, 1, (v12 >> 31) + v12);
                                     }
                                 }

@@ -475,8 +475,8 @@ int EntityTowerAttachment_4479F0(EntityTurret *a1)
             v10 = v21;
         }
     }
-    v23 = stru31_list_477300;
-    if ((stru31 **)stru31_list_477300 == &stru31_list_477300)
+    v23 = stru31_sentinel.next;
+    if (stru31_sentinel.next == (stru31 *)&stru31_sentinel)
     {
     LABEL_32:
         result = 0;
@@ -506,7 +506,7 @@ int EntityTowerAttachment_4479F0(EntityTurret *a1)
                 }
             }
             v23 = v23->next;
-            if ((stru31 **)v23 == &stru31_list_477300)
+            if (v23 == (stru31 *)&stru31_sentinel)
                 goto LABEL_32;
         }
         v1->_C_entity = v23->param__entity__int;

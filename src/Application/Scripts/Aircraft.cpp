@@ -249,15 +249,15 @@ void entity_mode_401600_aircraft_stru31(Entity *a1)
     Entity *v2; // esi@1
     enum UNIT_ID v3; // ecx@1
 
-    v1 = stru31_list_477300;
+    v1 = stru31_sentinel.next;
     v2 = a1;
     v3 = a1->unit_id;
-    if ((stru31 **)stru31_list_477300 != &stru31_list_477300)
+    if (stru31_sentinel.next != (stru31 *)&stru31_sentinel)
     {
         while (v1->param__entity__int->entity_id != v3)
         {
             v1 = v1->next;
-            if ((stru31 **)v1 == &stru31_list_477300)
+            if (v1 == (stru31 *)&stru31_sentinel)
                 goto LABEL_6;
         }
         v1->next->prev = v1->prev;
@@ -473,7 +473,7 @@ void Task_context_1_BomberDmgHandler_401DE0(Task_context_1_BomberDmgHandler *a1)
 
     v1 = a1;
     v2 = a1->sprite;
-    v2->pstru7 = &_479D48_stru7;
+    v2->pstru7 = _479D48_stru7;
     v2->z_speed = 512;
     v2->z_speed_limit = 512;
     v2->z_speed_factor_2 = -34;

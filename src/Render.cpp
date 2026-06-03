@@ -1,4 +1,5 @@
 #include <vector>
+#include <cmath>
 
 #include "src/Render.h"
 
@@ -300,7 +301,7 @@ void render_cleanup()
 {
     //if (is_render_window_initialized == 1)
     {
-        free(stru1_list);
+        delete[] stru1_list;
     }
 }
 
@@ -3739,7 +3740,7 @@ void draw_list_free()
     }
     while (!render_should_render())
         TimedMessagePump();
-    free(draw_list);
+    delete[] draw_list;
 }
 
 

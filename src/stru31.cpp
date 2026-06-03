@@ -1,8 +1,7 @@
 #include "stru31.h"
 
 
-stru31 *stru31_list_477300 = nullptr;
-stru31 *stru31_list_477304 = nullptr;
+stru31 stru31_sentinel;
 stru31 *stru31_list = nullptr;
 stru31 *stru31_list_free_pool = nullptr;
 
@@ -27,8 +26,8 @@ int stru31_list_alloc()
             v1 += 12;
         } while (v1 < 708);
         stru31_list[25].param__entity__int = 0;
-        stru31_list_477300 = (stru31 *)&stru31_list_477300;
-        stru31_list_477304 = (stru31 *)&stru31_list_477300;
+        stru31_sentinel.next = (stru31 *)&stru31_sentinel;
+        stru31_sentinel.prev = (stru31 *)&stru31_sentinel;
         result = 1;
     }
     else
@@ -57,9 +56,9 @@ void entity_401070_stru31(Entity *a1)
     if (v1)
     {
         v1->param__entity__int = a1;
-        v1->next = stru31_list_477300;
-        v1->prev = (stru31 *)&stru31_list_477300;
-        stru31_list_477300->prev = v1;
-        stru31_list_477300 = v1;
+        v1->next = stru31_sentinel.next;
+        v1->prev = (stru31 *)&stru31_sentinel;
+        stru31_sentinel.next->prev = v1;
+        stru31_sentinel.next = v1;
     }
 }

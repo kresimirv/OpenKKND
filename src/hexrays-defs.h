@@ -28,6 +28,18 @@ typedef unsigned __int64 ull;
 #else
 #error "unknown compiler"
 #endif
+
+// GCC compatibility: MSVC-specific keywords
+#if defined(__GNUC__)
+#define __declspec_align_1 __attribute__((packed))
+#define __declspec(x)
+#define __stdcall
+#define __cdecl
+#define __debugbreak() __builtin_trap()
+#else
+#define __declspec_align_1 __declspec(align(1))
+#endif
+
 typedef unsigned int uint;
 typedef unsigned char uchar;
 typedef unsigned short ushort;

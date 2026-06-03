@@ -8,6 +8,16 @@
 
 #include "src/Infrastructure/Log.h"
 #include "src/Infrastructure/PlatformSpecific/OsTools.h"
+#include <malloc.h>
+
+static void check_heap(const char *where) {
+    void *t = malloc(0xCC);
+    if (t) { free(t); }
+    else { log("HEAP CORRUPTED at %s\n", where); exit(1); }
+    void *t2 = malloc(16);
+    if (!t2) { log("HEAP CORRUPTED (small) at %s\n", where); exit(1); }
+    free(t2);
+}
 
 
 //----- (00422F60) --------------------------------------------------------
@@ -28,7 +38,8 @@ void GAME_PrepareLevel()
         prev_level_idx = current_level_idx;
         if (!sprites_lvl)
         {
-            sprites_lvl = LVL_LoadLevel("sprites.lvl");
+            sprites_lvl = LVL_LoadLevel("SPRITES.LVL");
+            check_heap("after SPRITES.LVL");
             if (!sprites_lvl)
             {
                 LVL_Deinit();
@@ -52,6 +63,7 @@ void GAME_PrepareLevel()
         }
 
         level_lvl = LVL_LoadLevel(levels[v0].lvl_filename);
+        check_heap("after LVL_LoadLevel");
         current_level_lvl = level_lvl;
         if (!level_lvl)
         {
@@ -69,9 +81,11 @@ void GAME_PrepareLevel()
             log("LVL_SubstHunk( ) failed\n");
             exit(0);
         }
+        check_heap("after LVL_SubstHunk");
     }
 
     LVL_LoadSlv(slvs[is_player_faction_evolved()]);
+    check_heap("after LVL_LoadSlv");
     if (!LVL_RunLevel(current_level_lvl))
     {
         netz_deinit();
@@ -83,10 +97,15 @@ void GAME_PrepareLevel()
     v6 = LVL_FindMapd();
     _40E400_set_palette((Palette *)&v6->items[1]);
     sidebar_button_list_alloc();
+    check_heap("after sidebar_button_list_alloc");
     boxd_40E6E0();
+    check_heap("after boxd_40E6E0");
     _44C010_init_mission_globals();
+    check_heap("after init_mission_globals");
     sidebar_initialize();
+    check_heap("after sidebar_initialize");
     stru31_list_alloc();
+    check_heap("after stru31_list_alloc");
     if (!UNIT_Init())
     {
         netz_deinit();
@@ -154,7 +173,7 @@ void GAME_PrepareSuperLvl(int mapd_idx)
                    //char v19[120]; // [sp+10h] [bp-78h]@1
 
     mApd_idx = mapd_idx;
-    sprites_lvl = LVL_LoadLevel("supspr.lvl");
+    sprites_lvl = LVL_LoadLevel("SUPSPR.LVL");
     if (!sprites_lvl)
     {
         LVL_Deinit();
@@ -207,14 +226,14 @@ void GAME_PrepareSuperLvl(int mapd_idx)
     memcpy(v10, v11, v12 & 3);
 
     current_level_idx = v3;
-    v17 = LVL_LoadLevel("super.lvl");
+    v17 = LVL_LoadLevel("SUPER.LVL");
     current_level_lvl = v17;
     if (!v17)
     {
         LVL_Deinit();
         netz_deinit();
         GAME_Deinit();
-        log("LVL_LoadLevel(%s) failed\n", "super.lvl");
+        log("LVL_LoadLevel(%s) failed\n", "SUPER.LVL");
         exit(0);
     }
     if (!LVL_SubstHunk(v17, sprites_lvl, (const char *)MOBD))

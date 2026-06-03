@@ -6,13 +6,7 @@ if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 endif()
 
 # vcpkg appends debug dlls with -d 
-set(CMAKE_DEBUG_POSTFIX, "d")
-
-#get_cmake_property(_variableNames VARIABLES)
-#list (SORT _variableNames)
-#foreach (_variableName ${_variableNames})
-#    message(STATUS "${_variableName}=${${_variableName}}")
-#endforeach()
+set(CMAKE_DEBUG_POSTFIX "d")
 
 message("-------------------------")
 message("vcpkg:")
@@ -23,36 +17,50 @@ message("CMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}")
 project("OpenKKND")
 set(PROJECT_VERSION "0.2.0")
 
-
-
-
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32 -std=gnu++17 -fpermissive -fno-strict-aliasing")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32 -fno-strict-aliasing")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -m32")
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
+  endif()
+  link_directories(/usr/lib32 ${SDL2_CUSTOM_PREFIX}/lib)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    #debug include files
-    set(CMAKE_CXX_FLAGS " /showIncludes ${CMAKE_CXX_FLAGS} ")
-
-    #disable pesky warnings
-    set(CMAKE_CXX_FLAGS " /D_CRT_SECURE_NO_WARNINGS ${CMAKE_CXX_FLAGS} ")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -stdlib=libc++")
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+  #debug include files
+  set(CMAKE_CXX_FLAGS " /showIncludes ${CMAKE_CXX_FLAGS} ")
+  #disable pesky warnings
+  set(CMAKE_CXX_FLAGS " /D_CRT_SECURE_NO_WARNINGS ${CMAKE_CXX_FLAGS} ")
 endif()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
+endif()
 
-
+set(SDL2_CUSTOM_PREFIX "/tmp/SDL2-install")
 message("-------------------------")
 message("SDL2:")
-find_path(SDL2_INCLUDE_DIR SDL2/SDL.h)
-
-if (CMAKE_BUILD_TYPE MATCHES "^Debug$" OR NOT DEFINED CMAKE_BUILD_TYPE)
+if(WIN32)
+  find_path(SDL2_INCLUDE_DIR SDL2/SDL.h)
+  if (CMAKE_BUILD_TYPE MATCHES "^Debug$" OR NOT DEFINED CMAKE_BUILD_TYPE)
     message("SDL2 Debug")
     find_library(SDL2_LIBRARY SDL2d)
     find_library(SDL2_MAIN SDL2maind)
-else()
+  else()
     message("SDL2 Release")
     find_library(SDL2_LIBRARY SDL2)
     find_library(SDL2_MAIN SDL2main)
+  endif()
+else()
+  message("SDL2 Linux (custom 32-bit shared)")
+  set(SDL2_INCLUDE_DIR "${SDL2_CUSTOM_PREFIX}/include")
+  set(SDL2_LIBRARY "${SDL2_CUSTOM_PREFIX}/lib/libSDL2-2.0.so")
+  set(SDL2_MAIN "${SDL2_CUSTOM_PREFIX}/lib/libSDL2main.a")
 endif()
 message("SDL2_INCLUDE_DIR=${SDL2_INCLUDE_DIR}")
 message("SDL2_LIBRARY=${SDL2_LIBRARY}")
@@ -74,11 +82,10 @@ add_subdirectory(src)
 
 message("-------------------------")
 
+if(WIN32)
+  add_executable(OpenKKND ./src/Application/Game.cpp)
 
-
-add_executable(OpenKKND ./src/Application/Game.cpp)
-
-target_link_libraries(OpenKKND
+  target_link_libraries(OpenKKND
     Application
     Engine
     Infrastructure
@@ -86,27 +93,41 @@ target_link_libraries(OpenKKND
     Video
     Unsorted
     ${SDL2_LIBRARY} ${SDL2_MAIN}
-)
+  )
+else()
+  add_executable(OpenKKND "")
 
+  target_link_libraries(OpenKKND
+    -Wl,--whole-archive Application -Wl,--no-whole-archive
+    -Wl,--whole-archive ApplicationScripts -Wl,--no-whole-archive
+    -Wl,--whole-archive Engine -Wl,--no-whole-archive
+    -Wl,--whole-archive Infrastructure -Wl,--no-whole-archive
+    -Wl,--whole-archive Audio -Wl,--no-whole-archive
+    -Wl,--whole-archive Video -Wl,--no-whole-archive
+    -Wl,--whole-archive Unsorted -Wl,--no-whole-archive
+    ${SDL2_LIBRARY} ${SDL2_MAIN}
+    m
+  )
+endif()
 
 set(COMPILE_OPTIONS_DEBUG "")
 set(COMPILE_OPTIONS_RELEASE "")
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  set(COMPILE_OPTIONS_DEBUG "-std=gnu++11 ${COMPILE_OPTIONS_DEBUG}")
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  set(COMPILE_OPTIONS_DEBUG "-std=c++11 -stdlib=libc++ ${COMPILE_OPTIONS_DEBUG}")
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-endif()
 
 target_compile_options(OpenKKND PUBLIC "$<$<CONFIG:DEBUG>:${COMPILE_OPTIONS_DEBUG}>")
 target_compile_options(OpenKKND PUBLIC "$<$<CONFIG:RELEASE>:${COMPILE_OPTIONS_RELEASE}>")
 
-
 # ----------------------
 # copy assets
-file(TO_NATIVE_PATH "${PROJECT_SOURCE_DIR}/assets" ASSETS_SRC_DIR)
-file(TO_NATIVE_PATH "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets" ASSETS_OUT_DIR)
-add_custom_command(TARGET OpenKKND
+if(WIN32)
+  file(TO_NATIVE_PATH "${PROJECT_SOURCE_DIR}/assets" ASSETS_SRC_DIR)
+  file(TO_NATIVE_PATH "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets" ASSETS_OUT_DIR)
+  add_custom_command(TARGET OpenKKND
     POST_BUILD
     COMMAND xcopy ${ASSETS_SRC_DIR} ${ASSETS_OUT_DIR} /S /E /Y /I
-)
+  )
+else()
+  add_custom_command(TARGET OpenKKND
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/assets" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets"
+  )
+endif()

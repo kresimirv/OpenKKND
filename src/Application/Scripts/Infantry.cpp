@@ -1342,8 +1342,8 @@ void entity_414670(Entity *a1)
                 }
             }
         }
-        v17 = stru31_list_477300;
-        if ((stru31 **)stru31_list_477300 != &stru31_list_477300)
+        v17 = stru31_sentinel.next;
+        if (stru31_sentinel.next != (stru31 *)&stru31_sentinel)
         {
             while (1)
             {
@@ -1357,7 +1357,7 @@ void entity_414670(Entity *a1)
                     }
                 }
                 v17 = v17->next;
-                if ((stru31 **)v17 == &stru31_list_477300)
+                if (v17 == (stru31 *)&stru31_sentinel)
                     return;
             }
             v1->_E4_prev_attack_target = v17->param__entity__int;

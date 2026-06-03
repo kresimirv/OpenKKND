@@ -2,6 +2,10 @@
 
 #pragma once
 
+#ifndef __int16
+#define __int16 short
+#endif
+
 #pragma pack(push, 1)
 
 /* 378 */

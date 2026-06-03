@@ -1450,8 +1450,8 @@ LABEL_28:
                 ++v34;
             } while (v27 < v32);
         }
-        v36 = sprite_list_47A4A0;
-        if ((Sprite **)sprite_list_47A4A0 != &sprite_list_47A4A0)
+        v36 = sprite_list_sentinel.next;
+        if (v36 != &sprite_list_sentinel)
         {
             do
             {
@@ -1491,7 +1491,7 @@ LABEL_28:
                     }
                 }
                 v36 = (Sprite *)v38;
-            } while (v38 != &sprite_list_47A4A0);
+            } while (v38 != &sprite_list_sentinel);
         }
         v44 = 0;
         v45 = 0;
@@ -1529,8 +1529,8 @@ LABEL_28:
     }
     else
     {
-        v50 = sprite_list_47A4A0;
-        if ((Sprite **)sprite_list_47A4A0 != &sprite_list_47A4A0)
+        v50 = sprite_list_sentinel.next;
+        if (v50 != &sprite_list_sentinel)
         {
             do
             {
@@ -1546,7 +1546,7 @@ LABEL_28:
                         sprite_list_remove_scripted(v50);
                 }
                 v50 = (Sprite *)v52;
-            } while (v52 != &sprite_list_47A4A0);
+            } while (v52 != &sprite_list_sentinel);
         }
         _47C6DC_dont_execute_unit_handlers = 0;
         v55 = SURVIVORS;
@@ -1662,7 +1662,7 @@ void script_426680_cursor_mobd(Script *a1)
     v1->field_88_unused = 1;
     v1->x = v2 << 7;
     v1->y = render_height << 7;
-    v1->pstru7 = &_479D48_stru7;
+    v1->pstru7 = _479D48_stru7;
     sprite_load_mobd(v1, current_level_idx != LEVEL_MUTE_04_RAID_THE_FORT ? CURSOR_MOBD_OFFSET_MISSION_ARROW_S_BLINK : CURSOR_MOBD_OFFSET_MISSION_ARROW_SW_BLINK);
     script_sleep(a1, 600);
     sprite_list_remove(v1);
@@ -1690,7 +1690,7 @@ void script_426710_mission_objectives_draw_x_mark(Script *a1)
             v2->handler = (void(*)(task_426710_attachment_x_mark *))nullsub_1;
             sprite_load_mobd(v3, 820);
             v3->z_index = 0;
-            v3->pstru7 = &_479D48_stru7;
+            v3->pstru7 = _479D48_stru7;
             sprite_create_scripted(MOBD_CURSORS, 0, script_426680_cursor_mobd, SCRIPT_COROUTINE, 0);
             if (current_level_idx == LEVEL_SURV_04_RESCUE_THE_SCOUT)
             {

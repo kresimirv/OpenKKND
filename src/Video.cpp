@@ -1,12 +1,12 @@
-#include <Windows.h>
-#include <mmeapi.h>
-#include <dsound.h>
+#include <SDL2/SDL.h>
 
 #include "src/Video.h"
+#include "src/DirectSoundSdl2.h"
 
 #include "src/_unsorted_data.h"
 #include "src/Render.h"
 #include "src/Sound.h"
+#include "src/Infrastructure/PlatformSpecific/OsTools.h"
 
 DetailedDrawHandler_VideoPlayer stru_477D90; // weak
 int dword_477DB8; // weak
@@ -35,7 +35,7 @@ Palette _477990_video_palette; // idb
 
 
 extern IDirectSound *pds;
-extern DSBUFFERDESC video_477DE4_dsb_desc; // weak
+extern DSBUFFERDESC video_477DE4_dsb_desc;
 extern IDirectSoundBuffer *video_477DE4_dsb;
 
 
@@ -155,7 +155,7 @@ int VIDEO_DoFrame()
             }
             else
             {
-                LODWORD(v2) = timeGetTime();
+                LODWORD(v2) = SDL_GetTicks();
             }
             v5 = (unsigned int)v2 < dword_477940;
         LABEL_14:
@@ -260,7 +260,7 @@ int VIDEO_DoFrame()
         }
         else
         {
-            v13 = timeGetTime();
+            v13 = SDL_GetTicks();
             v0 = video;
             dword_477940 = v13;
         }
@@ -286,7 +286,7 @@ int VIDEO_DoFrame()
     }
     else
     {
-        LODWORD(v15) = timeGetTime();
+        LODWORD(v15) = SDL_GetTicks();
     }
     v18 = (unsigned int)v15 < dword_477940;
 LABEL_55:
@@ -561,7 +561,7 @@ VideoFile *VIDEO_ReadFile(const char *video_name)
     v2 = result;
     if (result)
     {
-        v3 = (VideoFile *)LocalAlloc(0, 0x20748u);
+        v3 = (VideoFile *)malloc(0x20748u);
         if (v3)
         {
             memset(v3, 0, 0x748u);
@@ -583,8 +583,8 @@ VideoFile *VIDEO_ReadFile(const char *video_name)
             v3->data_offset = v4;
             v6 = v3->header.height * v3->header.width * (v5 & 0xF);
             v3->field_332 = 1;
-            v3->frame_front_buffer = LocalAlloc(0, v6);
-            v7 = LocalAlloc(0, v6);
+            v3->frame_front_buffer = malloc(v6);
+            v7 = malloc(v6);
             v8 = v3->frame_front_buffer;
             v3->frame_back_buffer = v7;
             v9 = !v8 || !v7;
@@ -612,7 +612,7 @@ VideoFile *VIDEO_ReadFile(const char *video_name)
         }
         else
         {
-            LocalFree(0);
+            free(0);
             fclose((FILE *)v2);
             result = 0;
         }
@@ -630,9 +630,9 @@ void VIDEO_Clean(VideoFile *video)
         v1 = video->file;
         if (v1)
             fclose(v1);
-        LocalFree(video->frame_back_buffer);
-        LocalFree(video->frame_front_buffer);
-        LocalFree(video);
+        free(video->frame_back_buffer);
+        free(video->frame_front_buffer);
+        free(video);
     }
 }
 
@@ -893,7 +893,7 @@ int VIDEO_Play(int id)
         goto LABEL_44;
     if (!sprites_lvl)
     {
-        sprites_lvl = LVL_LoadLevel("sprites.lvl");
+        sprites_lvl = LVL_LoadLevel("SPRITES.LVL");
         if (!sprites_lvl)
             return 0;
     }

@@ -9,6 +9,7 @@
 */
 std::string OsGetUserName();
 std::string OsGetCurrentDirectory();
+std::string OsGetExecutableDirectory();
 std::string OsGetCommandLine();
 
 void OsInitConsole();

@@ -47,12 +47,10 @@ extern int _4701A8_sidebar_mask_per_44_mobd_lookup_idx[]; // idb
 extern void(*_470478_sidebar_button_open_handlers[5])(SidebarButton *);
 extern void(*_470490_sidebar_button_close_handlers[5])(SidebarButton *);
 extern int _4704A8_per_sidebar_button_mobd_lookup_table_offsets[2][11];
-extern Sidebar *stru22_list_479548;
-extern Sidebar *stru22_list_47954C;
+extern Sidebar sidebar_sentinel;
 extern Sidebar *sidebar_list;
 extern Sidebar *sidebar_list_head;
-extern SidebarButton *sidebar_button_list_4795A0;
-extern SidebarButton *sidebar_button_list_4795A4;
+extern SidebarButton sidebar_button_sentinel;
 extern SidebarButton *sidebar_button_list;
 extern SidebarButton *sidebar_button_list_head;
 extern int sidebar_button_list_sidebar_height; // weak

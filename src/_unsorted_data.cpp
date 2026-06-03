@@ -391,7 +391,7 @@ int dword_464D3C[24] =
 };
 char aDDD[] = "%d %d %d\n"; // idb
 char aR[] = "r"; // idb
-char aSLevelsMulti_p[] = "%s\\LEVELS\\multi.pal"; // idb
+char aSLevelsMulti_p[] = "%S//LEVELS//MULTI.PAL"; // idb
 int dword_464DC0[] = { 0 }; // weak
 int dword_464DCC = 1; // weak
 EnemyAI_stru57 array_464DD0[47] =
@@ -764,13 +764,13 @@ int _465948_per_mobd_lookup_idx[16] =
 	2896,
 	1567,
 	0,
-	4294965729,
-	4294964400,
-	4294963512,
-	4294963200,
-	4294963512,
-	4294964400,
-	4294965729
+	(int)-1567,
+	(int)-2896,
+	(int)-3784,
+	(int)-4096,
+	(int)-3784,
+	(int)-2896,
+	(int)-1567
 };
 
 
@@ -785,13 +785,13 @@ stru7 array_466028[7] =
 	{ 0, 0, NULL, NULL }
 };
 int _466098_cost_multiplier[4] = { 374, 312, 256, 0 };
-const char *slvs[2] = { "surv.slv", "mute.slv" };
+const char *slvs[2] = { "SURV.SLV", "MUTE.SLV" };
 LevelDesc levels[68] =
 {
 	{
-		"surv_01.lvl",
-		"surv2.wav",
-		"heads01.vbc",
+		"SURV_01.LVL",
+		"SURV2.WAV",
+		"HEADS01.VBC",
 		1000,
 		5000,
 		0,
@@ -808,9 +808,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_02.lvl",
-		"surv1.wav",
-		"heads02.vbc",
+		"SURV_02.LVL",
+		"SURV1.WAV",
+		"HEADS02.VBC",
 		4500,
 		5000,
 		0,
@@ -827,9 +827,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_03.lvl",
-		"surv2.wav",
-		"heads03.vbc",
+		"SURV_03.LVL",
+		"SURV2.WAV",
+		"HEADS03.VBC",
 		1000,
 		5000,
 		0,
@@ -846,9 +846,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_04.lvl",
-		"surv1.wav",
-		"heads04.vbc",
+		"SURV_04.LVL",
+		"SURV1.WAV",
+		"HEADS04.VBC",
 		0,
 		5000,
 		0,
@@ -865,9 +865,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_05.lvl",
-		"surv2.wav",
-		"heads05.vbc",
+		"SURV_05.LVL",
+		"SURV2.WAV",
+		"HEADS05.VBC",
 		5000,
 		100,
 		0,
@@ -884,9 +884,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_06.lvl",
-		"surv1.wav",
-		"heads06.vbc",
+		"SURV_06.LVL",
+		"SURV1.WAV",
+		"HEADS06.VBC",
 		0,
 		50,
 		0,
@@ -903,9 +903,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_07.lvl",
-		"surv2.wav",
-		"heads07.vbc",
+		"SURV_07.LVL",
+		"SURV2.WAV",
+		"HEADS07.VBC",
 		4000,
 		5000,
 		0,
@@ -922,9 +922,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_08.lvl",
-		"surv1.wav",
-		"heads08.vbc",
+		"SURV_08.LVL",
+		"SURV1.WAV",
+		"HEADS08.VBC",
 		5000,
 		1000,
 		0,
@@ -941,9 +941,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_09.lvl",
-		"surv2.wav",
-		"heads09.vbc",
+		"SURV_09.LVL",
+		"SURV2.WAV",
+		"HEADS09.VBC",
 		1000,
 		100,
 		0,
@@ -960,9 +960,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_10.lvl",
-		"surv1.wav",
-		"heads10.vbc",
+		"SURV_10.LVL",
+		"SURV1.WAV",
+		"HEADS10.VBC",
 		6500,
 		1000,
 		0,
@@ -979,9 +979,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_11.lvl",
-		"surv2.wav",
-		"heads11.vbc",
+		"SURV_11.LVL",
+		"SURV2.WAV",
+		"HEADS11.VBC",
 		5000,
 		1000,
 		0,
@@ -998,9 +998,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_12.lvl",
-		"surv1.wav",
-		"heads12.vbc",
+		"SURV_12.LVL",
+		"SURV1.WAV",
+		"HEADS12.VBC",
 		0,
 		50,
 		0,
@@ -1017,9 +1017,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_13.lvl",
-		"surv2.wav",
-		"heads13.vbc",
+		"SURV_13.LVL",
+		"SURV2.WAV",
+		"HEADS13.VBC",
 		4000,
 		100,
 		0,
@@ -1036,9 +1036,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_14.lvl",
-		"surv1.wav",
-		"heads14.vbc",
+		"SURV_14.LVL",
+		"SURV1.WAV",
+		"HEADS14.VBC",
 		5000,
 		5000,
 		0,
@@ -1055,9 +1055,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_15.lvl",
-		"surv2.wav",
-		"heads15.vbc",
+		"SURV_15.LVL",
+		"SURV2.WAV",
+		"HEADS15.VBC",
 		6000,
 		1000,
 		0,
@@ -1074,9 +1074,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mute_01.lvl",
-		"mute1.wav",
-		"headm01.vbc",
+		"MUTE_01.LVL",
+		"MUTE1.WAV",
+		"HEADM01.VBC",
 		5000,
 		5000,
 		0,
@@ -1093,9 +1093,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mute_02.lvl",
-		"mute2.wav",
-		"headm02.vbc",
+		"MUTE_02.LVL",
+		"MUTE2.WAV",
+		"HEADM02.VBC",
 		2600,
 		1000,
 		0,
@@ -1112,9 +1112,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mute_03.lvl",
-		"mute1.wav",
-		"headm03.vbc",
+		"MUTE_03.LVL",
+		"MUTE1.WAV",
+		"HEADM03.VBC",
 		2500,
 		500,
 		0,
@@ -1131,9 +1131,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mute_04.lvl",
-		"mute2.wav",
-		"headm04.vbc",
+		"MUTE_04.LVL",
+		"MUTE2.WAV",
+		"HEADM04.VBC",
 		5000,
 		500,
 		0,
@@ -1150,9 +1150,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mute_05.lvl",
-		"mute1.wav",
-		"headm05.vbc",
+		"MUTE_05.LVL",
+		"MUTE1.WAV",
+		"HEADM05.VBC",
 		5000,
 		5000,
 		0,
@@ -1169,9 +1169,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mute_06.lvl",
-		"mute2.wav",
-		"headm06.vbc",
+		"MUTE_06.LVL",
+		"MUTE2.WAV",
+		"HEADM06.VBC",
 		2500,
 		100,
 		0,
@@ -1188,9 +1188,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mute_07.lvl",
-		"mute1.wav",
-		"headm07.vbc",
+		"MUTE_07.LVL",
+		"MUTE1.WAV",
+		"HEADM07.VBC",
 		5000,
 		100,
 		0,
@@ -1207,9 +1207,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mute_08.lvl",
-		"mute2.wav",
-		"headm08.vbc",
+		"MUTE_08.LVL",
+		"MUTE2.WAV",
+		"HEADM08.VBC",
 		5000,
 		5000,
 		0,
@@ -1226,9 +1226,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mute_09.lvl",
-		"mute1.wav",
-		"headm09.vbc",
+		"MUTE_09.LVL",
+		"MUTE1.WAV",
+		"HEADM09.VBC",
 		5000,
 		100,
 		0,
@@ -1245,9 +1245,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mute_10.lvl",
-		"mute2.wav",
-		"headm10.vbc",
+		"MUTE_10.LVL",
+		"MUTE2.WAV",
+		"HEADM10.VBC",
 		5000,
 		100,
 		0,
@@ -1264,9 +1264,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mute_11.lvl",
-		"mute1.wav",
-		"headm11.vbc",
+		"MUTE_11.LVL",
+		"MUTE1.WAV",
+		"HEADM11.VBC",
 		6500,
 		100,
 		0,
@@ -1283,9 +1283,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mute_12.lvl",
-		"mute2.wav",
-		"headm12.vbc",
+		"MUTE_12.LVL",
+		"MUTE2.WAV",
+		"HEADM12.VBC",
 		5000,
 		100,
 		0,
@@ -1302,9 +1302,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mute_13.lvl",
-		"mute1.wav",
-		"headm13.vbc",
+		"MUTE_13.LVL",
+		"MUTE1.WAV",
+		"HEADM13.VBC",
 		6000,
 		800,
 		0,
@@ -1321,9 +1321,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mute_14.lvl",
-		"mute2.wav",
-		"headm14.vbc",
+		"MUTE_14.LVL",
+		"MUTE2.WAV",
+		"HEADM14.VBC",
 		4000,
 		5000,
 		0,
@@ -1340,9 +1340,9 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mute_15.lvl",
-		"mute1.wav",
-		"headm15.vbc",
+		"MUTE_15.LVL",
+		"MUTE1.WAV",
+		"HEADM15.VBC",
 		7000,
 		100,
 		0,
@@ -1359,8 +1359,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mlti_01.lvl",
-		"surv1.wav",
+		"MLTI_01.LVL",
+		"SURV1.WAV",
 		NULL,
 		5000,
 		5000,
@@ -1378,8 +1378,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mlti_02.lvl",
-		"surv2.wav",
+		"MLTI_02.LVL",
+		"SURV2.WAV",
 		NULL,
 		5000,
 		5000,
@@ -1397,8 +1397,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mlti_03.lvl",
-		"surv3.wav",
+		"MLTI_03.LVL",
+		"SURV3.WAV",
 		NULL,
 		5000,
 		5000,
@@ -1416,8 +1416,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mlti_04.lvl",
-		"surv4.wav",
+		"MLTI_04.LVL",
+		"SURV4.WAV",
 		NULL,
 		5000,
 		5000,
@@ -1435,8 +1435,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mlti_05.lvl",
-		"mute1.wav",
+		"MLTI_05.LVL",
+		"MUTE1.WAV",
 		NULL,
 		5000,
 		5000,
@@ -1454,8 +1454,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mlti_06.lvl",
-		"mute2.wav",
+		"MLTI_06.LVL",
+		"MUTE2.WAV",
 		NULL,
 		5000,
 		5000,
@@ -1473,8 +1473,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mlti_07.lvl",
-		"mute3.wav",
+		"MLTI_07.LVL",
+		"MUTE3.WAV",
 		NULL,
 		5000,
 		5000,
@@ -1492,8 +1492,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mlti_08.lvl",
-		"mute4.wav",
+		"MLTI_08.LVL",
+		"MUTE4.WAV",
 		NULL,
 		5000,
 		5000,
@@ -1511,8 +1511,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mlti_09.lvl",
-		"surv1.wav",
+		"MLTI_09.LVL",
+		"SURV1.WAV",
 		NULL,
 		5000,
 		5000,
@@ -1530,8 +1530,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mlti_10.lvl",
-		"surv2.wav",
+		"MLTI_10.LVL",
+		"SURV2.WAV",
 		NULL,
 		5000,
 		5000,
@@ -1549,8 +1549,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mlti_11.lvl",
-		"surv3.wav",
+		"MLTI_11.LVL",
+		"SURV3.WAV",
 		NULL,
 		5000,
 		5000,
@@ -1568,8 +1568,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mlti_12.lvl",
-		"surv4.wav",
+		"MLTI_12.LVL",
+		"SURV4.WAV",
 		NULL,
 		5000,
 		5000,
@@ -1587,8 +1587,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mlti_13.lvl",
-		"mute1.wav",
+		"MLTI_13.LVL",
+		"MUTE1.WAV",
 		NULL,
 		5000,
 		5000,
@@ -1606,8 +1606,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mlti_14.lvl",
-		"mute2.wav",
+		"MLTI_14.LVL",
+		"MUTE2.WAV",
 		NULL,
 		5000,
 		5000,
@@ -1625,8 +1625,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mlti_15.lvl",
-		"mute4.wav",
+		"MLTI_15.LVL",
+		"MUTE4.WAV",
 		NULL,
 		5000,
 		5000,
@@ -1644,8 +1644,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mlti_10.lvl",
-		"mute3.wav",
+		"MLTI_10.LVL",
+		"MUTE3.WAV",
 		NULL,
 		5000,
 		5000,
@@ -1663,8 +1663,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mlti_10.lvl",
-		"surv1.wav",
+		"MLTI_10.LVL",
+		"SURV1.WAV",
 		NULL,
 		5000,
 		5000,
@@ -1682,8 +1682,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mlti_10.lvl",
-		"surv1.wav",
+		"MLTI_10.LVL",
+		"SURV1.WAV",
 		NULL,
 		5000,
 		5000,
@@ -1701,8 +1701,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_16.lvl",
-		"surv4.wav",
+		"SURV_16.LVL",
+		"SURV4.WAV",
 		NULL,
 		3000,
 		50,
@@ -1720,8 +1720,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_17.lvl",
-		"surv1.wav",
+		"SURV_17.LVL",
+		"SURV1.WAV",
 		NULL,
 		3000,
 		50,
@@ -1739,8 +1739,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_18.lvl",
-		"surv4.wav",
+		"SURV_18.LVL",
+		"SURV4.WAV",
 		NULL,
 		0,
 		50,
@@ -1758,8 +1758,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_19.lvl",
-		"surv2.wav",
+		"SURV_19.LVL",
+		"SURV2.WAV",
 		NULL,
 		0,
 		50,
@@ -1777,8 +1777,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_20.lvl",
-		"surv4.wav",
+		"SURV_20.LVL",
+		"SURV4.WAV",
 		NULL,
 		0,
 		50,
@@ -1796,8 +1796,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_21.lvl",
-		"surv3.wav",
+		"SURV_21.LVL",
+		"SURV3.WAV",
 		NULL,
 		5000,
 		50,
@@ -1815,8 +1815,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_22.lvl",
-		"surv4.wav",
+		"SURV_22.LVL",
+		"SURV4.WAV",
 		NULL,
 		0,
 		50,
@@ -1834,8 +1834,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_23.lvl",
-		"surv1.wav",
+		"SURV_23.LVL",
+		"SURV1.WAV",
 		NULL,
 		0,
 		50,
@@ -1853,8 +1853,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"surv_24.lvl",
-		"surv4.wav",
+		"SURV_24.LVL",
+		"SURV4.WAV",
 		NULL,
 		5000,
 		50,
@@ -1865,167 +1865,16 @@ LevelDesc levels[68] =
 		0u,
 		771,
 		10,
-		40000,
+		(__int16)40000,
 		196633000,
 		0,
 		0,
 		0
 	},
 	{
-		"surv_25.lvl",
-		"surv4.wav",
-		NULL,
-		6500,
-		50,
-		0,
-		256,
-		5,
-		0,
-		0u,
-		771,
-		10,
-		30000,
-		196633000,
-		0,
-		0,
-		0
-	},
-	{
-		"mute_16.lvl",
-		"mute4.wav",
-		NULL,
-		4500,
-		50,
-		0,
-		328,
-		3,
-		0,
-		0u,
-		771,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0
-	},
-	{
-		"mute_17.lvl",
-		"mute1.wav",
-		NULL,
-		2600,
-		50,
-		0,
-		280,
-		3,
-		0,
-		0u,
-		771,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0
-	},
-	{
-		"mute_18.lvl",
-		"mute4.wav",
-		NULL,
-		4500,
-		50,
-		0,
-		312,
-		3,
-		0,
-		0u,
-		771,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0
-	},
-	{
-		"mute_19.lvl",
-		"mute2.wav",
-		NULL,
-		5000,
-		50,
-		0,
-		320,
-		4,
-		0,
-		0u,
-		771,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0
-	},
-	{
-		"mute_20.lvl",
-		"mute4.wav",
-		NULL,
-		5000,
-		50,
-		0,
-		264,
-		4,
-		0,
-		0u,
-		771,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0
-	},
-	{
-		"mute_21.lvl",
-		"mute3.wav",
-		NULL,
-		4500,
-		50,
-		0,
-		374,
-		4,
-		0,
-		0u,
-		771,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0
-	},
-	{
-		"mute_22.lvl",
-		"mute4.wav",
-		NULL,
-		5500,
-		0,
-		0,
-		312,
-		5,
-		0,
-		8192u,
-		771,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0
-	},
-	{
-		"mute_23.lvl",
-		"mute1.wav",
+
+		"MUTE_23.LVL",
+		"MUTE1.WAV",
 		NULL,
 		5000,
 		50,
@@ -2036,15 +1885,15 @@ LevelDesc levels[68] =
 		0u,
 		771,
 		6,
-		35000,
+		(__int16)35000,
 		196638000,
 		0,
 		0,
 		0
 	},
 	{
-		"mute_24.lvl",
-		"mute4.wav",
+		"MUTE_24.LVL",
+		"MUTE4.WAV",
 		NULL,
 		6000,
 		50,
@@ -2062,8 +1911,8 @@ LevelDesc levels[68] =
 		0
 	},
 	{
-		"mute_25.lvl",
-		"mute4.wav",
+		"MUTE_25.LVL",
+		"MUTE4.WAV",
 		NULL,
 		5000,
 		50,
@@ -2096,41 +1945,41 @@ char aCouldNotSaveCp[38] = "Could not save cpu player information"; // weak
 char aCouldNotSaveOi[31] = "Could not save oil information"; // weak
 char aSS_0[] = "%s (%s)"; // idb
 int prev_level_idx = -1; // weak
-const char *pKknd_sve = "kknd.sve";
+const char *pKknd_sve = "KKND.SVE";
 char aC[3] = "%c"; // idb
 char *MOBD = "MOBD";
-char *aSLevelsSS = "%s\\LEVELS\\%s\\%s";
-char *aSLevelsSSupspr = "%s\\LEVELS\\%s\\supspr.lvl";
-char intro_vbc[10] = "intro.vbc"; // weak
-char *aSFmvMh_fmv_vbc = "%s\\FMV\\mh_fmv.vbc";
-char *fmv_lvl = "fmv.lvl";
-char *aSFmvS = "%s\\FMV\\%s";
-char *aEvolvout_vbc = "evolvout.vbc";
-char *aSurvout_vbc = "survout.vbc";
+char *aSLevelsSS = "%s//LEVELS//%s//%s";
+char *aSLevelsSSupspr = "%S//LEVELS//%S//SUPSPR.LVL";
+char intro_vbc[10] = "INTRO.VBC"; // weak
+char *aSFmvMh_fmv_vbc = "%S//FMV//MH_FMV.VBC";
+char *fmv_lvl = "FMV.LVL";
+char *aSFmvS = "%s//FMV//%s";
+char *aEvolvout_vbc = "EVOLVOUT.VBC";
+char *aSurvout_vbc = "SURVOUT.VBC";
 char *aUnit_initFaile = "UNIT_Init() failed\n";
 char *aSpriteLoadFail = "sprite load failed\n";
 CustomMission custom_missions[20] =
 {
-    { { "%FRESH MEAT", "~Though it makes me shiver to my", "soul, I sense that the Symmetrics", "have made their presence felt near", "one of our camps.", "~Their vile buildings taint our", "sweeping view of the landscape and", "would lower property values if such", "things still existed.", "~Clear their sorry, Symmetric selves", "from the land." } , "mb_m01.wav" },
-    { { "%THE AMOEBA", "~Our prosperous war camp is coming", "under threat -- the Symmetrics are", "gathering their forces, and we fear", "the results.", "~Our big camp, though prosperous, is", "too distant from the enemy, so you", "must set up another camp and deal", "with the enemy in close quarters." }, "mb_m02.wav" },
-    { { "%THE GAUNTLET", "~We have the Symmetrics backed into", "a defended valley.", "~They are cringing and will soon beg", "for mercy.", "~We need you to enter the valley", "through its only entrance and show", "the enemy none of this mercy.", "~Let them taste what a second Scourge", "would be like." }, "mb_m03.wav" },
-    { { "%STAND AND FIGHT", "~We keep weeding out the foul", "Symmetrics and, just like weeds,", "they keep returning.", "~This time they pester one of our", "camps like pests.", "~Exterminate them." }, "mb_m04.wav" },
-    { { "%THE PROPHECY", "~I feel a disturbance in the ... well,", "just a disturbance.", "~I fear that an enormous attack from", "the Symmetrics is in the making.", "I cannot be sure.", "~I feel that you should build up", "defenses that can withstand just", "such an attack, should it eventuate." }, "mb_m05.wav" },
-    { { "%TRAITORS", "~Alas, one of our Chieftains has", "fallen ill to the Scourge sickness.", "His mind betrays him as it betrays", "us -- he has made a pact with the", "Symmetrics!", "~His loyal clan follows him, and the", "two groups now fight as one.", "~He must be brought into alignment", "with his spirit once again.", "~So kill him.", "~That should do it." }, "mb_m06.wav" },
-    { { "%THE PURSUIT", "~We are a peaceful people.", "All we wish is to set up our homes", "and help prevent the Earth from", "further damage.", "~But the Symmetrics won't let us.", "Even now, they pursue and harass a", "convoy which only wants to set up a", "war camp.", "~Use our head start to complete the", "camp's set-up, then, with much love,", "annihilate the enemy." }, "mb_m07.wav" },
-    { { "%HIVE MIND", "~The enemy is falling to its", "claustrophobic nature -- they have", "set up their supply lines in a", "valley.", "~It's time to attack from the", "heavens -- use our glorious", "Thunder Wasps to accomplish", "this task." }, "mb_m08.wav" },
-    { { "%BOMBARDMENT", "~The creatures stir.", "They hear sounds on the horizon,", "and I fear it is the Symmetric's own", "heavenly attack -- the metal birds.", "Or it could be a Wilbur Bomber Air", "Strike.", "~Whatever it is, prepare for it,", "survive it, then hunt down the enemy", "and destroy them for daring to use", "our skies for themselves." }, "mb_m09.wav" },
-    { { "%HAND OF GOD", "~As we speak, our glorious warriors", "and beasts surround a Symmetric base.", "Our animals grow excited at the smell", "of soiled uniforms.", "~Using all of our forces, tighten your", "grip on the base and crush it,", "destroying everything." }, "mb_m10.wav" },
-    { { "%SQUISH", "~An unsightly Freaker village has", "sprung up near one of our pristine,", "high-tech encampments. Even if it's", "just for the pure aesthetics of it", "all, go in there and take out the", "garbage." }, "mb_s01.wav" },
-    { { "%COUNTER - ATTACK", "~Those mutants failed at their ambush,", "and we want them to fail even more.", "We've traced them back to their", "pitiful camp.", "You know what to do." }, "mb_s02.wav" },
-    { { "%DISTRESS", "~Our people in Communications have", "picked up a distress signal.", "Sure, it could be an old-world mobile", "phone with really good batteries, but", "we'd best be sure.", "~The signal is coming from a bunker in", "the badlands.", "~I don't know exactly what some of our", "highest ranking leaders were doing in", "the badlands in the first place, but", "that's where you have to go to rescue", "them.", "~And if it is just a mobile phone,", "bring it back.", "~I feel so common without one. " }, "mb_s03.wav" },
-    { { "%TRICKLE FEED", "~Well, Commander, what we've got here", "is a SNAFU, and don't say", "'Gesundheit' -- I really tire of", "that gag.", "~What's happened is some joker", "changed everyone's watches, so", "instead of having a big force to", "trash a Freak camp, you've initially", "only got a little force.", "~Over the course of the mission, your", "reinforcements will trickle in as", "their watches catch up -- hopefully,", "you won't be dead by then." }, "mb_s04.wav" },
-    { { "%S.O.S.", "~We've got a small base, and generally", "size doesn't count.", "But not this time.", "~This time, we've got a small base,", "the Freaks have got a large one, and", "we're in trouble.", "~Your mission is to hold off those", "freaky little dung people.", "~Reinforcements are on the way from a", "Survivor camp 15 minutes away; wait", "until they arrive, then reduce the", "size of the Freak camp to nothing.", "~That'll learn them for overextending." }, "mb_s05.wav" },
-    { { "%BUG HUNT", "~We've lost communications with an", "isolated base, Commander, and we want", "you to deal with it.", "~It's probably nothing more than one", "of those dead-beat communications", "guys kicking the power out of the", "wall again, but fix what needs to be", "fixed and deal with whatever needs to", "be dealt with, and slap everyone's", "wrists for wasting our time while", "you're at it." }, "mb_s06.wav" },
-    { { "%THE INFILTRATOR", "~The enemy have set up a camp and", "sent stragglers all over the place.", "They know we're here, and they're", "going to expect a big, crushing", "attack which could easily wipe", "them off this part of our world.", "~But we're not going to play their", "little game. We're going to send", "one single sniper with one gun and", "no armour to clear the whole damn", "area. That'll show 'em." }, "mb_s07.wav" },
-    { { "%JAIL BREAK", "~It's rescue time again, Commander.", "One of our patrols was captured by a", "mutant ambush.", "~Our people are alive, but there's no", "telling how long it'll be before the", "Freaks start performing some crazy", "death ceremony or other.", "~We want you to get in there and", "rescue the captured patrol, then", "perform a religious ceremony of your", "own -- sacrifice all the Freaks to", "nothing in particular." }, "mb_s08.wav" },
-    { { "%WAGONS HO", "~Those filthy Freaks have taken to the", "high ground and they're stinking up", "all the valleys around them.", "And they are killing people, which is", "a bad thing as well.Hold your nose", "while you hunt them down and kill", "them." }, "mb_s09.wav" },
-    { { "%TAG TEAM", "~One of our little bases is under", "constant attack.", "~And that really ticks us off.", "~What's worse is that the base is in a", "tight position and it can't be", "expanded enough to eradicate those", "irritating little Freaks.", "~Take a Mobile Outpost and set it up", "somewhere spacious, then build up", "your army.", "~Join forces with the original little", "camp and squash the Freaks like the", "cockroaches they aspire to be." }, "mb_s10.wav" }
+    { { "%FRESH MEAT", "~Though it makes me shiver to my", "soul, I sense that the Symmetrics", "have made their presence felt near", "one of our camps.", "~Their vile buildings taint our", "sweeping view of the landscape and", "would lower property values if such", "things still existed.", "~Clear their sorry, Symmetric selves", "from the land." } , "MB_M01.WAV" },
+    { { "%THE AMOEBA", "~Our prosperous war camp is coming", "under threat -- the Symmetrics are", "gathering their forces, and we fear", "the results.", "~Our big camp, though prosperous, is", "too distant from the enemy, so you", "must set up another camp and deal", "with the enemy in close quarters." }, "MB_M02.WAV" },
+    { { "%THE GAUNTLET", "~We have the Symmetrics backed into", "a defended valley.", "~They are cringing and will soon beg", "for mercy.", "~We need you to enter the valley", "through its only entrance and show", "the enemy none of this mercy.", "~Let them taste what a second Scourge", "would be like." }, "MB_M03.WAV" },
+    { { "%STAND AND FIGHT", "~We keep weeding out the foul", "Symmetrics and, just like weeds,", "they keep returning.", "~This time they pester one of our", "camps like pests.", "~Exterminate them." }, "MB_M04.WAV" },
+    { { "%THE PROPHECY", "~I feel a disturbance in the ... well,", "just a disturbance.", "~I fear that an enormous attack from", "the Symmetrics is in the making.", "I cannot be sure.", "~I feel that you should build up", "defenses that can withstand just", "such an attack, should it eventuate." }, "MB_M05.WAV" },
+    { { "%TRAITORS", "~Alas, one of our Chieftains has", "fallen ill to the Scourge sickness.", "His mind betrays him as it betrays", "us -- he has made a pact with the", "Symmetrics!", "~His loyal clan follows him, and the", "two groups now fight as one.", "~He must be brought into alignment", "with his spirit once again.", "~So kill him.", "~That should do it." }, "MB_M06.WAV" },
+    { { "%THE PURSUIT", "~We are a peaceful people.", "All we wish is to set up our homes", "and help prevent the Earth from", "further damage.", "~But the Symmetrics won't let us.", "Even now, they pursue and harass a", "convoy which only wants to set up a", "war camp.", "~Use our head start to complete the", "camp's set-up, then, with much love,", "annihilate the enemy." }, "MB_M07.WAV" },
+    { { "%HIVE MIND", "~The enemy is falling to its", "claustrophobic nature -- they have", "set up their supply lines in a", "valley.", "~It's time to attack from the", "heavens -- use our glorious", "Thunder Wasps to accomplish", "this task." }, "MB_M08.WAV" },
+    { { "%BOMBARDMENT", "~The creatures stir.", "They hear sounds on the horizon,", "and I fear it is the Symmetric's own", "heavenly attack -- the metal birds.", "Or it could be a Wilbur Bomber Air", "Strike.", "~Whatever it is, prepare for it,", "survive it, then hunt down the enemy", "and destroy them for daring to use", "our skies for themselves." }, "MB_M09.WAV" },
+    { { "%HAND OF GOD", "~As we speak, our glorious warriors", "and beasts surround a Symmetric base.", "Our animals grow excited at the smell", "of soiled uniforms.", "~Using all of our forces, tighten your", "grip on the base and crush it,", "destroying everything." }, "MB_M10.WAV" },
+    { { "%SQUISH", "~An unsightly Freaker village has", "sprung up near one of our pristine,", "high-tech encampments. Even if it's", "just for the pure aesthetics of it", "all, go in there and take out the", "garbage." }, "MB_S01.WAV" },
+    { { "%COUNTER - ATTACK", "~Those mutants failed at their ambush,", "and we want them to fail even more.", "We've traced them back to their", "pitiful camp.", "You know what to do." }, "MB_S02.WAV" },
+    { { "%DISTRESS", "~Our people in Communications have", "picked up a distress signal.", "Sure, it could be an old-world mobile", "phone with really good batteries, but", "we'd best be sure.", "~The signal is coming from a bunker in", "the badlands.", "~I don't know exactly what some of our", "highest ranking leaders were doing in", "the badlands in the first place, but", "that's where you have to go to rescue", "them.", "~And if it is just a mobile phone,", "bring it back.", "~I feel so common without one. " }, "MB_S03.WAV" },
+    { { "%TRICKLE FEED", "~Well, Commander, what we've got here", "is a SNAFU, and don't say", "'Gesundheit' -- I really tire of", "that gag.", "~What's happened is some joker", "changed everyone's watches, so", "instead of having a big force to", "trash a Freak camp, you've initially", "only got a little force.", "~Over the course of the mission, your", "reinforcements will trickle in as", "their watches catch up -- hopefully,", "you won't be dead by then." }, "MB_S04.WAV" },
+    { { "%S.O.S.", "~We've got a small base, and generally", "size doesn't count.", "But not this time.", "~This time, we've got a small base,", "the Freaks have got a large one, and", "we're in trouble.", "~Your mission is to hold off those", "freaky little dung people.", "~Reinforcements are on the way from a", "Survivor camp 15 minutes away; wait", "until they arrive, then reduce the", "size of the Freak camp to nothing.", "~That'll learn them for overextending." }, "MB_S05.WAV" },
+    { { "%BUG HUNT", "~We've lost communications with an", "isolated base, Commander, and we want", "you to deal with it.", "~It's probably nothing more than one", "of those dead-beat communications", "guys kicking the power out of the", "wall again, but fix what needs to be", "fixed and deal with whatever needs to", "be dealt with, and slap everyone's", "wrists for wasting our time while", "you're at it." }, "MB_S06.WAV" },
+    { { "%THE INFILTRATOR", "~The enemy have set up a camp and", "sent stragglers all over the place.", "They know we're here, and they're", "going to expect a big, crushing", "attack which could easily wipe", "them off this part of our world.", "~But we're not going to play their", "little game. We're going to send", "one single sniper with one gun and", "no armour to clear the whole damn", "area. That'll show 'em." }, "MB_S07.WAV" },
+    { { "%JAIL BREAK", "~It's rescue time again, Commander.", "One of our patrols was captured by a", "mutant ambush.", "~Our people are alive, but there's no", "telling how long it'll be before the", "Freaks start performing some crazy", "death ceremony or other.", "~We want you to get in there and", "rescue the captured patrol, then", "perform a religious ceremony of your", "own -- sacrifice all the Freaks to", "nothing in particular." }, "MB_S08.WAV" },
+    { { "%WAGONS HO", "~Those filthy Freaks have taken to the", "high ground and they're stinking up", "all the valleys around them.", "And they are killing people, which is", "a bad thing as well.Hold your nose", "while you hunt them down and kill", "them." }, "MB_S09.WAV" },
+    { { "%TAG TEAM", "~One of our little bases is under", "constant attack.", "~And that really ticks us off.", "~What's worse is that the base is in a", "tight position and it can't be", "expanded enough to eradicate those", "irritating little Freaks.", "~Take a Mobile Outpost and set it up", "somewhere spacious, then build up", "your army.", "~Join forces with the original little", "camp and squash the Freaks like the", "cockroaches they aspire to be." }, "MB_S10.WAV" }
 };
 char *aW = "w";
 
@@ -2558,7 +2407,7 @@ char aModem_lst[] = "modem.lst"; // idb
 char aSS_2[] = "%s-%s"; // idb
 char aD_2[] = "%d\n"; // idb
 char aS_0[4] = "%s\n"; // idb
-char aCLevelsMute1_wav[20] = "C:\\LEVELS\\MUTE1.WAV"; // weak
+char aCLevelsMute1_wav[20] = "C://LEVELS//MUTE1.WAV"; // weak
 
 char asc_470198[] = "        0"; // idb
 int _4701B8_mobd_lookups_per_ProductionGroup_field44[8] = { 146, 2016, 174, 2028, 169, 2004, 172, 2040 };
@@ -5190,8 +5039,7 @@ int dword_477460; // weak
 DataCplc_stru0 *cplc_stru0_list_477464;
 int currently_running_lvl_cplc_data_size; // weak
 DataCplcItem_ptr1 *_47746C_cplc_prev1;
-OilDeposit *oilspot_list_head;
-OilDeposit *oildeposit_list_end;
+OilDeposit oilspot_sentinel;
 OilDeposit *oilspot_list;
 OilDeposit *oilspot_list_free_pool;
 int dword_477890;
@@ -5234,7 +5082,7 @@ int next_pressed_key; // weak
 int array_479B98[25][2];
 int array_479C60[25][2];
 int array_479B98_array_479C60_inited; // weak
-stru7 _479D48_stru7;
+stru7 _479D48_stru7[20];
 int is_task_list_initialized; // weak
 int dword_479DBC; // weak
 int _479DC0_render_string_list_initialized; // weak
@@ -5258,7 +5106,7 @@ int game_save_in_progress; // weak
 int __47739C_machineshop_negindex[5]; // weak
 stru15unit _47739C_machineshop;
 int max_machineshop_level; // weak
-char app_root_dir[20]; // idb
+char app_root_dir[260]; // idb
 DataHunk *current_level_lvl; // idb
 char game_installation_drive_letter; // weak
 int _47A01C_sound_id; // weak
@@ -5301,23 +5149,19 @@ DataMobd *currently_running_lvl_mobd;
 Sprite *sprite_list_free_pool;
 Sprite sprite_47A400; // weak
 int currently_running_lvl_mobd_valid; // weak
-Sprite *sprite_list_47A4A0;
-Sprite *sprite_list_47A4A4;
+Sprite sprite_list_sentinel;
 Sprite *sprite_list;
-stru38 *stru38_list_47A4B0;
-stru38 *stru38_list_47A4B4;
+stru38 stru38_list_sentinel;
 stru38 *stru38_list;
 stru38 *stru38_list_free_pool;
-stru37 *stru37_list_47A500;
-stru37 *stru37_list_47A504;
+stru37 stru37_list_sentinel;
 stru37 *stru37_list;
 stru37 *stru37_list_free_pool;
 int dword_47A5A0; // weak
 char byte_47A5A8[56];
 Script *game_cursor_script; // idb
 int num_units_in_group[11]; // weak
-stru13construct *stru13construct_list_47A638;
-stru13construct *stru13construct_list_47A63C;
+stru13construct stru13construct_sentinel;
 stru13construct *stru13construct_list;
 stru13construct *stru13construct_list_free_pool;
 int dword_47A6F0; // weak
@@ -5373,8 +5217,7 @@ stru28 *stru28_list_free_pool;
 int _47C350_num_explosions_min0_max30; // weak
 int num_explosions; // weak
 Bitmap *bitmap_list;
-Bitmap *bitmap_list_47C360;
-Bitmap *bitmap_list_47C364;
+Bitmap bitmap_list_sentinel;
 void(*mapd_j_4391D0_handler)(Mapd_stru0 *, void *);
 Bitmap *bitmap_list_free_pool;
 DrawJobList draw_list_47C5D8; // idb
@@ -5472,8 +5315,7 @@ ProductionGroup *production_group_free_pool;
 stru19production _47C978_production;
 stru19production _47C990_production;
 stru12_game_globals game_globals_per_player;
-ProductionOption *production_option_list_47C9C8;
-ProductionOption *production_option_list_47C9CC;
+ProductionOption production_option_sentinel;
 ProductionOption *production_option_list;
 ProductionOption *production_option_list_free_pool;
 RenderString *_47CA00_render_string;
@@ -5487,7 +5329,7 @@ int dword_47CB18; // weak
 int dword_47CB1C; // weak
 int dword_47CB20; // weak
 int _47CBC0_fow[256];
-int __47CFC4_mobd_lookup_speeds[256];
+int __47CFC4_mobd_lookup_speeds[257];
 int _47D3C4_entity_mobd_lookup_ids[257];
 unsigned __int8 player_sprite_palette_tmp[256];
 stru12_game_globals game_globals_cpu[7];
@@ -5498,8 +5340,7 @@ int entity_drag_selection_z; // weak
 Script *pscript_show_message; // idb
 int entity_drag_selection_y; // weak
 int _4269B0_task_attachment__4_some_task_flags; // weak
-stru11unit *stru11unit_list_47DC70;
-stru11unit *stru11unit_list_47DC74;
+stru11unit stru11unit_sentinel;
 stru11unit *stru11unit_list;
 stru11unit *stru11unit_list_head;
 unsigned __int8 *per_player_sprite_palettes[7];
@@ -5509,6 +5350,6 @@ int _47DCC4_entity_id_counter; // weak
 int UNIT_num_player_units; // weak
 int UNIT_num_nonplayer_units; // weak
 int num_players_towers; // weak
-void *entity_default_stru60_ptr;
+Entity_stru_dmg_related entity_default_stru60;
 int dword_47DCE8; // weak
 bool _47DCF4_wm_quit_received = false; // weak

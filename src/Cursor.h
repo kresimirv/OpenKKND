@@ -2,6 +2,13 @@
 
 #include "src/Script.h"
 
+#ifndef __int8
+#define __int8 char
+#endif
+#ifndef __int16
+#define __int16 short
+#endif
+
 struct Entity;
 
 enum SELECTED_ENTITY_TYPE : __int32

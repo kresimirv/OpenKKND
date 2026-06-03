@@ -388,8 +388,7 @@ extern int dword_477460; // weak
 extern DataCplc_stru0 *cplc_stru0_list_477464;
 extern int currently_running_lvl_cplc_data_size; // weak
 extern DataCplcItem_ptr1 *_47746C_cplc_prev1;
-extern OilDeposit *oilspot_list_head;
-extern OilDeposit *oildeposit_list_end;
+extern OilDeposit oilspot_sentinel;
 extern OilDeposit *oilspot_list;
 extern OilDeposit *oilspot_list_free_pool;
 extern int dword_477890;
@@ -432,7 +431,7 @@ extern int next_pressed_key; // weak
 extern int array_479B98[25][2];
 extern int array_479C60[25][2];
 extern int array_479B98_array_479C60_inited; // weak
-extern stru7 _479D48_stru7;
+extern stru7 _479D48_stru7[20];
 extern int is_task_list_initialized; // weak
 extern int dword_479DBC; // weak
 extern int _479DC0_render_string_list_initialized; // weak
@@ -456,7 +455,7 @@ extern int game_save_in_progress; // weak
 extern int __47739C_machineshop_negindex[]; // weak
 extern stru15unit _47739C_machineshop;
 extern int max_machineshop_level; // weak
-extern char app_root_dir[20]; // idb
+extern char app_root_dir[260];
 extern DataHunk *current_level_lvl; // idb
 extern char game_installation_drive_letter; // weak
 extern int _47A01C_sound_id; // weak
@@ -498,23 +497,19 @@ extern DataMobd *currently_running_lvl_mobd;
 extern Sprite *sprite_list_free_pool;
 extern Sprite sprite_47A400; // weak
 extern int currently_running_lvl_mobd_valid; // weak
-extern Sprite *sprite_list_47A4A0;
-extern Sprite *sprite_list_47A4A4;
+extern Sprite sprite_list_sentinel;
 extern Sprite *sprite_list;
-extern stru38 *stru38_list_47A4B0;
-extern stru38 *stru38_list_47A4B4;
+extern stru38 stru38_list_sentinel;
 extern stru38 *stru38_list;
 extern stru38 *stru38_list_free_pool;
-extern stru37 *stru37_list_47A500;
-extern stru37 *stru37_list_47A504;
+extern stru37 stru37_list_sentinel;
 extern stru37 *stru37_list;
 extern stru37 *stru37_list_free_pool;
 extern int dword_47A5A0; // weak
 extern char byte_47A5A8[56];
 extern Script *game_cursor_script; // idb
 extern int num_units_in_group[11]; // weak
-extern stru13construct *stru13construct_list_47A638;
-extern stru13construct *stru13construct_list_47A63C;
+extern stru13construct stru13construct_sentinel;
 extern stru13construct *stru13construct_list;
 extern stru13construct *stru13construct_list_free_pool;
 extern int dword_47A6F0; // weak
@@ -571,8 +566,7 @@ extern stru28 *stru28_list_free_pool;
 extern int _47C350_num_explosions_min0_max30; // weak
 extern int num_explosions; // weak
 extern Bitmap *bitmap_list;
-extern Bitmap *bitmap_list_47C360;
-extern Bitmap *bitmap_list_47C364;
+extern Bitmap bitmap_list_sentinel;
 extern void(*mapd_j_4391D0_handler)(Mapd_stru0 *, void *);
 extern Bitmap *bitmap_list_free_pool;
 extern DrawJobList draw_list_47C5D8; // idb
@@ -639,8 +633,7 @@ extern ProductionGroup *production_group_free_pool;
 extern stru19production _47C978_production;
 extern stru19production _47C990_production;
 extern stru12_game_globals game_globals_per_player;
-extern ProductionOption *production_option_list_47C9C8;
-extern ProductionOption *production_option_list_47C9CC;
+extern ProductionOption production_option_sentinel;
 extern ProductionOption *production_option_list;
 extern ProductionOption *production_option_list_free_pool;
 extern RenderString *_47CA00_render_string;
@@ -653,7 +646,7 @@ extern _DWORD dword_47CB14; // idb
 extern int dword_47CB18; // weak
 extern int dword_47CB1C; // weak
 extern int dword_47CB20; // weak
-extern int __47CFC4_mobd_lookup_speeds[256];
+extern int __47CFC4_mobd_lookup_speeds[257];
 extern int _47D3C4_entity_mobd_lookup_ids[257];
 extern unsigned __int8 player_sprite_palette_tmp[256];
 extern stru12_game_globals game_globals_cpu[7];
@@ -664,8 +657,7 @@ extern int entity_drag_selection_z; // weak
 extern Script *pscript_show_message; // idb
 extern int entity_drag_selection_y; // weak
 extern int _4269B0_task_attachment__4_some_task_flags; // weak
-extern stru11unit *stru11unit_list_47DC70;
-extern stru11unit *stru11unit_list_47DC74;
+extern stru11unit stru11unit_sentinel;
 extern stru11unit *stru11unit_list;
 extern stru11unit *stru11unit_list_head;
 extern unsigned __int8 *per_player_sprite_palettes[7];
@@ -675,6 +667,6 @@ extern int _47DCC4_entity_id_counter; // weak
 extern int UNIT_num_player_units; // weak
 extern int UNIT_num_nonplayer_units; // weak
 extern int num_players_towers; // weak
-extern void *entity_default_stru60_ptr;
+extern Entity_stru_dmg_related entity_default_stru60;
 extern int dword_47DCE8; // weak
 extern bool _47DCF4_wm_quit_received; // weak

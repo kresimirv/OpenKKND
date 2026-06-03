@@ -65,7 +65,7 @@ void UNIT_DmgHandler_Sapper(Script *a1)
     v10 = v3;
     v11 = v9 / *(_DWORD *)(v3 + 16);
     v12 = v28->entity_id;
-    v1->pstru7 = &_479D48_stru7;
+    v1->pstru7 = _479D48_stru7;
     v13 = v4->stats;
     v31 = v12;
     a3 = v11;
@@ -253,7 +253,7 @@ void UNIT_DmgHandler_Rocket(Script *a1)
     if (v18 + v20 >= 100)
         v22 = 99;
     v23 = kknd_rand_debug(__FILE__, __LINE__);
-    v2->pstru7 = &_479D48_stru7;
+    v2->pstru7 = _479D48_stru7;
     v24 = 16 * (v23 % (100 - v21) - (100 - v22) / 2);
     sprite_408800_play_sound(v2, SOUND_14_dmg, _4690A8_sfx_volume, 0);
     v2->x_speed = (v19 + *((_DWORD *)v34 + 4) * _4731A8_speeds[__47CFC4_mobd_lookup_speeds[v37 + 1]]) >> 1;
@@ -447,7 +447,7 @@ void script_4363C0_giant_bettle_dmg(Script *a1)
     v12 = v2->entity_id;
     v7 = v6 / *(_DWORD *)(v4 + 16);
     sprite_load_mobd(v3, 1784);
-    v3->pstru7 = &_479D48_stru7;
+    v3->pstru7 = _479D48_stru7;
     v3->z_speed_limit = 512;
     v3->z_speed = 512;
     if (v7 > 2)
@@ -633,7 +633,7 @@ void script_4368B0_plasma_tank_dmg_handler(Script *a1)
     v7 = (v5->x - v4) >> 8;
     v8 = (v5->y - v3) >> 8;
     sprite_load_mobd(v1, 1152);
-    v1->pstru7 = &_479D48_stru7;
+    v1->pstru7 = _479D48_stru7;
     v9 = math_42D64D_vec_length_2d(v7, v8);
     script_sleep(a1, v9 / *(_DWORD *)(v12 + 16));
     v1->x_speed = 0;
@@ -735,7 +735,7 @@ void UNIT_DmgHandler_Mech(Script *a1)
         v53 = (signed __int16)_42D560_get_mobd_lookup_id_rotation(v8, v59);
         v1->mobd_id = MOBD_MECH;
         sprite_load_mobd(v1, 1152);
-        v1->pstru7 = &_479D48_stru7;
+        v1->pstru7 = _479D48_stru7;
         v9 = v4->stats->accuracy;
         v10 = v9 + veterancy_accuracy_bonus[v4->veterancy_level];
         v51 = v9 + veterancy_accuracy_bonus[v4->veterancy_level];
@@ -822,7 +822,7 @@ void UNIT_DmgHandler_Mech(Script *a1)
         if (v35 + v37 >= 100)
             v39 = 99;
         v40 = kknd_rand_debug(__FILE__, __LINE__);
-        v1->pstru7 = &_479D48_stru7;
+        v1->pstru7 = _479D48_stru7;
         v41 = 16 * (v40 % (100 - v38) - (100 - v39) / 2);
         sprite_408800_play_sound(v1, SOUND_14_dmg, _4690A8_sfx_volume, 0);
         v1->x_speed = (v36 + *(_DWORD *)(v55 + 16) * _4731A8_speeds[__47CFC4_mobd_lookup_speeds[v54 + 1]]) >> 1;
@@ -1348,7 +1348,7 @@ void UNIT_DmgHandler_Projectile(Script *a1)
     v6 = (v5->y - v1->y) >> 8;
     v7 = (v5->x - v4) >> 8;
     v8 = _42D560_get_mobd_lookup_id_rotation(v7, v6);
-    v1->pstru7 = &_479D48_stru7;
+    v1->pstru7 = _479D48_stru7;
     v9 = v3->veterancy_level;
     v10 = v3->stats;
     v31 = v8;
