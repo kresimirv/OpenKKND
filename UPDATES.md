@@ -186,3 +186,19 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
 
 ### Savegame Fix — Defensive Null Checks for Entity Factory
 - **Fix** (`Vehicles.cpp:175; Infantry.cpp:839,853`): Added null checks for `EntityFactory::Create()` return values in `UNIT_Handler_VehiclesInfantry` and `UNIT_Handler_OilTanker` to prevent dereferencing null pointers if entity creation fails.
+
+### Crash Fix — Information Icon (Help) Global-Buffer-Overflow
+- Root cause: `sidebar_button_handler_help_open` used sentinel pattern relying on `_47CA10_sidebar_button_minimap` being immediately adjacent to `_47CA08_sidebar_buttons[2]` in memory. ASan inserts redzones between globals, breaking this assumption and causing reads past the array bounds when clicking the Information icon.
+- **Fix 1** (`Sidebar.cpp:311-320`): Changed `sidebar_button_handler_help_open` from address-based sentinel loop to counted loop `for (int i = 1; i < 2; ++i)` (processes only index 1, skipping index 0 as intended).
+- **Fix 2** (`Sidebar.cpp:648-657`): Changed `sidebar_button_handler_446190_open` from address-based sentinel loop to counted loop `for (int i = 0; i < 1; ++i)` (processes only index 0, skipping index 1 as intended) for consistency and safety.
+
+### Crash Fix — KKND.SVE Validation (Mission Complete) Global-Buffer-Overflow
+- Root cause: `_4240E0_kknd_sve_read()` and `_424270_kknd_sve_read()` used sentinel patterns relying on `kknd_sve_array_463070[15]` being immediately adjacent to `kknd_sve_array_4630AC[15]`, which is then adjacent to `dword_4630E8`. ASan redzones between globals break this assumption, causing reads past array bounds when validating the KKND.SVE file after completing a mission.
+- **Fix** (`SaveLoad.cpp`): Converted 4 sentinel-based while loops to counted loops of 15 iterations each:
+  - `_4240E0_kknd_sve_read()`: first loop (lines 1174-1188) and second loop (lines 1199-1213)
+  - `_424270_kknd_sve_read()`: first loop (lines 1254-1268) and second loop (lines 1279-1293)
+- Each fix includes inner loops to consume remaining file values if validation fails early, keeping the file pointer correct for subsequent reads.
+
+### Menu Fix — Infantry Units Appearing in Buildings Menu
+- Root cause: In `entity_mode_outpost_enable_basic_construction` (Survivor) and `UNIT_Handler_Clanhall` (Mutant), the Outpost/Clanhall initialization code added BOTH building options AND infantry options to `_47B3D0_building_production_group`, which was created with `PRODUCTION_GROUP_BUILDINGS`. This caused infantry units (Rifleman, SWAT, Technician for Survivors; Berserker, Shotgunner, Mekanik for Mutants) to appear in the Buildings menu.
+- **Fix** (`kknd.cpp`): Removed the infantry loop from the Outpost/Clanhall initialization. Barracks and Tech Centers already create their own infantry production groups with `PRODUCTION_GROUP_INFANTRY` when built, so the infantry loop in the shared building production group was redundant and incorrect.

@@ -2216,24 +2216,22 @@ int sub_40AFC0(stru24 *a1, stru24_stru160 *a2, int a3, int a4)
     int v4; // esi@1
     char *v5; // edi@1
     int result; // eax@1
-    enum PLAYER_SIDE v7; // [sp+8h] [bp-Ch]@1
-    int v8; // [sp+Ch] [bp-8h]@1
-    int v9; // [sp+10h] [bp-4h]@1
+    _47CAF0_task_attachment1_move_task moveTask;
 
     v4 = (int)a2->_C_next;
-    v7 = a1->_2A0_player_side;
+    moveTask.player_side = a1->_2A0_player_side;
     v5 = (char *)&a2->_C_next;
     a2->field_3C = a3;
-    v8 = a3;
+    moveTask.dst_x = a3;
     result = a4;
     a2->field_40 = a4;
-    v9 = a4;
+    moveTask.dst_y = a4;
     a2->field_24 = 0;
     if ((void **)v4 != &a2->_C_next)
     {
         do
         {
-            result = script_trigger_event(0, EVT_CMD_ENTITY_MOVE, &v7, *(Script **)(*(_DWORD *)(v4 + 12) + 12));
+            result = script_trigger_event(0, EVT_CMD_ENTITY_MOVE, &moveTask, *(Script **)(*(_DWORD *)(v4 + 12) + 12));
             v4 = *(_DWORD *)v4;
         } while ((char *)v4 != v5);
     }

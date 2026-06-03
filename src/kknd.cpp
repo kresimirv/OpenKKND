@@ -709,14 +709,6 @@ void entity_mode_clanhall_set_default_production(Entity *a1)
 						v3 = current_level_idx;
 					}
 				}
-				for (int i = 0; i < 3; ++i)
-				{
-					if (!(levels[v3].disabled_units_mask & mute_default_infantry[i].production_mask))
-					{
-						production_group_enable(_47B3D0_building_production_group, mute_default_infantry[i].unit_stats_idx, mute_default_infantry[i].mobd_lookup_table_offset);
-						v3 = current_level_idx;
-					}
-				}
 				if (!_47B3D4_aircraft_production_group)
 					_47B3D4_aircraft_production_group = entity_building_create_production_group(v1, PRODUCTION_GROUP_AIRCRAFT);
 				max_clanhall_level = 1;
@@ -8015,17 +8007,14 @@ void _430F10_unit_inits()
 void entity_register_player_main_building(Entity *a1)
 {
 	int v1; // edx@1
-	Entity **v2; // eax@1
 
-	v1 = 0;
-	v2 = _47B3C0_player_outposts_clanhalls;
-	while (*v2)
+	for (v1 = 0; v1 < 4; ++v1)
 	{
-		++v2;
-		++v1;
-		if ((int)v2 >= (int) & _47B3D0_building_production_group)
-			return;
+		if (!_47B3C0_player_outposts_clanhalls[v1])
+			break;
 	}
+	if (v1 >= 4)
+		return;
 	_47B3C0_player_outposts_clanhalls[v1] = a1;
 }
 
@@ -8034,33 +8023,37 @@ void entity_430F90_clanhall(Entity *a1)
 {
 	ProductionGroup *v1; // esi@1
 	int v2; // edx@2
-	Entity **v3; // eax@2
 	int v4; // ecx@7
-	Entity **v5; // eax@7
+	int i;
 
 	v1 = _47B3D4_aircraft_production_group;
 	if (a1 == _47B3D4_aircraft_production_group->_C_entity)
 	{
-		v2 = 0;
-		v3 = _47B3C0_player_outposts_clanhalls;
-		while (*v3 != a1)
+		v2 = -1;
+		for (i = 0; i < 4; ++i)
 		{
-			++v3;
-			++v2;
-			if ((int)v3 >= (int) & _47B3D0_building_production_group)
-				goto LABEL_7;
+			if (_47B3C0_player_outposts_clanhalls[i] == a1)
+			{
+				v2 = i;
+				break;
+			}
 		}
-		_47B3C0_player_outposts_clanhalls[v2] = 0;
+		if (v2 >= 0)
+		{
+			_47B3C0_player_outposts_clanhalls[v2] = 0;
+		}
 	LABEL_7:
-		v4 = 0;
-		v5 = _47B3C0_player_outposts_clanhalls;
-		while (!*v5)
+		v4 = -1;
+		for (i = 0; i < 4; ++i)
 		{
-			++v5;
-			++v4;
-			if ((int)v5 >= (int) & _47B3D0_building_production_group)
-				return;
+			if (_47B3C0_player_outposts_clanhalls[i])
+			{
+				v4 = i;
+				break;
+			}
 		}
+		if (v4 < 0)
+			return;
 		v1->_C_entity = _47B3C0_player_outposts_clanhalls[v4];
 		_47B3D4_aircraft_production_group->outpost_clanhall = _47B3C0_player_outposts_clanhalls[v4];
 	}
@@ -8267,14 +8260,6 @@ void entity_mode_outpost_enable_basic_construction(Entity *a1)
 						v3 = current_level_idx;
 					}
 				}
-				for (int i = 0; i < 3; ++i)
-				{
-					if (!(levels[v3].disabled_units_mask & surv_basic_infantry[i].production_mask))
-					{
-						production_group_enable(_47B3D0_building_production_group, surv_basic_infantry[i].unit_stats_idx, surv_basic_infantry[i].mobd_lookup_table_offset);
-						v3 = current_level_idx;
-					}
-				}
 				if (!_47B3D4_aircraft_production_group)
 					_47B3D4_aircraft_production_group = entity_building_create_production_group(v1, PRODUCTION_GROUP_AIRCRAFT);
 				max_outpost_level = 1;
@@ -8289,8 +8274,8 @@ void UNIT_Handler_Outpost(Script *a1)
 {
 	Entity *v1; // esi@1
 	int v2; // ecx@4
-	Entity **v3; // eax@4
 	void *v4; // eax@12
+	int i;
 
 	v1 = (Entity *)a1->param;
 	if (!_47C6DC_dont_execute_unit_handlers)
@@ -8300,16 +8285,19 @@ void UNIT_Handler_Outpost(Script *a1)
 			v1 = EntityFactory().Create(a1);
 			if (v1->player_side == player_side)     // -- INLINED 00430F70 entity_register_player_base
 			{
-				v2 = 0;
-				v3 = _47B3C0_player_outposts_clanhalls;
-				while (*v3)
+				v2 = -1;
+				for (i = 0; i < 4; ++i)
 				{
-					++v3;
-					++v2;
-					if ((int)v3 >= (int) & _47B3D0_building_production_group)
-						goto LABEL_9;
+					if (!_47B3C0_player_outposts_clanhalls[i])
+					{
+						v2 = i;
+						break;
+					}
 				}
-				_47B3C0_player_outposts_clanhalls[v2] = v1;
+				if (v2 >= 0)
+				{
+					_47B3C0_player_outposts_clanhalls[v2] = v1;
+				}
 			}                                         // -- END OF INLINED
 		LABEL_9:
 			v1->script->event_handler = EventHandler_Outpost;
@@ -8491,26 +8479,32 @@ LABEL_22:
 		v8 = _47B3D4_aircraft_production_group;
 		if (v1 == _47B3D4_aircraft_production_group->_C_entity)
 		{
-			v9 = 0;
-			v10 = _47B3C0_player_outposts_clanhalls;
-			while (*v10 != v1)
+			int v9 = -1;
+			int i;
+			for (i = 0; i < 4; ++i)
 			{
-				++v10;
-				++v9;
-				if ((int)v10 >= (int) & _47B3D0_building_production_group)
-					goto LABEL_34;
+				if (_47B3C0_player_outposts_clanhalls[i] == v1)
+				{
+					v9 = i;
+					break;
+				}
 			}
-			_47B3C0_player_outposts_clanhalls[v9] = 0;
+			if (v9 >= 0)
+			{
+				_47B3C0_player_outposts_clanhalls[v9] = 0;
+			}
 		LABEL_34:
-			v11 = 0;
-			v12 = _47B3C0_player_outposts_clanhalls;
-			while (!*v12)
+			int v11 = -1;
+			for (i = 0; i < 4; ++i)
 			{
-				++v12;
-				++v11;
-				if ((int)v12 >= (int) & _47B3D0_building_production_group)
-					return;
+				if (_47B3C0_player_outposts_clanhalls[i])
+				{
+					v11 = i;
+					break;
+				}
 			}
+			if (v11 < 0)
+				return;
 			v8->_C_entity = _47B3C0_player_outposts_clanhalls[v11];
 			_47B3D4_aircraft_production_group->outpost_clanhall = _47B3C0_player_outposts_clanhalls[v11];
 		}
@@ -13377,7 +13371,12 @@ void production_group_enable(ProductionGroup *a1, enum UNIT_ID unit_id, int mobd
 		if (v8)
 		{
 			if (end->next == end)
-				script_trigger_event(0, EVT_MSG_1514, 0, _47CA18_sidebar_production_buttons[v3->group_id]->task);
+            {
+                if (v3->group_id >= 0 && v3->group_id < 5 && _47CA18_sidebar_production_buttons[v3->group_id])
+                {
+				    script_trigger_event(0, EVT_MSG_1514, 0, _47CA18_sidebar_production_buttons[v3->group_id]->task);
+                }
+            }
 			v8->field_2C = v3->field_40;
 			v9 = (int)v3->_C_entity;
 			v8->mobd_lookup_table_offset = mobd_lookup_table_offset;
@@ -13451,7 +13450,10 @@ LABEL_6:
 		if (v5->next == v5)
 		{
 			_47C990_production.sidebar_open_mask[v2->group_id] = 0;
-			script_trigger_event(0, EVT_MSG_1548_sidebar, 0, _47CA18_sidebar_production_buttons[v2->group_id]->task);
+            if (v2->group_id >= 0 && v2->group_id < 5 && _47CA18_sidebar_production_buttons[v2->group_id])
+            {
+			    script_trigger_event(0, EVT_MSG_1548_sidebar, 0, _47CA18_sidebar_production_buttons[v2->group_id]->task);
+            }
 		}
 		else if (v3)
 		{
@@ -13561,7 +13563,10 @@ void production_group_446860(ProductionGroup *a1)
     if (ProductionGroupAccessor(v7)->next == ProductionGroupAccessor(v7))
 	{
 		_47C990_production.sidebar_open_mask[v7] = 0;
-		script_trigger_event(0, EVT_MSG_1548_sidebar, 0, _47CA18_sidebar_production_buttons[v1->group_id]->task);
+        if (v1->group_id >= 0 && v1->group_id < 5 && _47CA18_sidebar_production_buttons[v1->group_id])
+        {
+		    script_trigger_event(0, EVT_MSG_1548_sidebar, 0, _47CA18_sidebar_production_buttons[v1->group_id]->task);
+        }
 	}
 	else if (v8)
 	{

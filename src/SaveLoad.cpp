@@ -1106,7 +1106,12 @@ bool GAME_Load_UnpackProductionInfo(void *a1)
             do
             {
                 if (v8->next == v8)
-                    script_trigger_event(0, EVT_MSG_1514, 0, _47CA18_sidebar_production_buttons[v4->group_id]->task);
+                {
+                    if (v4->group_id >= 0 && v4->group_id < 5 && _47CA18_sidebar_production_buttons[v4->group_id])
+                    {
+                        script_trigger_event(0, EVT_MSG_1514, 0, _47CA18_sidebar_production_buttons[v4->group_id]->task);
+                    }
+                }
                 v19 = production_option_list_free_pool;
                 if (production_option_list_free_pool)
                     production_option_list_free_pool = production_option_list_free_pool->next;
@@ -1171,22 +1176,27 @@ void _4240E0_kknd_sve_read(const char *filename)
         v6 = 47 - v6;
         if (v6)
         {
-            v3 = kknd_sve_array_463070;
-            while (1)
+            bool valid = true;
+            for (int i = 0; i < 15; ++i)
             {
                 fscanf(v1, "%03d", &v7);
-                v2 = v6;
-                v7 ^= *v3;
+                v7 ^= kknd_sve_array_463070[i];
                 if (v7 != v6)
+                {
+                    valid = false;
+                    for (int j = i + 1; j < 15; ++j)
+                    {
+                        fscanf(v1, "%03d", &v7);
+                    }
                     break;
-                ++v3;
-                if ((int)v3 >= (int)kknd_sve_array_4630AC)
-                    goto LABEL_8;
+                }
             }
-            v2 = 0;
-            v6 = 0;
+            if (!valid)
+            {
+                v2 = 0;
+                v6 = 0;
+            }
         }
-    LABEL_8:
         if (v2)
             current_surv_level = 47 - v2;
         else
@@ -1196,22 +1206,27 @@ void _4240E0_kknd_sve_read(const char *filename)
         v6 = 69 - v6;
         if (v6)
         {
-            v5 = kknd_sve_array_4630AC;
-            while (1)
+            bool valid = true;
+            for (int i = 0; i < 15; ++i)
             {
                 fscanf(v1, "%03d", &v7);
-                v4 = v6;
-                v7 ^= *v5;
+                v7 ^= kknd_sve_array_4630AC[i];
                 if (v7 != v6)
+                {
+                    valid = false;
+                    for (int j = i + 1; j < 15; ++j)
+                    {
+                        fscanf(v1, "%03d", &v7);
+                    }
                     break;
-                ++v5;
-                if ((int)v5 >= (int)&dword_4630E8)
-                    goto LABEL_17;
+                }
             }
-            v4 = 0;
-            v6 = 0;
+            if (!valid)
+            {
+                v4 = 0;
+                v6 = 0;
+            }
         }
-    LABEL_17:
         if (v4)
         {
             current_mute_level = 69 - v4;
@@ -1251,22 +1266,27 @@ void _424270_kknd_sve_read(const char *a1, _WORD *a2, _WORD *a3)
         v9 = 47 - v9;
         if (v9)
         {
-            v6 = kknd_sve_array_463070;
-            while (1)
+            bool valid = true;
+            for (int i = 0; i < 15; ++i)
             {
                 fscanf(v4, "%03d", &v10);
-                v5 = v9;
-                v10 ^= *v6;
+                v10 ^= kknd_sve_array_463070[i];
                 if (v10 != v9)
+                {
+                    valid = false;
+                    for (int j = i + 1; j < 15; ++j)
+                    {
+                        fscanf(v4, "%03d", &v10);
+                    }
                     break;
-                ++v6;
-                if ((int)v6 >= (int)kknd_sve_array_4630AC)
-                    goto LABEL_8;
+                }
             }
-            v5 = 0;
-            v9 = 0;
+            if (!valid)
+            {
+                v5 = 0;
+                v9 = 0;
+            }
         }
-    LABEL_8:
         if (v5)
             *v3 = 47 - v5;
         else
@@ -1276,22 +1296,27 @@ void _424270_kknd_sve_read(const char *a1, _WORD *a2, _WORD *a3)
         v9 = 69 - v9;
         if (v9)
         {
-            v8 = kknd_sve_array_4630AC;
-            while (1)
+            bool valid = true;
+            for (int i = 0; i < 15; ++i)
             {
                 fscanf(v4, "%03d", &v10);
-                v7 = v9;
-                v10 ^= *v8;
+                v10 ^= kknd_sve_array_4630AC[i];
                 if (v10 != v9)
+                {
+                    valid = false;
+                    for (int j = i + 1; j < 15; ++j)
+                    {
+                        fscanf(v4, "%03d", &v10);
+                    }
                     break;
-                ++v8;
-                if ((int)v8 >= (int)&dword_4630E8)
-                    goto LABEL_17;
+                }
             }
-            v7 = 0;
-            v9 = 0;
+            if (!valid)
+            {
+                v7 = 0;
+                v9 = 0;
+            }
         }
-    LABEL_17:
         if (v7)
         {
             *a3 = 69 - v7;

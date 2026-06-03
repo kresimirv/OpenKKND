@@ -310,15 +310,10 @@ void sidebar_button_handler_options_open(SidebarButton *a1)
 //----- (00446E00) --------------------------------------------------------
 void sidebar_button_handler_help_open(SidebarButton *a1)
 {
-    SidebarButton **v1; // esi@1
-
-    v1 = _47CA08_sidebar_buttons;
-    do
+    for (int i = 1; i < 2; ++i)
     {
-        if (v1 != _47CA08_sidebar_buttons)
-            script_trigger_event(0, EVT_MSG_DESELECTED, 0, (*v1)->task);
-        ++v1;
-    } while ((int)v1 < (int)& _47CA10_sidebar_button_minimap);
+        script_trigger_event(0, EVT_MSG_DESELECTED, 0, _47CA08_sidebar_buttons[i]->task);
+    }
     script_trigger_event(0, EVT_MSG_SHOW_UNIT_HINT, 0, game_cursor_script);
 }
 
@@ -647,16 +642,11 @@ void sidebar_button_handler_airstrike_close(SidebarButton *a1)
 //----- (00446190) --------------------------------------------------------
 void sidebar_button_handler_446190_open(SidebarButton *a1)
 {
-    SidebarButton **v1; // esi@1
-
     script_trigger_event(0, EVT_MSG_1519, 0, game_cursor_script);
-    v1 = _47CA08_sidebar_buttons;
-    do
+    for (int i = 0; i < 1; ++i)
     {
-        if (v1 != &_47CA08_sidebar_buttons[1])
-            script_trigger_event(0, EVT_MSG_DESELECTED, 0, (*v1)->task);
-        ++v1;
-    } while (v1 <= &_47CA08_sidebar_buttons[1]);
+        script_trigger_event(0, EVT_MSG_DESELECTED, 0, _47CA08_sidebar_buttons[i]->task);
+    }
 }
 
 //----- (004461E0) --------------------------------------------------------
