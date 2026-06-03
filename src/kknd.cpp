@@ -5430,20 +5430,20 @@ __int16 input_get_string(
 		case 45: // vk_insert
 			if (strlen(v6) >= max_len)
 				goto LABEL_41;
-			memcpy((void *)&v6[(unsigned __int16)v5 + 1], &v6[(unsigned __int16)v5], strlen(v6) - (unsigned __int16)v5);
+			memmove((void *)&v6[(unsigned __int16)v5 + 1], &v6[(unsigned __int16)v5], strlen(v6) - (unsigned __int16)v5);
 			v6[(unsigned __int16)v5] = 32;
 			goto LABEL_40;
 		case 46: // vk_delete
 			if (strlen(v6) == 0)
 				goto LABEL_41;
-			strcpy((char *)&v6[(unsigned __int16)v5], &v6[(unsigned __int16)v5 + 1]);
+			memmove((char *)&v6[(unsigned __int16)v5], &v6[(unsigned __int16)v5 + 1], strlen(&v6[(unsigned __int16)v5 + 1]) + 1);
 			if ((unsigned __int16)v5 >= strlen(v6) && (_WORD)v5)
 				v5--;
 			goto LABEL_40;
 		case 8: // vk_backspace
 			if (strlen(v6) == 0 || !(_WORD)v5)
 				goto LABEL_41;
-			strcpy((char *)&v6[(unsigned __int16)v5 - 1], &v6[(unsigned __int16)v5]);
+			memmove((char *)&v6[(unsigned __int16)v5 - 1], &v6[(unsigned __int16)v5], strlen(&v6[(unsigned __int16)v5]) + 1);
 			v5--;
 			goto LABEL_40;
 		default:

@@ -318,3 +318,11 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
 - **Fix 8 — Infantry stuck handler (Infantry.cpp)**: Changed from `entity_mode_attack_move_4_order_3_7_417E60` (stuck mode) to `entity_414C30_boxd` (nudge + escape attempt) in the result 4 handler, matching vehicle behavior and giving infantry the same second chance to find an alternative path before entering stuck animation.
 
 - **Verification**: Build succeeds. All units pathfind correctly, navigate around obstacles, and settle at the destination tile in group orders without wandering. No regressions in single-unit movement.
+
+### Crash Fix — strcpy Overlap in Kaos Player Name Editor (ASan)
+- Root cause: `input_get_string()` (`kknd.cpp:5439,5446`) used `strcpy` to shift characters left in the edit buffer during Delete and Backspace operations. Since source and destination overlap, `strcpy` behavior is undefined — ASan detected `strcpy-param-overlap`.
+- **Fix**: Replaced `strcpy` with `memmove` (with length derived from `strlen`) in both the Delete and Backspace handlers. Also fixed the Insert handler (`memcpy` → `memmove`) for the same class of bug.
+
+### Crash Fix — SIGILL After Entering Player Name in Kaos Mode
+- Root cause: After `input_get_string()` returned (Enter pressed), `script_main_menu_kaos_player_name` (`MainMenu.cpp:1720`) hit `__debugbreak()` which is `__builtin_trap()` → `ud2` instruction → SIGILL. The next line was a `strcpy` to hardcoded absolute EXE address `4695939` (0x47A303) — a decompilation artifact meaningless in the Linux port.
+- **Fix**: Removed `__debugbreak()` and replaced the dead `strcpy` with the proper version `strcpy(netz_47A740[idx + 2].player_name, netz_default_player_name)`, matching the identical pattern already used at line 1623 in the same function.
