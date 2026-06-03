@@ -60,6 +60,19 @@ Sentinel trick: two adjacent pointer globals used as `next`/`prev` of implicit s
 - `sound_pans`: increased from `[17]` to `[33]` (`Sound.cpp:67,153`), matching 0–32 pan offset range.
 - Uppercased resource filenames in `Level.cpp`, `Game.cpp`, `Video.cpp`, `_unsorted_data.cpp` (level names, wavs, vbcs, kknd.sve).
 
+### In-Game Menu — Game Pause & Sound Isolation
+- `DirectSoundSdl2.h` `PauseAll()`/`ResumeAll()`: skip stream (BGM) device; only pause SFX devices.
+- `sound_pause_all()` / `sound_resume_all()` (`Sound.cpp`): set/clear `sound_suspended` flag.
+- `GameMenu.cpp`: `sound_pause_all()` called at LABEL_26 (dialog opens), `sound_resume_all()` at LABEL_51 (dialog closes) and in Resume button handler.
+- `Entity.cpp`: `entity_move()` returns early when `single_player_game && is_async_execution_supported` (menu dialog open).
+- `Cursor.cpp`: `cursor_group_orders()` returns early when `single_player_game && is_async_execution_supported`.
+- `Game.cpp`: `boxd_40EA20_gameloop_update()` and `_44C4B0_mess_with_turrets()` skipped when `single_player_game && is_async_execution_supported`.
+- All changes guarded with `single_player_game` — multiplayer behavior is completely unaffected.
+
+### AI Fix — Enemy Units Now Attack Without a Base
+- `EnemyAI.cpp`: Generic AI initializes `_278_x_offset = -1` (no base). When `== -1`, the entire attacker marshalling and attack decision code was skipped via `goto LABEL_272` — enemies never attacked.
+- Fix: Inside the no-base block, before the `goto`, added code that forms non-scout attackers from `attacker_list_48` into a formation and inserts it into `list_11C`. The existing `list_11C` attack loop then calls `stru24_40B020()` to find the nearest enemy and issue `EVT_CMD_ENTITY_ATTACK`.
+
 ## Current Status
 - **ASan Debug build**: game runs through main menu → campaign start → gameplay without ASan errors.
 - **Release build (`-O3 -DNDEBUG -fno-strict-aliasing`)**: builds clean, runs with full rendering and sound.

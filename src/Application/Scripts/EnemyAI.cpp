@@ -1676,6 +1676,44 @@ LABEL_97:
                 v1->list_11C = mm;
                 mm = v152;
             }
+            if (v1->_278_x_offset == -1 && (stru24_AttackerNode **)v1->attacker_list_48->next != &v1->attacker_list_48)
+            {
+                mm = (stru24_stru160 *)v1->list_160_head;
+                if (mm)
+                {
+                    v1->list_160_head = mm->next;
+                    mm->_C_next = &mm->_C_next;
+                    mm->_10_prev = &mm->_C_next;
+                    mm->field_1C = 0;
+                    mm->field_8 = 0;
+                    mm->field_24 = 0;
+                    mm->_2C_ai_importance = 0;
+                    mm->field_30 = 0;
+                    mm->x_offset = 0;
+                    mm->y_offset = 0;
+                    v112 = v1->attacker_list_48;
+                    for (v115 = 0; (stru24_AttackerNode **)v112 != &v1->attacker_list_48; v112 = v112->next)
+                    {
+                        if (v112->entity->script->event_handler != EventHandler_General_Scout)
+                        {
+                            v116 = v112->prev;
+                            v112->next->prev = v116;
+                            v112->prev->next = v112->next;
+                            v112->next = (stru24_AttackerNode *)mm->_C_next;
+                            v112->prev = (stru24_AttackerNode *)&mm->_C_next;
+                            *((_DWORD *)mm->_C_next + 1) = (int)v112;
+                            mm->_C_next = v112;
+                            v112->list_8 = mm;
+                            mm->_2C_ai_importance += v112->entity->stats->_54_ai_importance;
+                            v112 = v116;
+                        }
+                    }
+                    mm->next = v1->list_11C;
+                    mm->prev = (stru24_stru160 *)&v1->list_11C;
+                    v1->list_11C->prev = mm;
+                    v1->list_11C = mm;
+                }
+            }
             for (nn = v1->list_11C; (stru24_stru160 **)nn != &v1->list_11C; nn = nn->next)
             {
                 v154 = nn->field_28 + 1;
@@ -3135,6 +3173,7 @@ int UNIT_InitAiPlayers()
                 (*v2)->param = v4;
                 v6 = (char *)&game_globals_per_player.cash[v78 + 1];
                 v5->_2A0_player_side = (PLAYER_SIDE)v75;
+                v5->_2A4_player_side = (PLAYER_SIDE)v75;
                 v5->_2A8_p_globals_cash = &game_globals_per_player.cash[v78 + 1];
                 if (is_demo_build)
                 {
