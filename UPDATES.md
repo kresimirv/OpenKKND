@@ -103,6 +103,7 @@ Sentinel trick: two adjacent pointer globals used as `next`/`prev` of implicit s
 - **ASan Debug build**: game runs through main menu → campaign start → gameplay without ASan errors.
 - **Release build (`-O3 -DNDEBUG -fno-strict-aliasing`)**: builds clean, runs with full rendering and sound.
 - **Savegames**: Fully working — save/load, unit selection, unit control, enemy AI, and attack commands all work correctly after loading a save.
+- **Pathfinding**: Fixed — units navigate around hills/obstacles, group move orders settle all units at or near the destination tile without wandering. Both infantry and vehicles work correctly.
 - Heap corruption ("malloc(): unaligned tcache chunk detected" at `malloc(0xCC)`) observed pre-fixes. May no longer occur after all sentinel overflows fixed — needs verification on real hardware.
 
 ## Remaining Concerns
@@ -295,3 +296,25 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
 ### Visual Fix — Mission Briefing Background / Subtitles (Survivors vs Evolved)
 - **Root cause**: Survivors missions used `MAPD_Draw(MAPD_FOG_OF_WAR, 0, -10)` with palette from `items[1]`, while Evolved used `MAPD_Draw(MAPD_MAP, 0, 0)` with palette from `items[0]`. The `FOG_OF_WAR` renderer produced white pixels around the video frame, and the `items[1]` palette lacked correct colors for subtitle text rendering.
 - **Fix** (`Video.cpp:1410-1419`): Unified both branches — Survivors now uses `MAPD_MAP` + `items[0]` palette, matching the Evolved path that already worked perfectly.
+
+### Pathfinding Fix — Units Getting Stuck Around Hills & Group Settlement
+- **Symptoms**: Units (both infantry and vehicles) would get stuck when pathfinding around hills or other obstacles. In group move orders, only one unit would reach the destination while others wandered indefinitely around nearby tiles.
+- **Root cause — Bresenham-only pathfinding**: The game uses Bresenham straight-line pathfinding (no A*). When a straight-line path crosses an impassable tile, the pathfinder returns result codes indicating obstruction. Unit handlers had no fallback mechanism — they either re-attempted the same blocked path or entered a "stuck" mode that produced lateral nudges insufficient to route around obstacles. For group settlement, the destination tile occupied by prior-arriving units returned classification 3 (fully occupied by friendlies) from `boxd_40EA50_classify_tile_objects`, leading to pathfinding result 5 with no escape path.
+
+- **Fix 1 — Perpendicular offset search (result 5 else branch, Infantry.cpp:2276-2338)**: When pathfinding returns result 5 (destination tile blocked, no intermediate waypoint), the handler now searches ±1→±3 tiles perpendicular to the path direction for a passable alternative tile. If found, the unit is teleported there and continues movement toward the destination via `entity_mode_move_to_target_416790`. This replaces `entity_414C30_boxd` (cardinal axis nudging) which caused ping-pong wandering.
+
+- **Fix 2 — Proximity-triggered settlement (result 5 else, Infantry.cpp:2269-2274)**: Before the perpendicular search, if the unit is within 16384px (2 tiles) of `sprite_x_2` (persistent destination), snap the persistent destination to the current tile and call `entity_initialize_order` to trigger settlement. Catches the case where the destination tile is occupied by friendlies (classification 3) and the unit is adjacent.
+
+- **Fix 3 — Proximity-triggered settlement (result 4, Infantry.cpp:2224-2233)**: Same proximity check for result 4 (first tile blocked / ClearStraightLine). When the unit is close to the persistent destination, snap and settle instead of calling `entity_414C30_boxd`.
+
+- **Fix 4 — Block handler settlement (Infantry.cpp:2794-2806, 2834-2844)**: In `entity_mode_move_to_target_416790`, when `map_40DA90_move_entity` returns 0 or 1 (movement blocked) and the unit is within 16384px of `sprite_x_2`, snap persistent destination to current tile and call `entity_mode_move_attack` to trigger settlement. Applied to both infantry and vehicle branches.
+
+- **Fix 5 — Cardinal axis escapes with speed save (Infantry.cpp:1590-1700)**: `entity_414C30_boxd` now saves and tries all 4 cardinal directions (forward X, forward Y, backward X, backward Y) before falling back to `entity_413A90_boxd` spiral-search teleport, and finally stuck mode. Previously only tried forward X and forward Y when facing was diagonal.
+
+- **Fix 6 — Diagonal nudge in `entity_414870_boxd` (Infantry.cpp:1460,1486)**: Added diagonal nudge (simultaneous X+Y displacement) after both cardinal-axis nudges fail, in both `|dx|<=|dy|` and `|dx|>|dy|` branches.
+
+- **Fix 7 — `/256` → `>>8` in pathfinders (Pathfind.cpp)**: Replaced integer division `/256` with arithmetic right shift `>>8` in `Map_41B970_straight_line_pathing_old_refactored` and `_new_refactored`. Integer division truncates toward zero, giving wrong sign for negative deltas; `>>8` truncates toward negative infinity, matching the original 16-bit assembly `sar` instruction.
+
+- **Fix 8 — Infantry stuck handler (Infantry.cpp)**: Changed from `entity_mode_attack_move_4_order_3_7_417E60` (stuck mode) to `entity_414C30_boxd` (nudge + escape attempt) in the result 4 handler, matching vehicle behavior and giving infantry the same second chance to find an alternative path before entering stuck animation.
+
+- **Verification**: Build succeeds. All units pathfind correctly, navigate around obstacles, and settle at the destination tile in group orders without wandering. No regressions in single-unit movement.

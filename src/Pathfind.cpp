@@ -1817,14 +1817,14 @@ int Map_41B970_straight_line_pathing_old_refactored(Entity *entity, int target_x
     tmp_entity->pathing.num_waypoints = 0;
     if (current_y > target_y)
     {
-        dx1 = (target_x - current_x) / 256;
-        dy1 = (current_y - target_y) / 256;
+        dx1 = (target_x - current_x) >> 8;
+        dy1 = (current_y - target_y) >> 8;
         if (dx1 <= 0)
         {
             tmp_entity2 = tmp_entity;
             v16 = -256;
             v15 = -256;
-            v14 = (current_y - target_y) / 256;
+            v14 = (current_y - target_y) >> 8;
             v13 = -dx1;
             if (-dx1 > dy1)
                 return boxd_41BA30(current_x, current_y, v13, v14, -256, -256, tmp_entity);
@@ -1834,7 +1834,7 @@ int Map_41B970_straight_line_pathing_old_refactored(Entity *entity, int target_x
             tmp_entity2 = tmp_entity;
             v16 = -256;
             v15 = 256;
-            v14 = (current_y - target_y) / 256;
+            v14 = (current_y - target_y) >> 8;
             v13 = dx1;
             if (dx1 > dy1)
                 return boxd_41BA30(current_x, current_y, dx1, v14, 256, -256, tmp_entity);
@@ -1842,24 +1842,24 @@ int Map_41B970_straight_line_pathing_old_refactored(Entity *entity, int target_x
     }
     else
     {
-        dx2 = (target_x - current_x) / 256;
-        dy2 = (target_y - current_y) / 256;
+        dx2 = (target_x - current_x) >> 8;
+        dy2 = (target_y - current_y) >> 8;
         if (dx2 <= 0)
         {
             tmp_entity2 = tmp_entity;
             v16 = 256;
             v15 = -256;
-            v14 = (target_y - current_y) / 256;
+            v14 = (target_y - current_y) >> 8;
             v13 = -dx2;
             if (-dx2 > dy2)
-                return boxd_41BA30(current_x, current_y, v13, dy2, -256, 256, tmp_entity);
+                return boxd_41BA30(current_x, current_y, v13, v14, -256, 256, tmp_entity);
         }
         else
         {
             tmp_entity2 = tmp_entity;
             v16 = 256;
             v15 = 256;
-            v14 = (target_y - current_y) / 256;
+            v14 = (target_y - current_y) >> 8;
             v13 = dx2;
             if (dx2 > dy2)
                 return boxd_41BA30(current_x, current_y, dx2, dy2, 256, 256, tmp_entity);
@@ -1882,12 +1882,10 @@ int Map_41B970_straight_line_pathing_new_refactored(Entity *entity, int target_x
 
     if (current_y > target_y) // up
     {
-        //calculate dx and dy
-        int dx = (target_x - current_x) / 256;
-        int dy = (current_y - target_y) / 256;
+        int dx = (target_x - current_x) >> 8;
+        int dy = (current_y - target_y) >> 8;
         if (dx <= 0)
         {
-            // up left
             if (abs(dx) > dy)
                 return boxd_41BA30(current_x, current_y, abs(dx), dy, -256, -256, entity);
             else
@@ -1895,7 +1893,6 @@ int Map_41B970_straight_line_pathing_new_refactored(Entity *entity, int target_x
         }
         else
         {
-            //up right
             if (dx > dy)
                 return boxd_41BA30(current_x, current_y, dx, dy, 256, -256, entity);
             else
@@ -1904,12 +1901,10 @@ int Map_41B970_straight_line_pathing_new_refactored(Entity *entity, int target_x
     }
     else
     {
-        // moving down
-        int dx = (target_x - current_x) / 256;
-        int dy = (target_y - current_y) / 256;
+        int dx = (target_x - current_x) >> 8;
+        int dy = (target_y - current_y) >> 8;
         if (dx <= 0)
         {
-            // down left
             if (abs(dx) > dy)
                 return boxd_41BA30(current_x, current_y, abs(dx), dy, -256, 256, entity);
             else
@@ -1917,7 +1912,6 @@ int Map_41B970_straight_line_pathing_new_refactored(Entity *entity, int target_x
         }
         else
         {
-            // down right
             if (dx > dy)
                 return boxd_41BA30(current_x, current_y, dx, dy, 256, 256, entity);
             else
