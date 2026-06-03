@@ -50,6 +50,12 @@ void script_424BF0_mobd_20_handler(Script *a1)
 
     a1->sprite->field_88_unused = 1;
     v1 = _47A378_stru48_array_num_items;
+    if (v1 >= 7)
+    {
+        sprite_list_remove(a1->sprite);
+        script_terminate(a1);
+        return;
+    }
     v2 = _47A378_stru48_array_num_items + 1;
     _47A378_stru48_array[v1].sprite_x = a1->sprite->x;
     _47A378_stru48_array[v1].sprite_y = a1->sprite->y;

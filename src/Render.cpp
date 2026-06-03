@@ -4120,8 +4120,6 @@ void _408550_multi_pal()
     palette_4778A4 = GetSysPalette();
     if (is_demo_build)
     {
-        if (single_player_game)
-            return;
         sprintf(v19, aSLevelsMulti_p, game_data_installation_dir);
         v0 = fopen(v19, aR);
         if (v0)
@@ -4151,7 +4149,19 @@ void _408550_multi_pal()
     else
     {
         if (single_player_game)
-            return;
+        {
+            bool has_active_players = false;
+            for (int i = 2; i < 8; i++)
+            {
+                if (netz_47A740[i].field_8)
+                {
+                    has_active_players = true;
+                    break;
+                }
+            }
+            if (!has_active_players)
+                return;
+        }
         sprintf(v19, aSLevelsMulti_p, game_data_installation_dir);
         v7 = fopen(v19, aR);
         if (v7)

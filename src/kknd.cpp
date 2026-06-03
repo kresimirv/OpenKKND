@@ -14334,15 +14334,12 @@ bool _44C010_init_mission_globals()
 	for (int i = 1; i < 7; i++)
 		player_sprite_color_by_player_side[i] = i - 1;
 	player_sprite_color_by_player_side[0] = 3;
-	if (!single_player_game)
+	v18 = &netz_47A740[2].field_9;
+	for (int i = 1; i < 7; i++)
 	{
-		v18 = &netz_47A740[2].field_9;
-		for (int i = 1; i < 7; i++)
-		{
-			if (*(v18 - 1))
-				player_sprite_color_by_player_side[i] = *v18;
-			v18 += 28;
-		}
+		if (*(v18 - 1))
+			player_sprite_color_by_player_side[i] = *v18;
+		v18 += 28;
 	}
 	_408550_multi_pal();
 	return 1;

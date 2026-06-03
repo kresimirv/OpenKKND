@@ -252,3 +252,11 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
 ### Crash Fix — Oil Patch (UNIT_Handler_OilPatch) Heap-Buffer-Overflow
 - Root cause: In the "Infiltrator" custom mission, oil patch entities were placed outside the map bounds (e.g., `y=84` when `map_height=82`). `UNIT_Handler_OilPatch` called `boxd_get_tile()` to mark the tile's `flags2 |= 0x80u` (marking tile as having oil), but `boxd_get_tile()` only logs an error message without bounds checking — it still returns a pointer into the `_478AA8_boxd_stru0_array` using the out-of-bounds index. ASan detected this as a heap-buffer-overflow when the flag was dereferenced and written to.
 - **Fix** (`kknd.cpp:2925-2930`): Added explicit bounds check before calling `boxd_get_tile()`. The oil deposit creation still proceeds (the entity is still spawned), but the tile flag update is skipped if `map_x` or `map_y` are outside the valid range `[0, map_get_width()-1]` or `[0, map_get_height()-1]`.
+
+### Kaos Mode — Wrong Colors / Missing Player Color Palette
+- Root cause: Three `%S` format specifiers in `_unsorted_data.cpp` — MSVC treats `%S` as wide-to-narrow conversion, but GCC treats it as `wchar_t*`. `sprintf()` produced garbled paths when formatting `game_data_installation_dir` (a `char*`), causing `fopen()` to silently fail. As a result, `MULTI.PAL` was never loaded, and per-player sprite color remapping never occurred.
+- **Fix** (`_unsorted_data.cpp`): Changed `%S` → `%s` in 3 format strings:
+  - `aSLevelsMulti_p`: `"%S//LEVELS//MULTI.PAL"` → `"%s//LEVELS//MULTI.PAL"`
+  - `aSLevelsSSupspr`: `"%S//LEVELS//%S//SUPSPR.LVL"` → `"%s//LEVELS//%s//SUPSPR.LVL"`
+  - `aSFmvMh_fmv_vbc`: `"%S//FMV//MH_FMV.VBC"` → `"%s//FMV//MH_FMV.VBC"`
+- **Fix** (`Render.cpp: _408550_multi_pal()`): Refined the single-player guard — only early-return in the `!is_demo_build` branch (campaign mode) when no active network players exist, preventing `MULTI.PAL` from overwriting the campaign palette. The `is_demo_build` branch (Kaos mode) is not guarded since it needs `MULTI.PAL` for player-selected colors.

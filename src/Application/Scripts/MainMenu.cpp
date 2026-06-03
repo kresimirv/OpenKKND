@@ -307,6 +307,7 @@ void script_main_menu_kaos_mode(Script *a1)
     }
     netz_47C6BC_mapd_idx = netz_47C6C0_mapd_idx;
     netz_47C6C0_mapd_idx = 15;
+    __47CA80_array_idx_and_netz_player_side = 0;
     script_408500_anim(a1);
     stru29_list_realloc(a1);
     bitmap_list_remove(_47A010_mapd_item_being_drawn[0]);
