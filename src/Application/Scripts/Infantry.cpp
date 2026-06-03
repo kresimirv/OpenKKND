@@ -1979,6 +1979,7 @@ void entity_mode_4157F0_infantry_idle_fidgeting(Entity *a1)
     unsigned __int8 v6; // of@4
     int v7; // eax@4
     Script *v11; // ST00_4@7
+    int new_frame;
 
     v1 = a1;
     v3 = kknd_rand_3() & 0x7F;
@@ -1987,14 +1988,19 @@ void entity_mode_4157F0_infantry_idle_fidgeting(Entity *a1)
         v6 = __OFSUB__(v3, 100);
         v5 = v3 - 100 < 0;
         v7 = a1->GetCurrentAnimFrame();
+        if (v7 == -1)
+        {
+            goto LABEL_SKIP;
+        }
         if (v5 ^ v6)
         {
-            entity_load_idle_mobd(a1, v7 + 32);
+            new_frame = ((unsigned __int8)v7 + 32) & 0xFF;
         }
         else
         {
-            entity_load_idle_mobd(a1, v7 - 32);
+            new_frame = ((unsigned __int8)v7 - 32) & 0xFF;
         }
+        entity_load_idle_mobd(a1, new_frame);
     }
     else
     {
@@ -2004,6 +2010,7 @@ void entity_mode_4157F0_infantry_idle_fidgeting(Entity *a1)
             v1->sprite->_60_mobd_anim_speed = 0;
         }
     }
+LABEL_SKIP:
     v11 = v1->script;
     v1->SetMode(entity_mode_adjust_unit_placement_inside_tile);
     script_sleep(v11, 80);

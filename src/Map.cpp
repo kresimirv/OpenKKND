@@ -15,10 +15,11 @@ using Engine::Infrastructure::EntityRepository;
 
 
 
-int dword_470588[] = { 1, 0, 0, 0xC0000000 };
-int dword_470598 = 0; // weak
-int dword_47059C = 0; // weak
-int *_4705A8_minimap_smthn = dword_470588; // weak
+int dword_470588[] = { 1, 0, 0, 0xC0000000, 0, 0 };
+Sprite_stru58 _4705A8_minimap_smthn[] = {
+    { (Sprite_stru58_stru0 *)dword_470588 },
+    { NULL }
+};
 
 MobdSprtImage _47CBA0_MobdSprtImage_fog_of_war;
 DataMobdItem_stru0 _4705B0_minimap = { 0, 0, 0, &_47CBA0_MobdSprtImage_fog_of_war, NULL, SOUND_0, NULL }; // weak
@@ -343,7 +344,7 @@ bool minimap_init()
                             _47CB8C_fow->type = 0;
                             v7 = (char *)minimap_revealed_pixels;
                             v41 = (char *)_47CB8C_fow->sprite_data;
-                            dword_47CBAC = (int)(&_47CB8C_fow[1].type + 2 * minimap_width);
+                            dword_47CBAC = (int)(&((DrawHandlerData_Units *)0)[1].type) + (int)_47CB8C_fow + 2 * minimap_width;
 
                             for (int v8 = 0; v8 < minimap_height; ++v8)
                             {
@@ -376,7 +377,6 @@ bool minimap_init()
                                                 v17 = v18;
                                                 v44 = v18;
                                             }
-                                            ++v19;
                                             ++v18;
                                         }
                                         *v7 = v17;
@@ -483,10 +483,10 @@ bool minimap_init()
                             _47CB8C_fow->width = minimap_width + 4;
                             _47CB8C_fow->height = minimap_height + 4;
                             _47CBA0_MobdSprtImage_fog_of_war.data = _47CB8C_fow;
-                            dword_470598 = (minimap_width + 4) << 8;
+                            dword_470588[4] = (minimap_width + 4) << 8;
                             _47CBA0_MobdSprtImage_fog_of_war.flags = 0;
                             _47CBA0_MobdSprtImage_fog_of_war.handler = render_sprt_draw_handler;
-                            dword_47059C = (minimap_height + 4) << 8;
+                            dword_470588[5] = (minimap_height + 4) << 8;
                             v40 = sprite_create_scripted(MOBD_MUTE_ALCHEMY_HALL, 0, script_44A500_fog_of_war, SCRIPT_COROUTINE, 0);
                             _47CB58_minimap_sprite = v40;
                             v40->_54_inside_mobd_ptr4 = &_4705B0_minimap;

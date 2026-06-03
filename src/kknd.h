@@ -428,7 +428,7 @@ struct MobdSprtImage
 };
 
 /* 276 */
-struct DrawHandlerData_Units
+struct __attribute__((packed)) DrawHandlerData_Units
 {
 	int width;
 	int height;

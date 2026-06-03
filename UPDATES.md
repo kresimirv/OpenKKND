@@ -202,3 +202,49 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
 ### Menu Fix — Infantry Units Appearing in Buildings Menu
 - Root cause: In `entity_mode_outpost_enable_basic_construction` (Survivor) and `UNIT_Handler_Clanhall` (Mutant), the Outpost/Clanhall initialization code added BOTH building options AND infantry options to `_47B3D0_building_production_group`, which was created with `PRODUCTION_GROUP_BUILDINGS`. This caused infantry units (Rifleman, SWAT, Technician for Survivors; Berserker, Shotgunner, Mekanik for Mutants) to appear in the Buildings menu.
 - **Fix** (`kknd.cpp`): Removed the infantry loop from the Outpost/Clanhall initialization. Barracks and Tech Centers already create their own infantry production groups with `PRODUCTION_GROUP_INFANTRY` when built, so the infantry loop in the shared building production group was redundant and incorrect.
+
+### Crash Fix — Minimap Button Global-Buffer-Overflow
+- Root cause: Multiple issues with the minimap data structures and memory layout assumptions:
+  1. `dword_470588[]` was only 4 elements, but accessed as `Sprite_stru58_stru0*` which has 6 int fields (24 bytes). The `z` and `w` fields were supposed to come from separate adjacent globals `dword_470598` and `dword_47059C`.
+  2. `_4705A8_minimap_smthn` was declared as `int*` (4-byte pointer), but code cast `&_4705A8_minimap_smthn` to `Sprite_stru58*`, taking the ADDRESS of the pointer variable.
+  3. **Most critical**: The collision detection code in `Pathfind.cpp` uses pointer arithmetic (`++v16`, `v38 + 1`) to iterate through an **array** of `Sprite_stru58` structures, terminating when `pstru0` is null. But `_4705A8_minimap_smthn` was only a single element, not an array with a sentinel.
+- In the original binary, all these globals were packed consecutively with no padding, so the memory layout "happened to work". ASan inserts redzones between globals, breaking all these assumptions.
+- **Fix** (`Map.cpp`):
+  - Expanded `dword_470588[]` from 4 elements to 6: `{ 1, 0, 0, 0xC0000000, 0, 0 }`
+  - Changed `dword_470598 = ...` → `dword_470588[4] = ...` (stores minimap width as `z` field)
+  - Changed `dword_47059C = ...` → `dword_470588[5] = ...` (stores minimap height as `w` field)
+  - Removed now-unused separate globals `dword_470598` and `dword_47059C`
+  - **Key fix**: Changed `_4705A8_minimap_smthn` from `int*` (pointer) to a proper **2-element array** of `Sprite_stru58`:
+    ```cpp
+    Sprite_stru58 _4705A8_minimap_smthn[] = {
+        { (Sprite_stru58_stru0 *)dword_470588 },
+        { NULL }  // Sentinel: terminates the loop in Pathfind.cpp
+    };
+    ```
+  - The second element with `pstru0 = NULL` acts as a sentinel, so when the collision detection code does `++v16` and checks `if (!v16->pstru0) break;`, it properly terminates instead of reading into ASan redzones.
+
+### Visual Fix — Minimap Background Rendering
+- Root cause: Memory layout mismatch between original code and GCC's default struct padding:
+  1. `DrawHandlerData_Units` struct: 2 ints (8 bytes) + char (1 byte) + 2-byte array = 11 bytes total. But GCC adds 1 byte of padding for 4-byte alignment, making it 12 bytes.
+  2. The minimap allocation size is `(minimap_width+4) * (minimap_height+4) + 12`, but the border setup code assumed no padding (11-byte struct).
+  3. This caused `dword_47CBAC` (content area address) to be calculated incorrectly.
+- **Fix 1** (`kknd.h:431): Added `__attribute__((packed))` to `DrawHandlerData_Units` struct to match original memory layout.
+- **Fix 2** (`Map.cpp:550): Reverted incorrect loop increment: `destination += i` → `destination += 4`. The original `destination += 4` was actually correct: the inner loop increments `destination` by 1 for each of `minimap_width` pixels, and `destination += 4` adds the remaining border stride, giving total `minimap_width + 4` per row.
+
+### Crash Fix — Infantry Idle Fidgeting Global-Buffer-Overflow
+- Root cause: `entity_mode_4157F0_infantry_idle_fidgeting` added/subtracted 32 from the current animation frame without bounds checking or wrap-around. This caused:
+  - `GetCurrentAnimFrame() + 32` could exceed 255 (e.g., 240 + 32 = 272)
+  - `GetCurrentAnimFrame() - 32` could become negative (e.g., 20 - 32 = -12)
+  - `SetCurrentAnimFrame()` only checked for `>= 256`, not for negative values
+  - When arrays were accessed as `_47D3C4_entity_mobd_lookup_ids[GetCurrentAnimFrame() + 1]`, a value of -12 became index -11, reading way out of bounds
+- **Fix 1** (`Entity.h:129-138`): Updated `SetCurrentAnimFrame()` to check for both `>= 256` AND `< 0`, and return early without changing the value if out of bounds (with logging).
+- **Fix 2** (`Infantry.cpp:1973-2010`): Updated `entity_mode_4157F0_infantry_idle_fidgeting` to:
+  - Check if `GetCurrentAnimFrame() == -1` (special uninitialized value) and skip if so
+  - Use `(unsigned __int8)` cast + `& 0xFF` mask to properly wrap values when adding/subtracting 32 (matching pattern used elsewhere in the codebase)
+
+### Visual Fix — Minimap Terrain Colors
+- Root cause: **Double increment bug in decompiled histogram loop** when sampling terrain colors for the minimap. The loop incremented `v19` (histogram index) twice per iteration:
+  - Once in the `for` loop header: `for (v19 = 1; ...; ++v19)`
+  - Once inside the loop: `++v19;`
+- This caused the loop to only check **odd palette indices** (1, 3, 5, 7...), skipping even indices (2, 4, 6, 8...). The actual most common terrain color was never found, so the minimap defaulted to color 0 (transparent) or 1 (gray).
+- **Fix** (`Map.cpp:373-382`): Removed the extra `++v19;` inside the loop. Now all palette indices 1-255 are properly checked when finding the most common color in each 16x16 tile sample.

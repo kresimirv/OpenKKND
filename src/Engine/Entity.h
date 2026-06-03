@@ -131,9 +131,9 @@ struct Entity
     }
 
     inline void SetCurrentAnimFrame(int current_mobd_lookup_idx) {
-        if (current_mobd_lookup_idx >= 256) {
-            InfrastructureDependencies::Resolve<Infrastructure::Log>()->Info("Entity[id=%u]::SetCurrentAnimFrame(%u): index out of bounds", entity_id, current_mobd_lookup_idx);
-            current_mobd_lookup_idx = this->current_mobd_lookup_idx;
+        if (current_mobd_lookup_idx >= 256 || current_mobd_lookup_idx < 0) {
+            InfrastructureDependencies::Resolve<Infrastructure::Log>()->Info("Entity[id=%u]::SetCurrentAnimFrame(%d): index out of bounds", entity_id, current_mobd_lookup_idx);
+            return;
         }
         this->current_mobd_lookup_idx = current_mobd_lookup_idx;
     }
