@@ -5,6 +5,7 @@
 #include "src/Pathfind.h"
 #include "src/Sprite.h"
 #include "src/stru31.h"
+#include <unistd.h>
 
 #include "src/Infrastructure/Log.h"
 #include "src/Infrastructure/PlatformSpecific/OsTools.h"
@@ -296,9 +297,27 @@ bool on_level_finished()
         fprintf(stderr, "on_level_finished: LVL_Deinit done\n");
         sound_free_sounds();
         fprintf(stderr, "on_level_finished: sound_free_sounds done\n");
+        {
+            char _b[256];
+            int _n = snprintf(_b, sizeof(_b), "on_level_finished: about to free current_level_lvl=%p\n", current_level_lvl);
+            write(STDERR_FILENO, _b, _n > 0 ? _n : 0);
+        }
         free(current_level_lvl);
-        free(sprites_lvl);
-        sprites_lvl = 0;
+        current_level_lvl = 0;
+        {
+            char _b[256];
+            int _n = snprintf(_b, sizeof(_b), "on_level_finished: about to free sprites_lvl=%p\n", sprites_lvl);
+            write(STDERR_FILENO, _b, _n > 0 ? _n : 0);
+        }
+        if (sprites_lvl && sprites_lvl < (void*)0x100000) {
+            char _b[256];
+            int _n = snprintf(_b, sizeof(_b), "on_level_finished: sprites_lvl=%p INVALID, SKIPPING free!\n", sprites_lvl);
+            write(STDERR_FILENO, _b, _n > 0 ? _n : 0);
+            sprites_lvl = 0;
+        } else {
+            free(sprites_lvl);
+            sprites_lvl = 0;
+        }
         prev_level_idx = -1;
     }
     else

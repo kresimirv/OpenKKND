@@ -4120,6 +4120,8 @@ void _408550_multi_pal()
     palette_4778A4 = GetSysPalette();
     if (is_demo_build)
     {
+        if (single_player_game)
+            return;
         sprintf(v19, aSLevelsMulti_p, game_data_installation_dir);
         v0 = fopen(v19, aR);
         if (v0)

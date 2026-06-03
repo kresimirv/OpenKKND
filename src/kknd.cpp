@@ -701,16 +701,22 @@ void entity_mode_clanhall_set_default_production(Entity *a1)
 			{
 				_47B3B8_tower_production_group = entity_building_create_production_group(v1, PRODUCTION_GROUP_TOWERS);
 				v3 = current_level_idx;
-				v4 = &mute_default_buildings[0].mobd_lookup_table_offset;
-				do
+				for (int i = 0; i < 6; ++i)
 				{
-					if (!(levels[v3].disabled_units_mask & *(v4 - 2)))
+					if (!(levels[v3].disabled_units_mask & mute_default_buildings[i].production_mask))
 					{
-						production_group_enable(_47B3D0_building_production_group, (enum UNIT_ID)*(v4 - 1), *v4);
+						production_group_enable(_47B3D0_building_production_group, mute_default_buildings[i].unit_stats_idx, mute_default_buildings[i].mobd_lookup_table_offset);
 						v3 = current_level_idx;
 					}
-					v4 += 3;
-				} while ((int)v4 < (int)&mute_default_infantry[0].mobd_lookup_table_offset);
+				}
+				for (int i = 0; i < 3; ++i)
+				{
+					if (!(levels[v3].disabled_units_mask & mute_default_infantry[i].production_mask))
+					{
+						production_group_enable(_47B3D0_building_production_group, mute_default_infantry[i].unit_stats_idx, mute_default_infantry[i].mobd_lookup_table_offset);
+						v3 = current_level_idx;
+					}
+				}
 				if (!_47B3D4_aircraft_production_group)
 					_47B3D4_aircraft_production_group = entity_building_create_production_group(v1, PRODUCTION_GROUP_AIRCRAFT);
 				max_clanhall_level = 1;
@@ -785,18 +791,16 @@ void entity_mode_clanhall_on_building_completed(Entity *a1)
 			show_message_ex(0, aBuildingCompleted);
 		v4 = entity_building_create_production_group(v1, PRODUCTION_GROUP_INFANTRY);
 		v5 = v4;
-		v6 = &mute_default_infantry[0].mobd_lookup_table_offset;
 		v3->production_group = v4;
 		v7 = current_level_idx;
-		do
+		for (int i = 0; i < 3; ++i)
 		{
-			if (!(levels[v7].disabled_units_mask & *(v6 - 2)))
+			if (!(levels[v7].disabled_units_mask & mute_default_infantry[i].production_mask))
 			{
-				production_group_enable(v5, (enum UNIT_ID)*(v6 - 1), *v6);
+				production_group_enable(v5, mute_default_infantry[i].unit_stats_idx, mute_default_infantry[i].mobd_lookup_table_offset);
 				v7 = current_level_idx;
 			}
-			v6 += 3;
-		} while ((int)v6 < (int)&_4640E0_stru7_array[0]._4_psprite_pstru7_idx);
+		}
 		++_477378_clanhall.num_buildings_by_level[1];
 	}
 	else if (v2 == 0)
@@ -8226,16 +8230,22 @@ void entity_mode_outpost_enable_basic_construction(Entity *a1)
 			{
 				_47B3B8_tower_production_group = entity_building_create_production_group(v1, PRODUCTION_GROUP_TOWERS);
 				v3 = current_level_idx;
-				v4 = &surv_basic_buildings[0].mobd_lookup_table_offset;
-				do
+				for (int i = 0; i < 5; ++i)
 				{
-					if (!(levels[v3].disabled_units_mask & *(v4 - 2)))
+					if (!(levels[v3].disabled_units_mask & surv_basic_buildings[i].production_mask))
 					{
-						production_group_enable(_47B3D0_building_production_group, (enum UNIT_ID)*(v4 - 1), *v4);
+						production_group_enable(_47B3D0_building_production_group, surv_basic_buildings[i].unit_stats_idx, surv_basic_buildings[i].mobd_lookup_table_offset);
 						v3 = current_level_idx;
 					}
-					v4 += 3;
-				} while ((int)v4 < (int)&surv_basic_infantry[0].unit_stats_idx);
+				}
+				for (int i = 0; i < 3; ++i)
+				{
+					if (!(levels[v3].disabled_units_mask & surv_basic_infantry[i].production_mask))
+					{
+						production_group_enable(_47B3D0_building_production_group, surv_basic_infantry[i].unit_stats_idx, surv_basic_infantry[i].mobd_lookup_table_offset);
+						v3 = current_level_idx;
+					}
+				}
 				if (!_47B3D4_aircraft_production_group)
 					_47B3D4_aircraft_production_group = entity_building_create_production_group(v1, PRODUCTION_GROUP_AIRCRAFT);
 				max_outpost_level = 1;
@@ -8323,18 +8333,16 @@ void entity_mode_outpost_set_default_production(Entity *a1)
 			show_message_ex(0, aBuildingCompleted);
 		v4 = entity_building_create_production_group(v1, PRODUCTION_GROUP_INFANTRY);
 		v5 = v4;
-		v6 = &surv_basic_infantry[0].mobd_lookup_table_offset;
 		v3->production_group = v4;
 		v7 = current_level_idx;
-		do
+		for (int i = 0; i < 3; ++i)
 		{
-			if (!(levels[v7].disabled_units_mask & *(v6 - 2)))
+			if (!(levels[v7].disabled_units_mask & surv_basic_infantry[i].production_mask))
 			{
-				production_group_enable(v5, (enum UNIT_ID)*(v6 - 1), *v6);
+				production_group_enable(v5, surv_basic_infantry[i].unit_stats_idx, surv_basic_infantry[i].mobd_lookup_table_offset);
 				v7 = current_level_idx;
 			}
-			v6 += 3;
-		} while ((int)v6 < (int)&dword_468FDC);
+		}
 		++_47B3E0_outpost_levels.num_buildings_by_level[1];
 	}
 	else if (v2 == 0)
@@ -11855,28 +11863,28 @@ void script_442BB0_mobd46(Script *a1)
 	stru29_list_4439F0(v4, 0, 0, 1, 0);
 	sprite_load_mobd(v4, 180);
     script_sleep(v1, 1);
-	if (netz_47C6C0_mapd_idx == SCRIPT_TYPE_14)
-	{
-		v5 = pstru6;
-		while (1)
+		if (netz_47C6C0_mapd_idx == SCRIPT_TYPE_14)
 		{
+			v5 = pstru6;
 			while (1)
 			{
-				v6 = dword_47C6E4 ? _46E4C0_mobd_offsets[BYTE2(a1a->num_runs_to_skip)] : _46E4F0_mobd_offsets[BYTE2(a1a->num_runs_to_skip)];
-				if (dword_47C6E8 >= 0)
+				while (1)
 				{
-					if (dword_47C6E8 > 9)
-						dword_47C6E8 = 9;
-				}
-				else
-				{
-					dword_47C6E8 = 0;
-				}
-				v7 = BYTE2(a1a->num_runs_to_skip);
-				v8 = v7 < 9u;
-				v9 = v7 == 9;
-				if (!v8 && !v9)
-					break;
+					v7 = BYTE2(a1a->num_runs_to_skip);
+					v8 = v7 < 9u;
+					v9 = v7 == 9;
+					if (!v8 && !v9)
+						break;
+					v6 = dword_47C6E4 ? _46E4C0_mobd_offsets[v7] : _46E4F0_mobd_offsets[v7];
+					if (dword_47C6E8 >= 0)
+					{
+						if (dword_47C6E8 > 9)
+							dword_47C6E8 = 9;
+					}
+					else
+					{
+						dword_47C6E8 = 0;
+					}
                 stru29_list_clear_bit_by_sprite(v5, 1);
 				if (BYTE2(a1a->num_runs_to_skip) == dword_47C6E8)
 				{
@@ -14503,6 +14511,8 @@ void _44C5C0_level_cleanup()
 	UNIT_FreeAiPlayers();
 	__47CAF0_tasks_evt39030_array_free();
 	free(stru11unit_list);
+	stru11unit_list = 0;
+	stru11unit_list_head = 0;
     entityRepo->DeleteAll();
 	dword_47DCE8 = 0;
 }

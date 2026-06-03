@@ -139,8 +139,13 @@ void Game::Run() {
                         LVL_Deinit();
                         dword_47A180 = 0;
                         free(current_level_lvl);
-                        free(sprites_lvl);
-                        sprites_lvl = 0;
+                        current_level_lvl = 0;
+                        if (sprites_lvl && sprites_lvl < (void*)0x100000) {
+                            sprites_lvl = 0;
+                        } else {
+                            free(sprites_lvl);
+                            sprites_lvl = 0;
+                        }
                         if (is_game_loading())
                         {
                             prev_level_idx = -1;
@@ -205,13 +210,23 @@ void Game::Run() {
             }
         }
         netz_deinit();
-        free(wait_lvl);
+        if (wait_lvl && wait_lvl < (void*)0x100000) {
+            wait_lvl = 0;
+        } else {
+            free(wait_lvl);
+            wait_lvl = 0;
+        }
         sound_free_sounds();
         GAME_Deinit();
     }
     else
     {
-        free(wait_lvl);
+        if (wait_lvl && wait_lvl < (void*)0x100000) {
+            wait_lvl = 0;
+        } else {
+            free(wait_lvl);
+            wait_lvl = 0;
+        }
         sound_free_sounds();
         GAME_Deinit();
     }
@@ -270,8 +285,13 @@ void Game::MainMenu() {
     LVL_Deinit();
     dword_47A180 = 0;
     free(current_level_lvl);
-    free(sprites_lvl);
-    sprites_lvl = 0;
+    current_level_lvl = 0;
+    if (sprites_lvl && sprites_lvl < (void*)0x100000) {
+        sprites_lvl = 0;
+    } else {
+        free(sprites_lvl);
+        sprites_lvl = 0;
+    }
 }
 
 //----- (00422610) --------------------------------------------------------

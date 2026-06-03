@@ -256,16 +256,32 @@ struct IDirectSoundBuffer
         if (device_id)
         {
             SDL_PauseAudioDevice(device_id, 0);
-            if (!looping && wfx.nAvgBytesPerSec > 0)
+            if (!looping)
             {
                 unsigned int existing = SDL_GetQueuedAudioSize(device_id);
-                unsigned int device_bps = 22050 * 2 * 2; // device is fixed at 22050/16/stereo
-                unsigned int offset_ms = (unsigned int)((double)existing / device_bps * 1000.0);
-                unsigned int our_ms = (unsigned int)((double)buffer_size / wfx.nAvgBytesPerSec * 1000.0);
-                play_start_time = SDL_GetTicks() - offset_ms;
-                duration_ms = offset_ms + our_ms;
-                fprintf(stderr, "Play: buf_size=%d avgBps=%d existing=%d offset_ms=%d our_ms=%d duration_ms=%d\n",
-                    buffer_size, wfx.nAvgBytesPerSec, existing, offset_ms, our_ms, duration_ms);
+                unsigned int our_ms = 0;
+                unsigned int offset_ms = 0;
+                if (buffer_size > 0 && wfx.nAvgBytesPerSec > 0)
+                {
+                    unsigned int device_bps = 22050 * 2 * 2;
+                    unsigned long long our_raw = (unsigned long long)buffer_size * 1000;
+                    our_ms = (unsigned int)(our_raw / wfx.nAvgBytesPerSec);
+                    if (device_bps > 0)
+                    {
+                        unsigned long long offset_raw = (unsigned long long)existing * 1000;
+                        offset_ms = (unsigned int)(offset_raw / device_bps);
+                    }
+                }
+                if (our_ms > 0)
+                {
+                    play_start_time = SDL_GetTicks() - offset_ms;
+                    duration_ms = offset_ms + our_ms;
+                }
+                else
+                {
+                    play_start_time = SDL_GetTicks();
+                    duration_ms = 0;
+                }
             }
         }
         return 0;

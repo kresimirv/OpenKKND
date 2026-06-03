@@ -34,7 +34,7 @@ void UNIT_Handler_TechBunker_2(Script *a1)
         _47A300_stru51_tech_bunkers[_47A300_stru51_tech_bunkers_num_items].x = a1->sprite->x;
         v2 = a1->sprite->y;
         _47A300_stru51_tech_bunkers_num_items = v1 + 1;
-        _47A300_stru51_array__field_4__minus1_index[2 * (v1 + 1)] = v2;
+        _47A300_stru51_tech_bunkers[v1].y = v2;
     }
     sprite_list_remove(a1->sprite);
     script_terminate(a1);
@@ -1314,7 +1314,7 @@ void script_425F50_stru48_stru51_tech_bunkers(Script *a1)
         {
             v12 += 12;
             ++v11;
-            if ((int)v12 >= (int)& _47A3D4_tanker_convoy_units_left)
+            if (v11 >= _47A378_stru48_array_num_items)
                 goto LABEL_28;
         }
         *(_DWORD *)v77 = v11;

@@ -15,3 +15,4 @@ extern BuildingLimits *building_limits_list_head;
 extern BuildingLimits *building_limits_list_end;
 extern BuildingLimits *building_limits_list;
 extern BuildingLimits *building_limits_list_free_pool;
+extern BuildingLimits building_limits_sentinel;

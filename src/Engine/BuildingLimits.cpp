@@ -9,6 +9,7 @@ BuildingLimits *building_limits_list_head = nullptr;
 BuildingLimits *building_limits_list_end = nullptr;
 BuildingLimits *building_limits_list = nullptr;
 BuildingLimits *building_limits_list_free_pool = nullptr;
+BuildingLimits building_limits_sentinel = {0};
 
 //----- (00403960) --------------------------------------------------------
 int building_limits_list_alloc()
@@ -19,15 +20,15 @@ int building_limits_list_alloc()
     if (building_limits_list)
     {
         building_limits_list_free_pool = building_limits_list;
-        building_limits_list[19].next = nullptr;
 
-        for (int i = 0; i < 20; ++i)
+        for (int i = 0; i < 19; ++i)
         {
             building_limits_list[i].next = &building_limits_list[i + 1];
         }
+        building_limits_list[19].next = nullptr;
 
-        building_limits_list_head = (BuildingLimits *)&building_limits_list_head;
-        building_limits_list_end = (BuildingLimits *)&building_limits_list_head;
+        building_limits_list_head = &building_limits_sentinel;
+        building_limits_list_end = &building_limits_sentinel;
         return true;
     }
     return false;
@@ -40,7 +41,7 @@ int building_limits_count(enum UNIT_ID unit_stats_idx)
     int result; // eax@4
 
     v1 = building_limits_list_head;
-    if ((BuildingLimits **)building_limits_list_head == &building_limits_list_head)
+    if (building_limits_list_head == &building_limits_sentinel)
     {
         result = 0;
     }
@@ -49,7 +50,7 @@ int building_limits_count(enum UNIT_ID unit_stats_idx)
         while (v1->building_unit_stat_idx != unit_stats_idx)
         {
             v1 = v1->next;
-            if ((BuildingLimits **)v1 == &building_limits_list_head)
+            if (v1 == &building_limits_sentinel)
                 return 0;
         }
         result = v1->num_buildings_of_this_type;
@@ -65,12 +66,12 @@ bool building_limits_can_build(enum UNIT_ID unit_id)
     if (unit_id != UNIT_STATS_SURV_DRILL_RIG && unit_id != UNIT_STATS_MUTE_DRILL_RIG)
     {
         v1 = building_limits_list_head;
-        if ((BuildingLimits **)building_limits_list_head != &building_limits_list_head)
+        if (building_limits_list_head != &building_limits_sentinel)
         {
             while (v1->building_unit_stat_idx != unit_id)
             {
                 v1 = v1->next;
-                if ((BuildingLimits **)v1 == &building_limits_list_head)
+                if (v1 == &building_limits_sentinel)
                     return 1;
             }
             if (unit_id == UNIT_STATS_SURV_RESEARCH_LAB || unit_id == UNIT_STATS_MUTE_ALCHEMY_HALL)
@@ -98,7 +99,7 @@ int building_limits_on_new_building(enum UNIT_ID stats_idx)
     if (stats_idx == 46 || stats_idx == 47)
         return 1;
     v1 = building_limits_list_head;
-    if ((BuildingLimits **)building_limits_list_head == &building_limits_list_head)
+    if (building_limits_list_head == &building_limits_sentinel)
     {
     LABEL_6:
         v2 = building_limits_list_free_pool;
@@ -106,19 +107,21 @@ int building_limits_on_new_building(enum UNIT_ID stats_idx)
             building_limits_list_free_pool = building_limits_list_free_pool->next;
         else
             v2 = 0;
+        if (!v2)
+            return 1;
         v2->num_buildings_of_this_type = 1;
         v2->building_unit_stat_idx = stats_idx;
         v3 = building_limits_list_head;
-        v2->prev = (BuildingLimits *)&building_limits_list_head;
+        v2->prev = &building_limits_sentinel;
         v2->next = v3;
-        building_limits_list_head->prev = v2;
+        v3->prev = v2;
         building_limits_list_head = v2;
         return 1;
     }
     while (v1->building_unit_stat_idx != stats_idx)
     {
         v1 = v1->next;
-        if ((BuildingLimits **)v1 == &building_limits_list_head)
+        if (v1 == &building_limits_sentinel)
             goto LABEL_6;
     }
     ++v1->num_buildings_of_this_type;
@@ -136,7 +139,7 @@ void building_limits_on_building_destroyed(Entity *a1)
     if (v1 != 46 && v1 != 47)
     {
         v2 = building_limits_list_head;
-        if ((BuildingLimits **)building_limits_list_head != &building_limits_list_head)
+        if (building_limits_list_head != &building_limits_sentinel)
         {
             while (1)
             {
@@ -148,7 +151,7 @@ void building_limits_on_building_destroyed(Entity *a1)
                         break;
                 }
                 v2 = v2->next;
-                if ((BuildingLimits **)v2 == &building_limits_list_head)
+                if (v2 == &building_limits_sentinel)
                     goto LABEL_9;
             }
             v2->next->prev = v2->prev;
@@ -157,7 +160,7 @@ void building_limits_on_building_destroyed(Entity *a1)
             building_limits_list_free_pool = v2;
         }
     LABEL_9:
-        if ((BuildingLimits **)building_limits_list_head == &building_limits_list_head && a1->player_side == player_side)
+        if (building_limits_list_head == &building_limits_sentinel && a1->player_side == player_side)
         {
             nullsub_1();
             if (sub_44CA50(v1))

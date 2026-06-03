@@ -363,10 +363,19 @@ void script_ingame_menu_create_briefing_dialog(Script *script)
         num_lines = 0;
         v4 = 5;
         // get current level mission briefing
-        if (current_level_idx < LEVEL_SURV_16 || current_level_idx > LEVEL_MUTE_25)
-            current_mission_briefing = mission_briefings[current_level_idx];
+        if (current_level_idx >= LEVEL_SURV_16 && current_level_idx <= LEVEL_MUTE_25)
+        {
+            int is_surv = current_level_idx <= LEVEL_SURV_25 ? 1 : 0;
+            int mission_offset = is_surv
+                ? current_level_idx - LEVEL_SURV_16
+                : current_level_idx - LEVEL_MUTE_16;
+            int cm_idx = mission_offset + 10 * is_surv;
+            current_mission_briefing = (char *)custom_missions_in_game_briefing[cm_idx];
+        }
         else
-            current_mission_briefing = *(char **)&aNoFreeLinks[4 * current_level_idx + 12];
+        {
+            current_mission_briefing = mission_briefings[current_level_idx];
+        }
 
         render_string_445AE0(render_string);
         loop_counter = 0;

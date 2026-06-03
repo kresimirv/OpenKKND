@@ -59,6 +59,7 @@ Sentinel trick: two adjacent pointer globals used as `next`/`prev` of implicit s
 - `_47CA18_sidebar_production_buttons[5]`: sentinel loop → counted for loop (`Sidebar.cpp:1594`).
 - `sound_pans`: increased from `[17]` to `[33]` (`Sound.cpp:67,153`), matching 0–32 pan offset range.
 - Uppercased resource filenames in `Level.cpp`, `Game.cpp`, `Video.cpp`, `_unsorted_data.cpp` (level names, wavs, vbcs, kknd.sve).
+- `script_442BB0_mobd46` (`kknd.cpp:11865`): moved bounds check for `BYTE2(a1a->num_runs_to_skip)` before `_46E4C0_mobd_offsets[10]` / `_46E4F0_mobd_offsets[10]` array access. The index was used to read the array before the `v7 < 9u || v7 == 9` guard — when `BYTE2` was ≥ 10 it caused a global-buffer-overflow, crashing when clicking NEW MISSIONS in the main menu.
 
 ### In-Game Menu — Game Pause & Sound Isolation
 - `DirectSoundSdl2.h` `PauseAll()`/`ResumeAll()`: skip stream (BGM) device; only pause SFX devices.
@@ -90,8 +91,22 @@ Sentinel trick: two adjacent pointer globals used as `next`/`prev` of implicit s
 - `SetCurrentAnimFrame(256): index out of bounds` warning during gameplay (minor, doesn't crash).
 - Low-risk printf-format warnings remain (`%d` → `size_t` args).
 
+### Crash Fixes — Stack-Buffer-Overflow in EnemyAI (entity_move)
+Root cause: `script_409770_ai` used groups of adjacent stack variables (`v172`/`v170`/`i1` and `param[4]`/`v173`/`v174`) as fake `_47CAF0_task_attachment1_move_task` structs via `&v172` / `&param`. ASan redzoning detects reads past the first variable.
+- Fixed 5 call sites in `EnemyAI.cpp:1388,1603,1743,1792,1848` — all replaced with proper local `_47CAF0_task_attachment1_move_task` struct variables and explicit field assignments.
+- Removed unused declarations (`v172`, `v170`, `i1`, `param[4]`, `v173`, `v174`, `v114`).
+
+### Crash Fixes — SIGFPE in Sound Playback (Unit Selection)
+Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed `(double)buffer_size / wfx.nAvgBytesPerSec * 1000.0` using floating-point arithmetic. When `nAvgBytesPerSec` was 0 (or under unknown FPU state in coroutine context), a floating-point division-by-zero raised SIGFPE — triggered when dragging a selection rectangle over units in gameplay.
+- Rewrote `Play()` time tracking to use only integer arithmetic (`unsigned long long`), with explicit zero-guards on all divisions and a `our_ms > 0` guard for `play_start_time`/`duration_ms` assignment.
+
 ### In-Game Menu — Restart / Return to Main Menu Crash Fix
 - Root cause: when "Restart Game" or "Return to Main Menu" was selected, `is_async_execution_supported` stayed `1` (set by the menu event loop) and `sound_suspended` stayed `true` (set by `sound_pause_all()` at menu open). Neither was reset on the restart/quit path because the normal menu-dismiss path (which resets both) was bypassed.
 - `is_async_execution_supported = 1` blocked entity movement (`Entity.cpp:180`), cursor commands (`Cursor.cpp:1880`), and game tick counters (`Game.cpp:155`) in the next level — units couldn't move, no commands worked, the game appeared frozen/crashed.
 - `sound_suspended = true` blocked all sound playback in the restarted mission or main menu.
 - Fix (`Game.cpp:173-184`): added `is_async_execution_supported = 0; sound_resume_all();` in both the quit-to-main-menu path (before `goto LABEL_5`) and the restart path (after `on_level_finished()` returns).
+
+### Kaos Mode — Crash on Quit, Main Menu Corruption, Wrong Start Position
+- **BSS buffer overflow** (`Mission.cpp:37`): Tech bunker handler wrote sprite `y` to `_47A300_stru51_array__field_4__minus1_index[2*(v1+1)]` — computed index up to 24, but array was declared `[5]`. Overflow corrupted adjacent BSS globals: `sprites_lvl` (at index 22, value `0x8ef00`) caused crash-on-quit in `free()`; `wait_lvl` (index 24) caused second crash in `Game::Run()`; possibly also corrupted `game_state` and other state → main menu items disabled after Kaos quit. **Fix**: store `y` to `_47A300_stru51_tech_bunkers[v1].y` instead — correct write within array bounds, also fixes tech bunker spawn y-read at line 1640.
+- **`free(wait_lvl)` crash guard** (`Game.cpp:213,219`): added same `0x100000` pointer-sanity check as `sprites_lvl` guard.
+- **Player start position not found** (`Mission.cpp:1317`): `is_demo_build` search loop compared `v12` against `&_47A3D4_tanker_convoy_units_left` (BSS `0xdbbb0`) — which sits **before** `_47A378_stru48_array` (BSS `0xdbbc0`). The initial `v12 = 0xDBBC8` already exceeded the bound, so the loop **always** immediately exited to random-start fallback (`kknd_rand % 6`). Player spawned at a random (often AI) start → camera in fog, units under wrong side control, "fully built base" from AI territory. **Fix**: changed bound to `v11 >= _47A378_stru48_array_num_items` — properly iterates all available start positions until `player_side` matches.

@@ -1289,6 +1289,8 @@ void script_deinit(Script *s)
     script_discard_all_events(script);
     script_execute_list.remove(script);
     script_free_handler(script);
+    if (script->sprite)
+        script->sprite->script = 0;
     delete script;
 }
 

@@ -966,7 +966,6 @@ void script_409770_ai(Script *a1)
     int v111; // ecx@188
     stru24_AttackerNode *v112; // eax@188
     char *v113; // edx@188
-    enum PLAYER_SIDE v114; // ecx@188
     int v115; // edx@188
     stru24_AttackerNode *v116; // edi@190
     stru24_AttackerNode *i2; // eax@192
@@ -1021,12 +1020,7 @@ void script_409770_ai(Script *a1)
     int v166; // [sp+10h] [bp-24h]@187
     int x; // [sp+14h] [bp-20h]@26
     int y; // [sp+18h] [bp-1Ch]@26
-    enum PLAYER_SIDE v172; // [sp+1Ch] [bp-18h]@128
-    int v170; // [sp+20h] [bp-14h]@128
-    int i1; // [sp+24h] [bp-10h]@128
-    char param[4]; // [sp+28h] [bp-Ch]@215
-    int v173; // [sp+2Ch] [bp-8h]@215
-    int v174; // [sp+30h] [bp-4h]@215
+
 
     v1 = (stru24 *)a1->param;
     v2 = 0;
@@ -1383,12 +1377,14 @@ LABEL_97:
                     if (*(void(**)(Script *, Script *, enum SCRIPT_EVENT, void *))((int)v70->script + 52) != EventHandler_General_Scout)
                     {
                         v71 = v69->x;
-                        v172 = v1->_2A0_player_side;
                         v72 = v69->y;
-                        v170 = v71;
-                        i1 = v72;
 
-                        script_trigger_event(0, EVT_CMD_ENTITY_MOVE, &v172, v70->script);
+                        _47CAF0_task_attachment1_move_task moveTask;
+                        moveTask.player_side = v1->_2A0_player_side;
+                        moveTask.dst_x = v71;
+                        moveTask.dst_y = v72;
+
+                        script_trigger_event(0, EVT_CMD_ENTITY_MOVE, &moveTask, v70->script);
                         v69->next->prev = v69->prev;
                         v69->prev->next = v69->next;
                         v69->next = v1->list_310_head;
@@ -1602,13 +1598,16 @@ LABEL_97:
                         v145 = (stru24_stru160 *)kk->_C_next;
                         v146 = v144->y_offset;
                         v147 = v144->x_offset;
-                        *(_DWORD *)param = v1->_2A0_player_side;
                         kk->field_3C = v147;
-                        v173 = v147;
                         kk->field_40 = v146;
-                        v174 = v146;
                         for (kk->field_24 = 0; (void **)v145 != &kk->_C_next; v145 = v145->next)
-                            script_trigger_event(0, EVT_CMD_ENTITY_MOVE, param, *((Script **)v145->_C_next + 3));
+                        {
+                            _47CAF0_task_attachment1_move_task moveTask;
+                            moveTask.player_side = v1->_2A0_player_side;
+                            moveTask.dst_x = v147;
+                            moveTask.dst_y = v146;
+                            script_trigger_event(0, EVT_CMD_ENTITY_MOVE, &moveTask, *((Script **)v145->_C_next + 3));
+                        }
                     }
                     else
                     {
@@ -1742,13 +1741,16 @@ LABEL_97:
                         nn->field_8 = v160;
                         v162 = v160->y_offset;
                         v163 = v160->x_offset;
-                        *(_DWORD *)param = v1->_2A0_player_side;
                         nn->field_3C = v163;
-                        v173 = v163;
                         nn->field_40 = v162;
-                        v174 = v162;
                         for (nn->field_24 = 0; (void **)v161 != &nn->_C_next; v161 = v161->next)
-                            script_trigger_event(0, EVT_CMD_ENTITY_MOVE, param, *((Script **)v161->_C_next + 3));
+                        {
+                            _47CAF0_task_attachment1_move_task moveTask;
+                            moveTask.player_side = v1->_2A0_player_side;
+                            moveTask.dst_x = v163;
+                            moveTask.dst_y = v162;
+                            script_trigger_event(0, EVT_CMD_ENTITY_MOVE, &moveTask, *((Script **)v161->_C_next + 3));
+                        }
                     }
                     else
                     {
@@ -1768,27 +1770,29 @@ LABEL_97:
             goto LABEL_272;
         }
         v111 = v1->array_2C8_idx;
-        v170 = v1->_278_x_offset;
         x = 0;
         v112 = v1->attacker_list_48;
         v113 = (char *)v1->field_280 + 8 * v111;
-        v114 = v1->_2A0_player_side;
         y = (int)v113;
-        v115 = v1->_27C_y_offset;
-        v172 = v114;
-        for (i1 = v115; (stru24_AttackerNode **)v112 != &v1->attacker_list_48; v112 = v112->next)
         {
-            if (v112->entity->script->event_handler != EventHandler_General_Scout)
+            _47CAF0_task_attachment1_move_task moveTask;
+            moveTask.player_side = v1->_2A0_player_side;
+            moveTask.dst_x = v1->_278_x_offset;
+            moveTask.dst_y = v1->_27C_y_offset;
+            for (; (stru24_AttackerNode **)v112 != &v1->attacker_list_48; v112 = v112->next)
             {
-                v116 = v112->prev;
-                v112->next->prev = v116;
-                v112->prev->next = v112->next;
-                v112->next = v1->marshalling_nodes_list__evmission8_only_60;
-                v112->prev = (stru24_AttackerNode *)&v1->marshalling_nodes_list__evmission8_only_60;
-                v1->marshalling_nodes_list__evmission8_only_60->prev = v112;
-                v1->marshalling_nodes_list__evmission8_only_60 = v112;
-                script_trigger_event(0, EVT_CMD_ENTITY_MOVE, &v172, v112->entity->script);
-                v112 = v116;
+                if (v112->entity->script->event_handler != EventHandler_General_Scout)
+                {
+                    v116 = v112->prev;
+                    v112->next->prev = v116;
+                    v112->prev->next = v112->next;
+                    v112->next = v1->marshalling_nodes_list__evmission8_only_60;
+                    v112->prev = (stru24_AttackerNode *)&v1->marshalling_nodes_list__evmission8_only_60;
+                    v1->marshalling_nodes_list__evmission8_only_60->prev = v112;
+                    v1->marshalling_nodes_list__evmission8_only_60 = v112;
+                    script_trigger_event(0, EVT_CMD_ENTITY_MOVE, &moveTask, v112->entity->script);
+                    v112 = v116;
+                }
             }
         }
         for (i2 = v1->marshalling_nodes_list__evmission8_only_60;
@@ -1845,15 +1849,18 @@ LABEL_97:
                     v126 = *(_DWORD *)(y + 4);
                     v127 = *(_DWORD *)y;
                     v128 = v1->field_24C;
-                    *(_DWORD *)param = v1->_2A0_player_side;
-                    v173 = v127;
                     v129 = (int *)v128->_C_next;
                     v130 = (int)&v128->_C_next;
                     v128->field_3C = v127;
                     v128->field_40 = v126;
-                    v174 = v126;
                     for (v128->field_24 = 0; v129 != (_DWORD *)v130; v129 = (_DWORD *)*v129)
-                        script_trigger_event(0, EVT_CMD_ENTITY_MOVE, param, *(Script **)(v129[3] + 12));
+                    {
+                        _47CAF0_task_attachment1_move_task moveTask;
+                        moveTask.player_side = v1->_2A0_player_side;
+                        moveTask.dst_x = v127;
+                        moveTask.dst_y = v126;
+                        script_trigger_event(0, EVT_CMD_ENTITY_MOVE, &moveTask, *(Script **)(v129[3] + 12));
+                    }
                     v131 = v1->field_24C;
                     v132 = (char *)&v1->field_168;
                     goto LABEL_219;

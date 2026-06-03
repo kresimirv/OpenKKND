@@ -117,6 +117,7 @@ extern char *aSurvout_vbc;
 extern char *aUnit_initFaile;
 extern char *aSpriteLoadFail;
 extern CustomMission custom_missions[20];
+extern const char *custom_missions_in_game_briefing[20];
 extern char *aW;
 
 
