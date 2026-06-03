@@ -419,9 +419,8 @@ struct IDirectSound
     static const int MAX_SFX_DEVICES = 8;
     SDL_AudioDeviceID m_stream_device;   // shared device for BGM (streaming music)
     SDL_AudioDeviceID m_sfx_devices[MAX_SFX_DEVICES]; // pool for SFX
-    int m_next_sfx_device;
 
-    IDirectSound() : m_stream_device(0), m_next_sfx_device(0)
+    IDirectSound() : m_stream_device(0)
     {
         for (int i = 0; i < MAX_SFX_DEVICES; i++)
             m_sfx_devices[i] = 0;
@@ -495,9 +494,18 @@ struct IDirectSound
                 }
                 else
                 {
-                    int idx = m_next_sfx_device % MAX_SFX_DEVICES;
-                    m_next_sfx_device++;
-                    buf->device_id = m_sfx_devices[idx];
+                    int best_idx = 0;
+                    unsigned int least_queued = SDL_GetQueuedAudioSize(m_sfx_devices[0]);
+                    for (int i = 1; i < MAX_SFX_DEVICES; i++)
+                    {
+                        unsigned int q = SDL_GetQueuedAudioSize(m_sfx_devices[i]);
+                        if (q < least_queued)
+                        {
+                            least_queued = q;
+                            best_idx = i;
+                        }
+                    }
+                    buf->device_id = m_sfx_devices[best_idx];
                 }
             }
             fprintf(stderr, "CreateSoundBuffer: buf_size=%d wfx.sr=%d wfx.ch=%d wfx.bps=%d dev_id=%d\n",

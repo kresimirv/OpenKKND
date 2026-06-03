@@ -80,6 +80,9 @@ int _47C5C0_can_sound; // weak
 void *faction_slv; // idb
 int dword_47C5D0; // weak
 
+// Max bytes queued per SFX device before new sounds are dropped (~500ms at 22050/16/stereo = 88200 bytes/sec)
+static const unsigned int MAX_QUEUED_SFX_BYTES = 44100;
+
 
 SOUND_ID _468988_sound_ids[4] = { SOUND_69, SOUND_53, SOUND_51, SOUND_50 };
 SOUND_ID _468998_sound_ids[4] = { SOUND_139, SOUND_116, SOUND_142, SOUND_140 };
@@ -537,6 +540,19 @@ int sound_play(enum SOUND_ID sound_id, int sound_flags, int volume_offset, int p
                     }
                     else
                     {
+                        // Drop sound if this device's queue is already too full
+                        if (sound->pdsb && sound->pdsb->device_id)
+                        {
+                            unsigned int queued = SDL_GetQueuedAudioSize(sound->pdsb->device_id);
+                            if (queued >= MAX_QUEUED_SFX_BYTES)
+                            {
+                                sound->pdsb->Release();
+                                *sound_buffer_1 = nullptr;
+                                sound_list_free_pool.remove(sound);
+                                result = 0;
+                                return result;
+                            }
+                        }
                         sound_buffer_2 = *sound_buffer_1;
                         v13 = *sound_buffer_1 == 0;
                         v29 = (const void *)a3a;
@@ -1242,13 +1258,13 @@ void _43A370_process_sound()
 //----- (0043A320) --------------------------------------------------------
 void sound_free_sounds()
 {
+    _47C5C0_can_sound = 0;
     for (auto sound : sound_list_free_pool)
     {
         sound_cleanup(sound);
     }
     sound_list_free_pool.clear();
 
-    _47C5C0_can_sound = 0;
     if (faction_slv)
     {
         free(faction_slv);
@@ -1315,13 +1331,13 @@ void sound_cleanup(std::shared_ptr<Sound> snd)
 //----- (0043A510) --------------------------------------------------------
 void sound_deinit()
 {
+    _47C5C0_can_sound = 0;
     for (auto sound : sound_list_free_pool)
     {
         sound_cleanup(sound);
     }
     sound_list_free_pool.clear();
 
-    _47C5C0_can_sound = 0;
     if (faction_slv)
     {
         free(faction_slv);

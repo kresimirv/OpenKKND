@@ -4647,7 +4647,7 @@ void entity_419560_on_death(Entity *a1)
             v11 = _4690A8_sfx_volume;
             v6 = 5;
         }
-        sprite_408800_play_sound(v1->sprite, _465988_sounds[rnd_capped(v6)], v11, 0);
+        sprite_408800_play_sound(v1->sprite, _465988_sounds[rnd_capped(v6) % 5], v11, 0);
         v1->sprite->mobd_id = MOBD_EXPLOSIONS;
         v7 = SPRITE_EXPLOSION_MOBD_OFFSET_UNIT_SURV_RIFLEMAN_DEATH;
         if (v1->stats->player_side != 1)
