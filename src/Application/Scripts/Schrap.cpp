@@ -196,7 +196,7 @@ void script_438F50_explosions(Script *a1)
 
     v1 = a1->sprite;
     v2 = 30;
-    v3 = (unsigned __int8)((char)kknd_rand_debug("k/Scripts/Schrap.cpp", 293) % -8);
+    v3 = (unsigned __int8)(kknd_rand_debug("k/Scripts/Schrap.cpp", 293) % 8);
     if (v3 < 4)
         v2 = 60;
     v1->pstru7 = _479D48_stru7;

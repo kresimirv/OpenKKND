@@ -326,3 +326,8 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
 ### Crash Fix — SIGILL After Entering Player Name in Kaos Mode
 - Root cause: After `input_get_string()` returned (Enter pressed), `script_main_menu_kaos_player_name` (`MainMenu.cpp:1720`) hit `__debugbreak()` which is `__builtin_trap()` → `ud2` instruction → SIGILL. The next line was a `strcpy` to hardcoded absolute EXE address `4695939` (0x47A303) — a decompilation artifact meaningless in the Linux port.
 - **Fix**: Removed `__debugbreak()` and replaced the dead `strcpy` with the proper version `strcpy(netz_47A740[idx + 2].player_name, netz_default_player_name)`, matching the identical pattern already used at line 1623 in the same function.
+
+### Crash Fix — Schrap Explosions Global-Buffer-Overflow (dword_46BC98[8])
+- Root cause: `script_438F50_explosions` (`Schrap.cpp:199`) used `(unsigned __int8)((char)kknd_rand_debug() % -8)` to compute an index into `dword_46BC98[8]`. When `kknd_rand_debug()` returned a value whose `char` truncation was negative (e.g., 128–255), C's `%` with negative dividend produced a negative result, and the `(unsigned __int8)` cast wrapped it to 249–255 — far past the array's 8 elements.
+- Two other `% -8` sites (lines 148, 179) were safe because their operands were non-negative loop counters (0–7 and 0–5), where the result is the same as `% 8`.
+- **Fix**: Replaced `(unsigned __int8)((char)... % -8)` with `(unsigned __int8)(... % 8)` — the random value is positive, so `% 8` gives a clean 0–7 range.
