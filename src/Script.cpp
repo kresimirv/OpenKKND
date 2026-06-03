@@ -915,7 +915,15 @@ ScriptHandler other_unsorted_handlers[] = {
 
 Script *create_script(int script_id) 
 {
+    int _num_scripts = sizeof(scripts) / sizeof(scripts[0]);
+    if (script_id < 0 || script_id >= _num_scripts) {
+        fprintf(stderr, "create_script: OUT OF BOUNDS script_id=%d num_scripts=%d\n", script_id, _num_scripts);
+        return nullptr;
+    }
     auto desc = scripts[script_id];
+    fprintf(stderr, "create_script: script_id=%d handler=%p name=%s\n",
+        script_id, desc->script_handler,
+        desc->script_handler_name ? desc->script_handler_name : "null");
     if (desc->script_handler)
     {
         return (desc->script_type == SCRIPT_FUNCTION)
@@ -999,11 +1007,15 @@ int get_num_handlers()
 
 void *get_handler(int handler_id) 
 {
+    if (handler_id < 0 || handler_id >= get_num_handlers())
+        return nullptr;
     return script_handlers[handler_id].function;
 }
 
 const char *get_handler_name(int handler_id) 
 {
+    if (handler_id < 0 || handler_id >= get_num_handlers())
+        return nullptr;
     return script_handlers[handler_id].function_name;
 }
 
@@ -1013,10 +1025,10 @@ int get_handler_id(void *function)
     {
         if (script_handlers[i].function == function) 
         {
-            return i;
+            return i + 1;
         }
     }
-    return -1;
+    return 0;
 }
 
 int get_num_other_unsorted_handlers()
@@ -1142,6 +1154,9 @@ Script *script_create_function(enum SCRIPT_TYPE type, void(*function)(Script *))
         script->routine_type = SCRIPT_FUNCTION;
         script->handler = function;
         script->debug_handler_name = get_handler_name((void *)function);
+        fprintf(stderr, "script_create_function: script=%p handler=%p name=%s\n",
+            script, function,
+            script->debug_handler_name ? script->debug_handler_name : "null");
         if (function)
         {
             //add script to script_execute_list head
@@ -1158,6 +1173,8 @@ Script *script_create_function(enum SCRIPT_TYPE type, void(*function)(Script *))
 void script_execute_function(Script *s)
 {
     if (s->routine_type == SCRIPT_FUNCTION) {
+        fprintf(stderr, "script_execute_function: Script=%p handler=%p name=%s\n",
+            s, s->handler, s->debug_handler_name ? s->debug_handler_name : "null");
         s->handler(s);
     }
 }
@@ -1322,6 +1339,7 @@ void script_list_update()
     int yield_flags; // ecx@15
     int flags; // eax@16
 
+    fprintf(stderr, "script_list_update: enter, list_size=%zu\n", script_execute_list.size());
     std::vector<Script *> remove_list;
     for (auto script : script_execute_list)
     {
@@ -1383,13 +1401,17 @@ void script_list_free()
     ScriptLocalObject *loc_object_1; // eax@4
     ScriptLocalObject *loc_object_2; // edi@5
 
-    if (coroutine_current == coroutine_list_get_head())
+    fprintf(stderr, "script_list_free: enter, list_size=%zu\n", script_execute_list.size());
+    coroutine_current = coroutine_list_get_head();
     {
         if(!script_execute_list.empty())
         {
             for (auto v0 : script_execute_list)
             {
                 script = v0;
+                fprintf(stderr, "script_list_free: freeing Script=%p handler=%p name=%s\n",
+                    script, script->handler,
+                    script->debug_handler_name ? script->debug_handler_name : "null");
                 loc_object_1 = script->locals_list;
                 if (loc_object_1)
                 {
@@ -1407,6 +1429,7 @@ void script_list_free()
             }
         }
         script_execute_list.clear();
+        fprintf(stderr, "script_list_free: done, list_size=%zu\n", script_execute_list.size());
         coroutine_list_free();
         script_event_list_free();
     }

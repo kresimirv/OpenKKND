@@ -2207,6 +2207,7 @@ void cplc_create_sprite_script(DataCplcItem_ptr1 *a1)
 	{
         if (v1->script_handler_id >= 0)
         {
+            fprintf(stderr, "cplc_create_sprite_script: script_handler_id=%d\n", v1->script_handler_id);
             auto v8 = create_script(v1->script_handler_id);
 			auto v9 = get_script_mobd(v1->script_handler_id);
 			if (v9 >= 0)
@@ -3107,11 +3108,38 @@ void entity_mode_408260_drillrig(Entity *a1)
 //----- (00408330) --------------------------------------------------------
 void entity_mode_drillrig_on_death(Entity *a1)
 {
-	script_trigger_event_group(a1->script, EVT_MSG_1540, 0, SCRIPT_TANKER_CONVOY_HANDLER);
+    Entity *entity;
 
-    a1->destroyed = 1;
-    a1->SetMode(entity_mode_building_on_death_default);
-    script_sleep(a1->script, 1);
+    if (!a1)
+        return;
+
+    unsigned int offset12_val = *(unsigned int *)((char *)a1 + 12);
+    const unsigned int SCRIPT_TYPE_MAX = 0x00100000;
+    bool is_likely_script = offset12_val < SCRIPT_TYPE_MAX;
+
+    if (is_likely_script)
+    {
+        Script *s = (Script *)a1;
+        Entity *script_entity = (Entity *)s->param;
+        if (script_entity && script_entity->script == s)
+            entity = script_entity;
+        else
+            return;
+    }
+    else
+    {
+        Entity *e = (Entity *)a1;
+        if (e->script && e->script->param == e)
+            entity = e;
+        else
+            return;
+    }
+
+	script_trigger_event_group(entity->script, EVT_MSG_1540, 0, SCRIPT_TANKER_CONVOY_HANDLER);
+
+    entity->destroyed = 1;
+    entity->SetMode(entity_mode_building_on_death_default);
+    script_sleep(entity->script, 1);
 }
 
 //----- (00408370) --------------------------------------------------------
@@ -5396,6 +5424,7 @@ __int16 input_get_string(
 			}
 			goto LABEL_41;
 		case 27: // vk_escape
+		case INPUT_KEYBOARD_ESCAPE_MASK:
 			strcpy((char *)v6, v12);
 			goto LABEL_19;
 		case 13: // vk_return
@@ -5414,13 +5443,13 @@ __int16 input_get_string(
 				goto LABEL_41;
 			strcpy((char *)&v6[(unsigned __int16)v5], &v6[(unsigned __int16)v5 + 1]);
 			if ((unsigned __int16)v5 >= strlen(v6) && (_WORD)v5)
-				v5 += 0xFFFF;
+				v5--;
 			goto LABEL_40;
 		case 8: // vk_backspace
 			if (strlen(v6) == 0 || !(_WORD)v5)
 				goto LABEL_41;
 			strcpy((char *)&v6[(unsigned __int16)v5 - 1], &v6[(unsigned __int16)v5]);
-			v5 += 0xFFFF;
+			v5--;
 			goto LABEL_40;
 		default:
 			if (input_char_is_alpha()
@@ -12104,7 +12133,7 @@ int script_443380(Script *a1, int lookup_table_offset, bool a3)
 		{
 			v7 = script_yield_any_trigger(v3, 1);
 			stru29 *v8 = (stru29 *)v3->sprite->_80_entity__stru29__sprite__initial_hitpoints; // stru29 for main menu sprites
-			if (v8 && v8->field_C & 2)
+			if (v8 && stru29_list_initialized && v8->field_C & 2)
 			{
 				if (!dword_47C6EC || debug_unit_stats_supplied)
 					v4 |= 0x20;

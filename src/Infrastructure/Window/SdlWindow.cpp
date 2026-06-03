@@ -290,6 +290,22 @@ void SdlWindow::MessageProcessor(SDL_Event &e) {
                 NofifySpecialKeyUp(INPUT_KEYBOARD_ESCAPE_MASK, ctrlStatus, altStatus);
             } else if (scan == SDL_SCANCODE_RETURN) {
                 NofifySpecialKeyUp(INPUT_KEYBOARD_RETURN_MASK, ctrlStatus, altStatus);
+            } else if (scan == SDL_SCANCODE_BACKSPACE) {
+                NofifyCharUp(8, ctrlStatus, altStatus);            // VK_BACK
+            } else if (scan == SDL_SCANCODE_DELETE) {
+                NofifyCharUp(46, ctrlStatus, altStatus);           // VK_DELETE
+            } else if (scan == SDL_SCANCODE_SPACE) {
+                NofifyCharUp(32, ctrlStatus, altStatus);           // VK_SPACE
+            } else if (scan == SDL_SCANCODE_LEFT) {
+                NofifyCharUp(37, ctrlStatus, altStatus);           // VK_LEFT
+            } else if (scan == SDL_SCANCODE_RIGHT) {
+                NofifyCharUp(39, ctrlStatus, altStatus);           // VK_RIGHT
+            } else if (scan == SDL_SCANCODE_HOME) {
+                NofifyCharUp(36, ctrlStatus, altStatus);           // VK_HOME
+            } else if (scan == SDL_SCANCODE_END) {
+                NofifyCharUp(35, ctrlStatus, altStatus);           // VK_END
+            } else if (scan == SDL_SCANCODE_INSERT) {
+                NofifyCharUp(45, ctrlStatus, altStatus);           // VK_INSERT
             } else {
                 // even more required ...
                 // check 0041AC50 input_get_string (convert into platform-independed enum)

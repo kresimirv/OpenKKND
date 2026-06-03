@@ -269,22 +269,22 @@ Entity *EntityFactory::Unpack(EntitySerialized *save_data)
             v3->SetMode(m);
 
             v20 = v2->entity_mode_idle;
-            v3->mode_idle = (void(*)(Entity *))get_handler(v20 - 1);
+            v3->mode_idle = v20 ? (void(*)(Entity *))get_handler(v20 - 1) : 0;
 
             v22 = v2->entity_mode_arrive;
-            v3->mode_arrive = (void(*)(Entity *))get_handler(v22 - 1);
+            v3->mode_arrive = v22 ? (void(*)(Entity *))get_handler(v22 - 1) : 0;
 
             v24 = v2->entity_mode_attacked;
-            v3->mode_attacked = (void(*)(Entity *))get_handler(v24 - 1);
+            v3->mode_attacked = v24 ? (void(*)(Entity *))get_handler(v24 - 1) : 0;
 
             v26 = v2->entity_mode_return;
-            v3->mode_return = (void(*)(Entity *))get_handler(v26 - 1);
+            v3->mode_return = v26 ? (void(*)(Entity *))get_handler(v26 - 1) : 0;
 
             v28 = v2->entity_mode_turn_return;
-            v3->mode_turn_return = (void(*)(Entity *))get_handler(v28 - 1);
+            v3->mode_turn_return = v28 ? (void(*)(Entity *))get_handler(v28 - 1) : 0;
 
             v30 = v2->entity_message_handler_idx;
-            v3->event_handler = (void(*)(Script *, Script *, enum SCRIPT_EVENT, void *))get_handler(v30 - 1);
+            v3->event_handler = v30 ? (void(*)(Script *, Script *, enum SCRIPT_EVENT, void *))get_handler(v30 - 1) : 0;
 
             memset(&v3->_24_ai_node_per_player_side, 0, sizeof(v3->_24_ai_node_per_player_side));
             memset32(&v3->stru60, (int)&entity_default_stru60, 6u);
@@ -294,6 +294,7 @@ Entity *EntityFactory::Unpack(EntitySerialized *save_data)
             v3->field_84 = v2->entity_field_84;
             v3->_88_dst_orientation = v2->entity_field_88;
             v3->destroyed = 0;
+            v3->entity_id = v2->entity_entity_id;
             v3->hitpoints = v2->entity_hitpoints;
             v3->experience = v2->entity_field_94;
             v3->veterancy_level = v2->entity_98_veterancy_damage_bonus_idx;
@@ -540,7 +541,6 @@ Entity *EntityFactory::Unpack(EntitySerialized *save_data)
                 {
                     v72 = v2[1].turret_sprite.x_speed;
                     v71->event_handler = (void(*)(Script *, Script *, enum SCRIPT_EVENT, void *))get_handler(v72 - 1);
-                    //v71->debug_handler_name = get_handler_name(v72 - 1);
                     v71->flags_20 = v2[1].turret_sprite.y_speed;
                     v71->num_runs_to_skip = v2[1].turret_sprite.z_speed;
                     v71->flags_24 = v2[1].turret_sprite._inside_mobd_item;

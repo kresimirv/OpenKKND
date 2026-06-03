@@ -172,6 +172,8 @@ void EventHandler_Towers(Script *receiver, Script *sender, enum SCRIPT_EVENT eve
     Script **v7; // eax@14
 
     v4 = (Entity *)receiver->param;
+    if (!v4 || v4->script != receiver)
+        return;
     if (!v4->destroyed)
     {
         switch (event)

@@ -43,8 +43,12 @@ void EventHandler_DefaultBuildingsHandler(Script *receiver, Script *sender, enum
     int v12; // [sp-Ch] [bp-18h]@27
     enum PLAYER_SIDE v13; // [sp-4h] [bp-10h]@24
 
-    v4 = 0;
+    if ((void *)receiver->handler == (void *)EventHandler_DefaultBuildingsHandler)
+        return;
     v5 = (Entity *)receiver->param;
+    if (!v5 || v5->script != receiver)
+        return;
+    v4 = 0;
     if (sender)
         v4 = sender->param;
     if (!v5->destroyed)

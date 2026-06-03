@@ -184,6 +184,7 @@ void stru29_list_free()
     if (stru29_list && stru29_list_initialized)
     {
         delete[] stru29_list;
+        stru29_list = nullptr;
         stru29_list_initialized = false;
     }
 }
@@ -207,6 +208,7 @@ void stru29_list_remove_all(Script *a1)
         do
         {
             v3 = v1->sprite;
+            v3->_80_entity__stru29__sprite__initial_hitpoints = 0;
             v4 = (RenderString *)v3->param;
             v5 = v3->script;
             if (v4)

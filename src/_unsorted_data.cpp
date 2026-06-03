@@ -392,7 +392,7 @@ int dword_464D3C[24] =
 char aDDD[] = "%d %d %d\n"; // idb
 char aR[] = "r"; // idb
 char aSLevelsMulti_p[] = "%S//LEVELS//MULTI.PAL"; // idb
-int dword_464DC0[] = { 0 }; // weak
+int dword_464DC0[4] = { 0, 1, 4, 59 }; // weak
 int dword_464DCC = 1; // weak
 EnemyAI_stru57 array_464DD0[47] =
 {
@@ -2494,9 +2494,9 @@ int _4690B0_sound_volume_previous = 16; // weak
 int _4690B4_unk_volume = 24576; // weak
 char asc_46BB14[18] = "                 ";
 int _46BB60_dmg_handler_mobd_offsets[3] = { 332, 364, 388 };
-char aSGameD_sav[] = "%s\\game%d.sav"; // idb
+char aSGameD_sav[] = "%s/game%d.sav"; // idb
 char aActiveslotD[] = "ActiveSlot=%d\n"; // idb
-char aSSave_lst[] = "%s\\save.lst"; // idb
+char aSSave_lst[] = "%s/save.lst"; // idb
 int _46BBE8_mobd_offset_table_by_stru22[8] = { 1976, 1988, 2000, 2012, 2024, 2036, 2048, 2060 };
 int dword_46BC20[8] = { 60, 40, 4294967286, 4294967266, 4294967251, 4294967261, 0, 30 };
 int dword_46BC40[8] = { 10, 4294967251, 4294967241, 4294967261, 0, 25, 35, 40 };

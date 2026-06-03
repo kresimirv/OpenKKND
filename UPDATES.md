@@ -80,9 +80,29 @@ Sentinel trick: two adjacent pointer globals used as `next`/`prev` of implicit s
 - `Sound.cpp` (`_439C10_sound_thread`): Reduced BGM streaming buffer from `3 * nAvgBytesPerSec` to `nAvgBytesPerSec / 2` (0.5 seconds). Previously, old-volume audio data in the 3-second SDL queue had to drain before the new volume was heard — causing a multi-second delay. The smaller buffer drains 6x faster, making volume changes audible within ~600ms.
 - `Sound.cpp`: After `CreateSoundBuffer`, BGM buffer's `device_id` is forced to `pds->m_stream_device` regardless of buffer size. This prevents the `>= 110000` streaming threshold from misclassifying the smaller buffer as SFX, which would assign it to a device in the SFX pool — causing BGM to get paused by `PauseAll()` when the in-game menu opens.
 
+### In-Game Menu — Custom Mission Briefing Fix
+- Root cause: `script_ingame_menu_create_briefing_dialog` (`GameMenu.cpp:345`) indexed `aNoFreeLinks[4 * current_level_idx + 12]` — but custom mission level indices go up to 19, producing an OOB access into the fixed `[4*10]` array. Game crashed when opening "MISSION BRIEFING" for any New Mission.
+- Additionally, the full 20-line `custom_missions[].briefing[]` text was too long for the 11-line in-game menu dialog. The original EXE stored separate shorter briefings using `.` as newline delimiters (`.`=`\n`, `..`=`\n\n`).
+- **Fix**: extracted the 20 short briefings from the original EXE into `custom_missions_in_game_briefing[20]` array (`_unsorted_data.cpp:2135-2176`), using a `period+space=no-break` rule to keep entries ≤ 11 lines. Updated `script_ingame_menu_create_briefing_dialog` to use `custom_missions_in_game_briefing[cm_idx]` instead of the OOB heuristic.
+- Removed unused `briefing_text[2048]` local variable.
+
+### Save Game Dialog — Missing Keyboard Keys
+- `SdlWindow.cpp:MessageProcessor`: added SDL_KEYUP forwarding for scancodes: BACKSPACE (8), DELETE (46), SPACE (32), LEFT (37), RIGHT (39), HOME (36), END (35), INSERT (45) via `NofifyCharUp(vk, ctrl, alt)`.
+- `input_get_string()` (`kknd.cpp:5333`) already handled all these VK codes — they just weren't being forwarded from SDL.
+
+### Save Game Dialog — Escape Key Fix
+- Root cause: `input_get_string()` checked for `case 27 (VK_ESCAPE)` in its switch, but the SDL_KEYUP handler forwarded Escape via `NofifySpecialKeyUp(INPUT_KEYBOARD_ESCAPE_MASK, ...)` which is `0x200`. The switch missed the `0x200` case, so Escape was silently ignored — the function still returned `true` (same as Enter), causing the save to proceed instead of cancelling.
+- Also, `input_char_is_escape()` only checked `input_combo_pressed_vk == 27`, missing the `0x200` value.
+- **Fix**: added `case INPUT_KEYBOARD_ESCAPE_MASK:` alongside `case 27:` in `input_get_string()`, and updated `input_char_is_escape()` to check for both `VK_ESCAPE (27)` and `INPUT_KEYBOARD_ESCAPE_MASK (0x200)`.
+
+### Save Game Dialog — Delete Key Crash Fix
+- Root cause: `input_get_string()` Delete and Backspace handlers used `v5 += 0xFFFF` (lines 5417, 5423). In the original 16-bit x86 assembly, `add ax, 0FFFFh` wraps to `ax -= 1`. In the 32-bit C++ translation, `v5` is `int`, so `0xFFFF` is the literal 65535 — adding 65535 instead of subtracting 1 produced a huge cursor position (e.g., 65536). This was passed to `draw_handler()` → `render_string_443EE0()`, which used it to traverse a linked list — walking past the end into freed memory → crash.
+- **Fix**: replaced `v5 += 0xFFFF` with `v5--` in both the Delete and Backspace handlers.
+
 ## Current Status
 - **ASan Debug build**: game runs through main menu → campaign start → gameplay without ASan errors.
 - **Release build (`-O3 -DNDEBUG -fno-strict-aliasing`)**: builds clean, runs with full rendering and sound.
+- **Savegames**: Fully working — save/load, unit selection, unit control, enemy AI, and attack commands all work correctly after loading a save.
 - Heap corruption ("malloc(): unaligned tcache chunk detected" at `malloc(0xCC)`) observed pre-fixes. May no longer occur after all sentinel overflows fixed — needs verification on real hardware.
 
 ## Remaining Concerns
@@ -110,3 +130,59 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
 - **BSS buffer overflow** (`Mission.cpp:37`): Tech bunker handler wrote sprite `y` to `_47A300_stru51_array__field_4__minus1_index[2*(v1+1)]` — computed index up to 24, but array was declared `[5]`. Overflow corrupted adjacent BSS globals: `sprites_lvl` (at index 22, value `0x8ef00`) caused crash-on-quit in `free()`; `wait_lvl` (index 24) caused second crash in `Game::Run()`; possibly also corrupted `game_state` and other state → main menu items disabled after Kaos quit. **Fix**: store `y` to `_47A300_stru51_tech_bunkers[v1].y` instead — correct write within array bounds, also fixes tech bunker spawn y-read at line 1640.
 - **`free(wait_lvl)` crash guard** (`Game.cpp:213,219`): added same `0x100000` pointer-sanity check as `sprites_lvl` guard.
 - **Player start position not found** (`Mission.cpp:1317`): `is_demo_build` search loop compared `v12` against `&_47A3D4_tanker_convoy_units_left` (BSS `0xdbbb0`) — which sits **before** `_47A378_stru48_array` (BSS `0xdbbc0`). The initial `v12 = 0xDBBC8` already exceeded the bound, so the loop **always** immediately exited to random-start fallback (`kknd_rand % 6`). Player spawned at a random (often AI) start → camera in fog, units under wrong side control, "fully built base" from AI territory. **Fix**: changed bound to `v11 >= _47A378_stru48_array_num_items` — properly iterates all available start positions until `player_side` matches.
+
+### Crash Fix — AI Player Save/Load (heap-buffer-overflow)
+- Root cause: `GAME_Save_PackAiPlayers` size pass counted list data for *all* non-null AI players, but the pack pass only *wrote* it when `handler_id >= 0`. For null-handler players with non-empty lists (e.g., preplaced enemies), a buffer gap of uninitialized heap existed — on load, the sequential reader read past the actual written data.
+- **Fix 1** (`SaveLoad.cpp:3345`): removed `if (handler_id >= 0)` guard in the pack pass. Every non-null AI player now has full data written (284-byte base + all list data), matching the size calculation.
+- **Fix 2** (`SaveLoad.cpp:2304`): removed the null-handler early skip in `GAME_Load_UnpackAiPlayers`. Every non-null AI player now has full data loaded regardless of handler validity.
+- Backward compatible: old saves have zeroed count fields in null-handler base blocks; load skips list processing when counts are zero.
+- **Fix 3** (`SaveLoad.cpp:2029-2036`): handle `block_size == 0` in `GAME_Load()` when no CPU opponents exist. `fread()` with count 0 returns 0 items (falsy), treated as failure — crashed campaigns without CPU players (e.g., mission 1 "The Next Generation"). Added `block_size == 0 ||` short-circuits to skip AI player loading when no data exists.
+
+### Save File Paths — Backslash → Forward Slash
+- Root cause: format strings used `\\` (Windows backslash) as path separator. On Linux, `\\` is a valid filename character, not a separator. `game_data_installation_dir` (e.g. `/path/to/bin`) combined with `%s\\game%d.sav` produced `/path/to/bin\game0.sav` — a literal file with `\` in the name.
+- **Fix**: changed all save-related path format strings to use `/` instead of `\\`:
+  - `aSGameD_sav`: `"%s\\game%d.sav"` → `"%s/game%d.sav"` (`_unsorted_data.cpp:2497`)
+  - `aSSave_lst`: `"%s\\save.lst"` → `"%s/save.lst"` (`_unsorted_data.cpp:2499`)
+  - KKND.SVE read path: `"%s\\%s"` → `"%s/%s"` (`SaveLoad.cpp:1164`)
+  - KKND.SVE update path: `"%s\\%s"` → `"%s/%s"` (`SaveLoad.cpp:1326`)
+- Save files now created as e.g. `bin/game0.sav`, `bin/save.lst`, `bin/KKND.SVE`.
+
+### Crash Fix — AI Player List Off-by-One on Load (heap-buffer-overflow)
+- Root cause: `GAME_Load_UnpackAiPlayers` advanced read pointers (`v6 += 4`, `a2 += 4`, `++v56`) *before* reading entity IDs, but the pack code writes the ID before advancing (`*((_DWORD *)i19 - 1) = id; i19 += 4`). First entry at offset 0 was skipped, and the last iteration read one DWORD past the allocated buffer.
+- **Fix**: moved all pointer-advance operations to *after* the entity-ID reads in 7 loops:
+  - Enemy list (`SaveLoad.cpp:3097`)
+  - Wanderer list (`2412`)
+  - `list_40` (`2443`)
+  - `attacker_list_48` (`2474`)
+  - `marshalling_nodes` (`2508`)
+  - `power_plant` list (`2577`)
+  - Attacker sublist in convoy (`2363`)
+  - Attacker sublist in drill-rig (`2658`)
+
+### Crash Fix — EventHandler_OilTanker Segfault (Script Handler Mismatch)
+- Root cause: `EventHandler_OilTanker` was registered in the `script_handlers[]` table and got called as a `Script::handler` via `s->handler(s)` (1 arg) instead of as a `Script::event_handler` (4 args). The remaining 3 parameters were garbage on stack — `receiver->param` was a `task_sidebar_attachment*`, not an `Entity*`, causing a segfault on dereference.
+- **Fix** (`Vehicles.cpp:688-690`): added defensive guard `if (!v5 || v5->script != receiver) return;` — validates that `receiver->param` points back to the receiver via the Entity's `script` field before proceeding.
+
+### Crash Fix — Use-After-Free on New Campaign Start After Quit to Main Menu
+- Root cause: `script_list_free()` (`Script.cpp:1390`) guards cleanup with `if (coroutine_current == coroutine_list_get_head())`. After MainMenu exits (user clicks "New Campaign"), `coroutine_current` still points to the last resumed coroutine, NOT the head. The guard fails silently — scripts are NOT deleted and `script_execute_list` is NOT cleared. Stale scripts (from previous game + main menu) persist into the new campaign's script list. A stale tower-adjacent script with corrupted `param` executes `EventHandler_Towers` → reads from freed SDL surface memory → heap-use-after-free.
+- **Fix 1** (`Script.cpp:1390`): replaced `if (coroutine_current == coroutine_list_get_head())` with `coroutine_current = coroutine_list_get_head();` — unconditionally resets `coroutine_current` to head so cleanup always runs when `script_list_free()` is called from `LVL_Deinit()`.
+- **Fix 2** (`Towers.cpp:174-175`): added defensive guard `if (!v4 || v4->script != receiver) return;` in `EventHandler_Towers` — validates the bidirectional Entity↔Script relationship before accessing entity fields, preventing crashes from stale/corrupted script params.
+
+### Savegame Fix — Handler ID Mismatch Between Save/Load (Crash)
+- Root cause: Handler IDs were saved as 0-based (0 = first handler) but loaded as 1-based (0 = null handler, 1 = first handler). This caused wrong handlers to be invoked, including 4-param handlers being called as 1-param handlers, leading to crashes.
+- **Fix** (`Script.cpp`): changed `get_handler_id()` to return 1-based index:
+  - Return `i + 1` instead of `i` when handler is found
+  - Return `0` instead of `-1` when handler is not found (matching load-side convention: 0 = null)
+- **Fix** (`Vehicles.cpp:51,55,60; Infantry.cpp:362,438; kknd.cpp:11144,11152,11158`): added pointer-type detection guards (offset-12 heuristic: values < 1MB = `script_type`, values >= 1MB = `script` pointer) to safely handle cases where `script` and `script_type` might be confused.
+
+### Savegame Fix — Entity ID Not Restored (Unit Control + AI Broken)
+- Root cause: When loading savegames, `EntityFactory::Create()` assigned new sequential IDs instead of restoring the original saved IDs. This broke:
+  - Unit targeting (attack commands used wrong entity IDs)
+  - Enemy AI (couldn't find targets by ID)
+  - All entity ID-based lookups
+- **Fix 1** (`EntityFactory.cpp:297`): Added `v3->entity_id = v2->entity_entity_id;` in `EntityFactory::Unpack()` to restore the saved entity ID instead of generating a new one.
+- **Fix 2** (`SaveLoad.cpp:2057-2059`): Updated `_47DCC4_entity_id_counter` after loading all entities to avoid ID collisions for newly spawned units.
+- **Fix 3** (`SaveLoad.cpp:1968`): Fixed compilation error — moved `int max_entity_id;` declaration before the while loop that contains `goto LABEL_59` to avoid "crosses initialization of variable" error.
+
+### Savegame Fix — Defensive Null Checks for Entity Factory
+- **Fix** (`Vehicles.cpp:175; Infantry.cpp:839,853`): Added null checks for `EntityFactory::Create()` return values in `UNIT_Handler_VehiclesInfantry` and `UNIT_Handler_OilTanker` to prevent dereferencing null pointers if entity creation fails.

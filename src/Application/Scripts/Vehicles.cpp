@@ -26,12 +26,30 @@ void UNIT_Handler_OilTanker(Script *a1)
     if (!_47C6DC_dont_execute_unit_handlers)
     {
         v1 = (Entity *)a1->param;
-        if (!v1)
+        if (v1)
         {
+            unsigned int offset12_val = *(unsigned int *)((char *)v1 + 12);
+            const unsigned int SCRIPT_TYPE_MAX = 0x00100000;
+            bool is_likely_entity = offset12_val >= SCRIPT_TYPE_MAX;
+
+            if (!is_likely_entity)
+            {
+                return;
+            }
+        }
+        else
+        {
+            if (!a1->sprite)
+                return;
+
             v1 = EntityFactory().Create(a1);
             entity_oil_tanker_initialize(v1);
             entity_oil_tanker_initialize_state(v1);
         }
+
+        if (!v1)
+            return;
+
         v1->ExecMode();
         v1->script->script_type = SCRIPT_TANKER_CONVOY_HANDLER;
         v2 = v1->_12C_prison_bunker_spawn_type;
@@ -683,10 +701,14 @@ void EventHandler_OilTanker(Script *receiver, Script *sender, enum SCRIPT_EVENT 
     int v20; // eax@49
     Script *v21; // [sp-Ch] [bp-18h]@58
 
+    if ((void *)receiver->handler == (void *)EventHandler_OilTanker)
+        return;
+    v5 = (Entity *)receiver->param;
+    if (!v5 || v5->script != receiver)
+        return;
     v4 = 0;
     if (sender)
         v4 = (Entity *)sender->param;
-    v5 = (Entity *)receiver->param;
     v6 = v5->state;
     if (!v5->destroyed)
     {
@@ -944,7 +966,11 @@ void EventHandler_MobileDerrick(Script *receiver, Script *sender, enum SCRIPT_EV
 {
     Entity *v4; // esi@1
 
+    if ((void *)receiver->handler == (void *)EventHandler_MobileDerrick)
+        return;
     v4 = (Entity *)receiver->param;
+    if (!v4 || v4->script != receiver)
+        return;
     if (!v4->destroyed)
     {
         switch (event)

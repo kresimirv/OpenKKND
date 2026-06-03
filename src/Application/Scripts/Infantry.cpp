@@ -47,13 +47,33 @@ void UNIT_Handler_VehiclesInfantry(Script *a1)
     if (!_47C6DC_dont_execute_unit_handlers)
     {
         v1 = (Entity *)a1->param;
-        if (!v1)
+        if (v1)
         {
+            unsigned int offset12_val = *(unsigned int *)((char *)v1 + 12);
+            const unsigned int SCRIPT_TYPE_MAX = 0x00100000;
+            bool is_likely_entity = offset12_val >= SCRIPT_TYPE_MAX;
+
+            if (!is_likely_entity)
+            {
+                return;
+            }
+
+            if (v1->script != a1)
+                return;
+        }
+        else
+        {
+            if (!a1->sprite)
+                return;
+
             v1 = EntityFactory().Create(a1);
             entity_init_infantry(v1);
             entity_attach_turret(v1);
             entity_set_draw_handlers(v1);
         }
+
+        if (!v1)
+            return;
 
         v1->ExecMode();
         v2 = v1->sprite;
@@ -75,8 +95,11 @@ void UNIT_Handler_VehiclesInfantry(Script *a1)
                 if (v6 == v1->retaliation_target_id)
                 {
                     v7 = v1->retaliation_target;
-                    v1->_11C__infantry_sprite_y___drillrig_oil_spot = v7->sprite->x;
-                    v1->_120__infantry_sprite_x = v7->sprite->y;
+                    if (v7->sprite)
+                    {
+                        v1->_11C__infantry_sprite_y___drillrig_oil_spot = v7->sprite->x;
+                        v1->_120__infantry_sprite_x = v7->sprite->y;
+                    }
                 }
             }
         }
@@ -4663,24 +4686,78 @@ void entity_infantry_on_dead(Entity *a1)
 //----- (00419760) --------------------------------------------------------
 void entity_mode_419760_infantry_destroyed(Entity *a1)
 {
-    a1->sprite->x_speed = 0;
-    a1->sprite->y_speed = 0;
-    entity_load_move_mobd(a1);
+    Entity *entity;
 
-    a1->SetMode(entity_mode_4197E0_infantry);
-    a1->destroyed = 1;
-    script_trigger_event_group(a1->script, EVT_MSG_DESELECTED, a1, SCRIPT_TYPE_39030);
-    entity_40DEC0_boxd(a1, a1->sprite_map_x, a1->sprite_map_y, a1->_A4_idx_in_tile);
-    a1->script->event_handler = EventHandler_General_Scout;
+    if (!a1)
+        return;
+
+    unsigned int offset12_val = *(unsigned int *)((char *)a1 + 12);
+    const unsigned int SCRIPT_TYPE_MAX = 0x00100000;
+    bool is_likely_script = offset12_val < SCRIPT_TYPE_MAX;
+
+    if (is_likely_script)
+    {
+        Script *s = (Script *)a1;
+        Entity *script_entity = (Entity *)s->param;
+        if (script_entity && script_entity->script == s)
+            entity = script_entity;
+        else
+            return;
+    }
+    else
+    {
+        Entity *e = (Entity *)a1;
+        if (e->script && e->script->param == e)
+            entity = e;
+        else
+            return;
+    }
+
+    entity->sprite->x_speed = 0;
+    entity->sprite->y_speed = 0;
+    entity_load_move_mobd(entity);
+
+    entity->SetMode(entity_mode_4197E0_infantry);
+    entity->destroyed = 1;
+    script_trigger_event_group(entity->script, EVT_MSG_DESELECTED, entity, SCRIPT_TYPE_39030);
+    entity_40DEC0_boxd(entity, entity->sprite_map_x, entity->sprite_map_y, entity->_A4_idx_in_tile);
+    entity->script->event_handler = EventHandler_General_Scout;
 }
 
 //----- (004197E0) --------------------------------------------------------
 void entity_mode_4197E0_infantry(Entity *a1)
 {
-    a1->sprite->x_speed = 0;
-    a1->sprite->y_speed = 0;
-    entity_load_move_mobd(a1, a1->GetCurrentAnimFrame() + 64);
-    script_yield(a1->script, SCRIPT_FLAGS_20_10000000, 0);
+    Entity *entity;
+
+    if (!a1)
+        return;
+
+    unsigned int offset12_val = *(unsigned int *)((char *)a1 + 12);
+    const unsigned int SCRIPT_TYPE_MAX = 0x00100000;
+    bool is_likely_script = offset12_val < SCRIPT_TYPE_MAX;
+
+    if (is_likely_script)
+    {
+        Script *s = (Script *)a1;
+        Entity *script_entity = (Entity *)s->param;
+        if (script_entity && script_entity->script == s)
+            entity = script_entity;
+        else
+            return;
+    }
+    else
+    {
+        Entity *e = (Entity *)a1;
+        if (e->script && e->script->param == e)
+            entity = e;
+        else
+            return;
+    }
+
+    entity->sprite->x_speed = 0;
+    entity->sprite->y_speed = 0;
+    entity_load_move_mobd(entity, entity->GetCurrentAnimFrame() + 64);
+    script_yield(entity->script, SCRIPT_FLAGS_20_10000000, 0);
 }
 
 //----- (00419830) --------------------------------------------------------

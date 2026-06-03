@@ -399,42 +399,42 @@ LABEL_9:
         goto LABEL_224;
     }
 
-    v4->entity_mode_idle = get_handler_id(v3->mode_idle);
+    v4->entity_mode_idle = v3->mode_idle ? get_handler_id(v3->mode_idle) : 0;
     if (v4->entity_mode_idle < 0)
     {
         sprintf(byte_479EF8, "unit %d %s", v3->unit_id, "unknown idle mode");
         goto LABEL_224;
     }
 
-    v4->entity_mode_arrive = get_handler_id(v3->mode_arrive);
+    v4->entity_mode_arrive = v3->mode_arrive ? get_handler_id(v3->mode_arrive) : 0;
     if (v4->entity_mode_arrive < 0)
     {
         sprintf(byte_479EF8, aUnitDS, v3->unit_id, "unknown arrive mode");
         goto LABEL_224;
     }
 
-    v4->entity_mode_attacked = get_handler_id(v3->mode_attacked);
+    v4->entity_mode_attacked = v3->mode_attacked ? get_handler_id(v3->mode_attacked) : 0;
     if (v4->entity_mode_attacked < 0)
     {
         sprintf(byte_479EF8, aUnitDS, v3->unit_id, "unknown attacked mode");
         goto LABEL_224;
     }
 
-    v4->entity_mode_return = get_handler_id(v3->mode_return);
+    v4->entity_mode_return = v3->mode_return ? get_handler_id(v3->mode_return) : 0;
     if (v4->entity_mode_return < 0)
     {
         sprintf(byte_479EF8, aUnitDS, v3->unit_id, "unknown return mode");
         goto LABEL_224;
     }
 
-    v4->entity_mode_turn_return = get_handler_id(v3->mode_turn_return);
+    v4->entity_mode_turn_return = v3->mode_turn_return ? get_handler_id(v3->mode_turn_return) : 0;
     if (v4->entity_mode_turn_return < 0)
     {
         sprintf(byte_479EF8, aUnitDS, v3->unit_id, "unknown turn-return mode");
         goto LABEL_224;
     }
 
-    v4->entity_message_handler_idx = get_handler_id(v3->event_handler);
+    v4->entity_message_handler_idx = v3->event_handler ? get_handler_id(v3->event_handler) : 0;
     if (v4->entity_message_handler_idx < 0)
     {
         sprintf(byte_479EF8, aUnitDS, v3->unit_id, "unknown message handler");
@@ -1161,7 +1161,7 @@ void _4240E0_kknd_sve_read(const char *filename)
     int v7; // [sp+Ch] [bp-108h]@4
     char FileName[260]; // [sp+10h] [bp-104h]@1
 
-    sprintf(FileName, "%s\\%s", game_data_installation_dir, filename);
+    sprintf(FileName, "%s/%s", game_data_installation_dir, filename);
     //SetFileAttributesA(FileName, FILE_ATTRIBUTE_NORMAL);
     v1 = fopen(FileName, "r");
     if (v1)
@@ -1323,7 +1323,7 @@ void _4243C0_kknd_sve_update_last_level(const char *a1)
 
     a2 = 0;
     v6 = 0;
-    sprintf(filename, "%s\\%s", game_data_installation_dir, a1);
+    sprintf(filename, "%s/%s", game_data_installation_dir, a1);
     //SetFileAttributesA(filename, FILE_ATTRIBUTE_NORMAL);
 
     short _a2, _v6;
@@ -1543,16 +1543,14 @@ MiscSaveStruct *GAME_Save_PackMiscInfo(size_t *a1)
         v5->scout_entity_id = v6;
         v7 = _47B3C0_player_outposts_clanhalls;
         v8 = v5->outposts_clanhalls_entity_ids;
-        do
+        for (int op_idx = 0; op_idx < 4; ++op_idx, ++v7, ++v8)
         {
             if (*v7)
                 v9 = (*v7)->entity_id;
             else
                 v9 = -1;
             *v8 = v9;
-            ++v7;
-            ++v8;
-        } while ((int)v7 < (int)& _47B3D0_building_production_group);
+        }
         v5->_47A370_unit = _4269B0_task_attachment__num_units_spawned;
         v5->_47A2F8_unit = _4269B0_task_attachment__num_units_created_manually;
         v5->dword_47CA2C = _47CA2C_should_airstrike_mess_with_sidebar;
@@ -1924,7 +1922,15 @@ int GAME_Save()
     ABORT_SAVEGAME_FWRITE(fwrite(&misc_info_size, 1u, 4u, file));
     ABORT_SAVEGAME_FWRITE(fwrite(misc_info, 1u, misc_info_size, file));
 
-    CLEANUP_SAVEGAME();
+    if (misc_info) { free(misc_info); misc_info = nullptr; }
+    if (map_info) { free(map_info); map_info = nullptr; }
+    if (cpu_players) { free(cpu_players); cpu_players = nullptr; }
+    if (production_info) { free(production_info); production_info = nullptr; }
+    if (entity_save_data) { delete[] entity_save_data; entity_save_data = nullptr; }
+    if (oil_save_data) { free(oil_save_data); oil_save_data = nullptr; }
+    if (file) { fclose(file); file = nullptr; }
+    game_save_in_progress = 0;
+    return 1;
 }
 
 //----- (004218B0) --------------------------------------------------------
@@ -1959,6 +1965,8 @@ int GAME_Load()
     int ptr; // [sp+14h] [bp-10h]@1
     int v29; // [sp+18h] [bp-Ch]@1
     int mapd_cplc_dim[2]; // [sp+1Ch] [bp-8h]@7
+    int num_entity_ids; // [sp+20h]
+    int max_entity_id;
 
     v0 = 0;
     ptr = -1;
@@ -1999,31 +2007,17 @@ int GAME_Load()
     if (!fread(&ptr, 1u, 4u, v4))
         goto LABEL_56;
 
-    for (i = ptr; ptr != -1; i = ptr)
+    num_entity_ids = 0;
+    while (ptr != -1)
     {
-        //v8 = entity_list_free_pool;
-        //if (entity_list_free_pool)
-        //	entity_list_free_pool = entity_list_free_pool->next;
-        //else
-        //	v8 = 0;
-        v8 = 0;//if (!v8)
-        goto LABEL_59;
-        v8->entity_id = i;
-        if (ptr >= _47DCC4_entity_id_counter)
-            _47DCC4_entity_id_counter = ptr + 1;
-        //v9 = entity_list_47D9AC;
-        //v10 = entity_list_47D9AC->next;
-        //v8->prev = entity_list_47D9AC;
-        //v8->next = v10;
-        //v9->next->prev = v8;
-        //v9->next = v8;
+        ++num_entity_ids;
         if (!fread(&ptr, 1u, 4u, v4))
             goto LABEL_59;
     }
     if (!fread(&block_size, 1u, 4u, v4))
         goto LABEL_56;
-    minus1_sized_block = malloc(block_size);
-    if (!minus1_sized_block)
+    minus1_sized_block = block_size ? malloc(block_size) : nullptr;
+    if (block_size && !minus1_sized_block)
     {
     LABEL_56:
         fclose(v4);
@@ -2032,76 +2026,111 @@ int GAME_Load()
         return result;
     }
 
-    if (entityRepo->CountAll() <= 0)
+    max_entity_id = 0;
+    for (int entity_idx = 0; entity_idx < num_entity_ids; ++entity_idx)
     {
-    LABEL_33:
-        free(minus1_sized_block);
-        if (fread(&block_size, 1u, 4u, v4))// max entity save size
+        if (!fread(&block_size, 1u, 4u, v4))
+            goto LABEL_56;
+        if (!fread(minus1_sized_block, 1u, block_size, v4))
+            goto LABEL_56;
+        auto v12 = EntityFactory().Unpack((EntitySerialized *)minus1_sized_block);
+        if (v12 == nullptr) {
+            break;
+        }
+        entityRepo->Save(v12);
+
+        if (v12->entity_id > max_entity_id)
         {
-            entity_data = malloc(block_size);
-            if (entity_data)
+            max_entity_id = v12->entity_id;
+        }
+
+        v13 = v12->player_side;
+        if (v13 == player_side)
+        {
+            ++UNIT_num_player_units;
+        }
+        else if (v13)
+        {
+            ++UNIT_num_nonplayer_units;
+        }
+    }
+    if (max_entity_id > _47DCC4_entity_id_counter)
+    {
+        _47DCC4_entity_id_counter = max_entity_id;
+    }
+    free(minus1_sized_block);
+    minus1_sized_block = nullptr;
+
+    if (fread(&block_size, 1u, 4u, v4))
+    {
+        entity_data = block_size ? malloc(block_size) : nullptr;
+        if (block_size == 0 || entity_data)
+        {
+            if (block_size == 0 || fread(entity_data, 1u, block_size, v4))
             {
-                if (fread(entity_data, 1u, block_size, v4))
+                bool ai_unpack_ok = block_size == 0 || GAME_Load_UnpackAiPlayers(entity_data);
+                if (entity_data)
                 {
-                    if (GAME_Load_UnpackAiPlayers(entity_data))
+                    free(entity_data);
+                    entity_data = nullptr;
+                }
+                if (ai_unpack_ok)
+                {
+                    if (fread(&block_size, 1u, 4u, v4))
                     {
-                        free(entity_data);
-                        if (fread(&block_size, 1u, 4u, v4))
+                        v16 = malloc(block_size);
+                        v17 = v16;
+                        if (v16)
                         {
-                            v16 = malloc(block_size);
-                            v17 = v16;
-                            if (v16)
+                            if (fread(v16, 1u, block_size, v4))
                             {
-                                if (fread(v16, 1u, block_size, v4))
+                                if (GAME_Load_UnpackProductionInfo(v17))
                                 {
-                                    if (GAME_Load_UnpackProductionInfo(v17))
+                                    free(v17);
+                                    if (fread(&block_size, 1u, 4u, v4))
                                     {
-                                        free(v17);
-                                        if (fread(&block_size, 1u, 4u, v4))
+                                        v18 = (char *)malloc(block_size);
+                                        v19 = v18;
+                                        if (v18)
                                         {
-                                            v18 = (char *)malloc(block_size);
-                                            v19 = v18;
-                                            if (v18)
+                                            if (fread(v18, 1u, block_size, v4))
                                             {
-                                                if (fread(v18, 1u, block_size, v4))
+                                                v20 = map_fog_of_war_scrl_tiles;
+                                                v21 = v19;
+                                                if ((map_get_height() + 4) * (map_get_width() + 4) > 0)
                                                 {
-                                                    v20 = map_fog_of_war_scrl_tiles;
-                                                    v21 = v19;
-                                                    if ((map_get_height() + 4) * (map_get_width() + 4) > 0)
+                                                    v22 = (map_get_height() + 4) * (map_get_width() + 4);
+                                                    do
                                                     {
-                                                        v22 = (map_get_height() + 4) * (map_get_width() + 4);
-                                                        do
+                                                        v23 = *v21;
+                                                        if (*v21 <= v0 || v23 >= 16)
                                                         {
-                                                            v23 = *v21;
-                                                            if (*v21 <= v0 || v23 >= 16)
-                                                            {
-                                                                v24 = 0;
-                                                            }
-                                                            else
-                                                            {
-                                                                v24 = fog_of_war_scrl_source->tiles[v23];
-                                                                v0 = 0;
-                                                            }
-                                                            *v20 = v24;
-                                                            ++v20;
-                                                            ++v21;
-                                                            --v22;
-                                                        } while (v22);
-                                                    }
-                                                    _44A780_gof_of_war();
-                                                    free(v19);
-                                                    if (fread(&block_size, 1u, 4u, v4))
+                                                            v24 = 0;
+                                                        }
+                                                        else
+                                                        {
+                                                            v24 = fog_of_war_scrl_source->tiles[v23];
+                                                            v0 = 0;
+                                                        }
+                                                        *v20 = v24;
+                                                        ++v20;
+                                                        ++v21;
+                                                        --v22;
+                                                    } while (v22);
+                                                }
+                                                _44A780_gof_of_war();
+                                                free(v19);
+                                                if (fread(&block_size, 1u, 4u, v4))
+                                                {
+                                                    v25 = malloc(block_size);
+                                                    if (v25)
                                                     {
-                                                        v25 = malloc(block_size);
-                                                        if (v25)
+                                                        if (fread(v25, 1u, block_size, v4))
                                                         {
-                                                            if (fread(v25, 1u, block_size, v4))
+                                                            if (GAME_Load_UnpackMiscInfo(v25))
                                                             {
-                                                                if (GAME_Load_UnpackMiscInfo(v25))
-                                                                {
-                                                                    free(v25);
-                                                                    v29 = 1;
-                                                                }
+                                                                free(v25);
+                                                                v29 = 1;
                                                             }
                                                         }
                                                     }
@@ -2116,29 +2145,8 @@ int GAME_Load()
                 }
             }
         }
-        goto LABEL_56;
     }
-
-    while (fread(&block_size, 1u, 4u, v4)
-        && fread(minus1_sized_block, 1u, block_size, v4))
-    {
-        auto v12 = EntityFactory().Unpack((EntitySerialized *)minus1_sized_block);
-        if (v12 == nullptr) {
-            break;
-        }
-        entityRepo->Save(v12);
-
-        v13 = v12->player_side;
-        if (v13 == player_side)
-        {
-            ++UNIT_num_player_units;
-        }
-        else if (v13)
-        {
-            ++UNIT_num_nonplayer_units;
-        }
-    }
-    free(minus1_sized_block);
+    goto LABEL_56;
 LABEL_59:
     fclose(v4);
     game_load_in_progress = 0;
@@ -2304,10 +2312,12 @@ bool GAME_Load_UnpackAiPlayers(void *save_data)
         v117 = v5;
         v7 = *(_DWORD *)v5;
         a2 = v6;
-        v3->handler = (void(*)(Script *))get_handler(v7 - 1);
-        v3->debug_handler_name = get_handler_name(v7 - 1);
-        if (!v3->handler)
-            return 0;
+        if (v7 > 0)
+        {
+            v3->handler = (void(*)(Script *))get_handler(v7 - 1);
+            v3->debug_handler_name = get_handler_name(v7 - 1);
+        }
+
         v9 = (PLAYER_SIDE)*((_DWORD *)v5 + 40);
         v4->_2A0_player_side = v9;
         v10 = 0;
@@ -2361,8 +2371,9 @@ bool GAME_Load_UnpackAiPlayers(void *save_data)
                                 v19 = 0;
                             if (!v19)
                                 return 0;
-                            a2 += 4;
+
                             auto v22 = entityRepo->FindById(*(_DWORD *)a2);
+                            a2 += 4;
                             v19->entity = v22;
                             if (v22)
                             {
@@ -2408,9 +2419,10 @@ bool GAME_Load_UnpackAiPlayers(void *save_data)
                     v24 = 0;
                 if (!v24)
                     return 0;
+
+                auto v26 = entityRepo->FindById(*(_DWORD *)v6);
                 v6 += 4;
                 a2 = v6;
-                auto v26 = entityRepo->FindById(*(_DWORD *)v6);
                 v24->entity = v26;
                 if (v26)
                 {
@@ -2439,9 +2451,10 @@ bool GAME_Load_UnpackAiPlayers(void *save_data)
                     v28 = 0;
                 if (!v28)
                     return 0;
+
+                auto v30 = entityRepo->FindById(*(_DWORD *)v6);
                 v6 += 4;
                 a2 = v6;
-                auto v30 = entityRepo->FindById(*(_DWORD *)v6);
                 v28->_C__entity = v30;
                 if (v30)
                 {
@@ -2470,9 +2483,10 @@ bool GAME_Load_UnpackAiPlayers(void *save_data)
                     v32 = 0;
                 if (!v32)
                     return 0;
+
+                auto v34 = entityRepo->FindById(*(_DWORD *)v6);
                 v6 += 4;
                 a2 = v6;
-                auto v34 = entityRepo->FindById(*(_DWORD *)v6);
                 v32->entity = v34;
                 if (v34)
                 {
@@ -2503,10 +2517,10 @@ bool GAME_Load_UnpackAiPlayers(void *save_data)
                     v37 = 0;
                 if (!v37)
                     return 0;
-                v6 += 4;
-                a2 = v6;
 
                 auto v39 = entityRepo->FindById(*(_DWORD *)v6);
+                v6 += 4;
+                a2 = v6;
                 v37->entity = v39;
                 if (v39)
                 {
@@ -2569,10 +2583,10 @@ bool GAME_Load_UnpackAiPlayers(void *save_data)
                 v47 = 0;
             if (!v47)
                 return 0;
-            v6 += 4;
-            a2 = v6;
 
             auto v49 = entityRepo->FindById(*(_DWORD *)v6);
+            v6 += 4;
+            a2 = v6;
             v47->entity = v49;
             ++j;
             v49->_24_ai_node_per_player_side._0_ai_node_per_player_side[v4->_2A0_player_side] = (int)v47;
@@ -2653,10 +2667,10 @@ bool GAME_Load_UnpackAiPlayers(void *save_data)
                                 v59 = 0;
                             if (!v59)
                                 return 0;
-                            ++v56;
-                            a2 = (int)v56;
 
                             auto v61 = entityRepo->FindById(*v56);
+                            ++v56;
+                            a2 = (int)v56;
                             v59->entity = v61;
                             if (v61)
                             {
@@ -3092,10 +3106,10 @@ bool GAME_Load_UnpackAiPlayers(void *save_data)
             v11 = 0;
         if (!v11)
             return 0;
-        v6 += 4;
-        a2 = v6;
 
         auto v13 = entityRepo->FindById(*(_DWORD *)v6);
+        v6 += 4;
+        a2 = v6;
         v11->entity = v13;
         if (v13)
         {
@@ -3215,7 +3229,7 @@ void *GAME_Save_PackAiPlayers(size_t *size)
 
     *size = 0;
     v1 = task_ai_players;
-    do
+    for (int ai_idx = 0; ai_idx < 7; ++ai_idx, ++v1)
     {
         if (*v1)
         {
@@ -3318,8 +3332,7 @@ void *GAME_Save_PackAiPlayers(size_t *size)
             for (i8 = (int)v2->list_318; (stru24_stru310 **)i8 != &v2->list_318; i8 = *(_DWORD *)i8)
                 *size += 28;
         }
-        ++v1;
-    } while ((int)v1 < (int)&unk_4778EC);
+    }
     result = malloc(*size);
     v97 = result;
     if (!result)
@@ -3349,7 +3362,6 @@ void *GAME_Save_PackAiPlayers(size_t *size)
     v93 = v37;
 
     *(_DWORD *)v38 = get_handler_id(task_ai_players[v35]->handler);
-    if (*(_DWORD *)v38 >= 0)
     {
         for (i9 = (stru24 *)v37->enemy_list_108; (stru24_EnemyNode **)i9 != &v37->enemy_list_108; i9 = i9->next)
         {
@@ -3658,7 +3670,5 @@ void *GAME_Save_PackAiPlayers(size_t *size)
         *((_DWORD *)v38 + 70) = v93->field_360;
         goto LABEL_140;
     }
-    errmsg_save[1] = "unknown mode";
-    return 0;
 }
 // 41EF20: using guessed type int var_1C[7];

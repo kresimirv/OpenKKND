@@ -1389,7 +1389,7 @@ void script_main_menu_kaos_map(Script *a1)
     Sprite *v3; // eax@3
     bool v4; // sf@6
     unsigned __int8 v5; // of@6
-    char a2; // [sp+10h] [bp-14h]@4
+    char a2[256]; // [sp+10h] [bp-14h]@4
 
     if (netz_47C6C0_mapd_idx == 15)
         BYTE3(_46E420_starting_cash_idx) = 0;
@@ -1405,11 +1405,11 @@ void script_main_menu_kaos_map(Script *a1)
     stru29_list_4439F0(v2, v1, 0, 1, 0);
     while (1)
     {
-        sprintf(&a2, aS_0, off_46C358[SBYTE3(_46E420_starting_cash_idx)]);
+        sprintf(a2, aS_0, off_46C358[SBYTE3(_46E420_starting_cash_idx)]);
         v1->field_18 = 0;
         v1->num_lines = 0;
         render_string_445AE0(v1);
-        render_string_443D80(v1, &a2, 0);
+        render_string_443D80(v1, a2, 0);
         while (!script_443780(a1, 2156, 1, 0))
             ;
         v5 = __OFSUB__(BYTE3(_46E420_starting_cash_idx) + 1, 15);

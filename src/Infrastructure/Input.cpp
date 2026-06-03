@@ -220,7 +220,7 @@ bool input_char_is_whitespace() {
     return input_combo_pressed_vk == VK_SPACE;
 }
 bool input_char_is_escape() {
-    return input_combo_pressed_vk == VK_ESCAPE;
+    return input_combo_pressed_vk == VK_ESCAPE || input_combo_pressed_vk == INPUT_KEYBOARD_ESCAPE_MASK;
 }
 bool input_char_is_any() {
     return input_combo_pressed_vk != 0;
