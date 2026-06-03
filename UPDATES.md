@@ -71,7 +71,13 @@ Sentinel trick: two adjacent pointer globals used as `next`/`prev` of implicit s
 
 ### AI Fix — Enemy Units Now Attack Without a Base
 - `EnemyAI.cpp`: Generic AI initializes `_278_x_offset = -1` (no base). When `== -1`, the entire attacker marshalling and attack decision code was skipped via `goto LABEL_272` — enemies never attacked.
-- Fix: Inside the no-base block, before the `goto`, added code that forms non-scout attackers from `attacker_list_48` into a formation and inserts it into `list_11C`. The existing `list_11C` attack loop then calls `stru24_40B020()` to find the nearest enemy and issue `EVT_CMD_ENTITY_ATTACK`.
+- Fix (formation creation): Inside the no-base block, before the `goto`, added code that forms non-scout attackers from `attacker_list_48` into a formation and inserts it into `list_11C`. The existing `list_11C` attack loop then calls `stru24_40B020()` to find the nearest enemy and issue `EVT_CMD_ENTITY_ATTACK`.
+- **Second root cause — `_2A4_player_side` uninitialized**: `_2A4_player_side` is normally set at lines 366-368 when an AI building is created. For no-base AI, no building is ever built, so the field stays `0` (from `memset` at line 3172). When the condition at line 323 checks `stats->player_side != v4->_2A4_player_side`, a Survivor player unit (side `0`) compared against `0` yields `false`, routing the unit into the `else` allegiance branch (line 347) instead of adding it to `enemy_list_108`. That branch marks the unit as allied and removes it from the enemy list, leaving the list empty — the attack block at line 1581 is gated on `enemy_list_108` not being empty, so the entire formation/attack path was skipped despite the formation creation fix.
+- Fix (`_2A4_player_side`): Initialize `v4->_2A4_player_side = (PLAYER_SIDE)v75;` alongside `_2A0_player_side` at line 3175 in the generic AI init loop, so no-base AI correctly identifies enemy units of different sides instead of routing them into the ally code path.
+
+### Music Volume — Faster Response
+- `Sound.cpp` (`_439C10_sound_thread`): Reduced BGM streaming buffer from `3 * nAvgBytesPerSec` to `nAvgBytesPerSec / 2` (0.5 seconds). Previously, old-volume audio data in the 3-second SDL queue had to drain before the new volume was heard — causing a multi-second delay. The smaller buffer drains 6x faster, making volume changes audible within ~600ms.
+- `Sound.cpp`: After `CreateSoundBuffer`, BGM buffer's `device_id` is forced to `pds->m_stream_device` regardless of buffer size. This prevents the `>= 110000` streaming threshold from misclassifying the smaller buffer as SFX, which would assign it to a device in the SFX pool — causing BGM to get paused by `PauseAll()` when the in-game menu opens.
 
 ## Current Status
 - **ASan Debug build**: game runs through main menu → campaign start → gameplay without ASan errors.
@@ -83,3 +89,9 @@ Sentinel trick: two adjacent pointer globals used as `next`/`prev` of implicit s
 - Heap corruption at `malloc(0xCC)` not yet verified as fixed on non-ASan real-hardware run.
 - `SetCurrentAnimFrame(256): index out of bounds` warning during gameplay (minor, doesn't crash).
 - Low-risk printf-format warnings remain (`%d` → `size_t` args).
+
+### In-Game Menu — Restart / Return to Main Menu Crash Fix
+- Root cause: when "Restart Game" or "Return to Main Menu" was selected, `is_async_execution_supported` stayed `1` (set by the menu event loop) and `sound_suspended` stayed `true` (set by `sound_pause_all()` at menu open). Neither was reset on the restart/quit path because the normal menu-dismiss path (which resets both) was bypassed.
+- `is_async_execution_supported = 1` blocked entity movement (`Entity.cpp:180`), cursor commands (`Cursor.cpp:1880`), and game tick counters (`Game.cpp:155`) in the next level — units couldn't move, no commands worked, the game appeared frozen/crashed.
+- `sound_suspended = true` blocked all sound playback in the restarted mission or main menu.
+- Fix (`Game.cpp:173-184`): added `is_async_execution_supported = 0; sound_resume_all();` in both the quit-to-main-menu path (before `goto LABEL_5`) and the restart path (after `on_level_finished()` returns).

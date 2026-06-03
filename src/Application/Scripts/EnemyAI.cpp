@@ -3427,11 +3427,10 @@ void UNIT_FreeAiPlayers()
     stru24 *v2; // esi@4
     stru24 *v3; // esi@7
 
-    v0 = task_ai_players;
-    do
+    for (int i = 0; i < 7; ++i)
     {
-        v1 = *v0;
-        if (*v0)
+        v1 = task_ai_players[i];
+        if (v1)
         {
             if (current_level_idx == LEVEL_MUTE_05_AMBUSH)
             {
@@ -3469,10 +3468,9 @@ void UNIT_FreeAiPlayers()
                     free(v2->list_40);
                 }
             }
-            script_deinit(*v0);
+            script_deinit(task_ai_players[i]);
         }
-        ++v0;
-    } while ((int)v0 < (int)&unk_4778EC);
+    }
 }
 
 //----- (0042D6B0) --------------------------------------------------------

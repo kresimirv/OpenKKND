@@ -171,5 +171,5 @@ void building_limits_on_building_destroyed(Entity *a1)
 //----- (00403B60) --------------------------------------------------------
 void building_limits_list_free()
 {
-    free(building_limits_list);
+    delete[] building_limits_list;
 }

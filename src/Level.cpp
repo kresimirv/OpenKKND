@@ -24,13 +24,10 @@ static void check_heap(const char *where) {
 void GAME_PrepareLevel()
 {
     enum LEVEL_ID v0; // edx@1
-                      //char *v1; // eax@3
-                      //const char *v2; // ST10_4@16
-                      //char *v3; // eax@16
+
+    fprintf(stderr, "GAME_PrepareLevel: enter. curr=%d prev=%d\n", current_level_idx, prev_level_idx);
     DataHunk *level_lvl; // eax@16
-                         //int v5; // eax@24
     DataMapd *v6; // eax@28
-                  //char filename[120]; // [sp+8h] [bp-78h]@3
 
     v0 = current_level_idx;
     if (current_level_idx != prev_level_idx)
@@ -86,13 +83,16 @@ void GAME_PrepareLevel()
 
     LVL_LoadSlv(slvs[is_player_faction_evolved()]);
     check_heap("after LVL_LoadSlv");
+    fprintf(stderr, "GAME_PrepareLevel: calling LVL_RunLevel...\n");
     if (!LVL_RunLevel(current_level_lvl))
     {
+        fprintf(stderr, "GAME_PrepareLevel: LVL_RunLevel FAILED! Exiting.\n");
         netz_deinit();
         GAME_Deinit();
         log("LVL_RunLevel() failed\n");
         exit(0);
     }
+    fprintf(stderr, "GAME_PrepareLevel: LVL_RunLevel succeeded\n");
     stru1_408480_reset_animation();
     v6 = LVL_FindMapd();
     _40E400_set_palette((Palette *)&v6->items[1]);
@@ -270,16 +270,20 @@ bool on_level_finished()
 {
     void *v1; // eax@12
 
+    fprintf(stderr, "on_level_finished: enter, game_state=%d\n", (int)game_state);
+
     for (int i = 0; i < 3; ++i) {
         if (_47A010_mapd_item_being_drawn[i]) {
             bitmap_list_remove(_47A010_mapd_item_being_drawn[i]);
             _47A010_mapd_item_being_drawn[i] = 0;
         }
     }
- 
+  
     nullsub_1();
     stru37_stru38_list_free();
+    fprintf(stderr, "on_level_finished: _44C5C0_level_cleanup...\n");
     _44C5C0_level_cleanup();
+    fprintf(stderr, "on_level_finished: _44C5C0_level_cleanup done\n");
     stru31_list_free();
     sidebar_deinit();
     per_player_sprite_palettes_47DC88_free();
@@ -287,8 +291,11 @@ bool on_level_finished()
     sidebar_list_free();
     if (game_state != GAME_STATE::GAME_2_restart_mission || current_level_idx >= LEVEL_SURV_16 && current_level_idx <= LEVEL_MUTE_25)
     {
+        fprintf(stderr, "on_level_finished: IF branch (non-restart or super level)\n");
         LVL_Deinit();
+        fprintf(stderr, "on_level_finished: LVL_Deinit done\n");
         sound_free_sounds();
+        fprintf(stderr, "on_level_finished: sound_free_sounds done\n");
         free(current_level_lvl);
         free(sprites_lvl);
         sprites_lvl = 0;
@@ -296,10 +303,14 @@ bool on_level_finished()
     }
     else
     {
+        fprintf(stderr, "on_level_finished: ELSE branch (restart)\n");
         prev_level_idx = current_level_idx;
         cplc_4060F0();
+        fprintf(stderr, "on_level_finished: cplc_4060F0 done\n");
         LVL_Deinit();
+        fprintf(stderr, "on_level_finished: LVL_Deinit done\n");
         sound_free_sounds();
+        fprintf(stderr, "on_level_finished: sound_free_sounds done\n");
     }
     if (!single_player_game && !*(_DWORD *)&netz_47A740[2].str_0[0])
     {
@@ -307,10 +318,16 @@ bool on_level_finished()
         netz_42F650(v1);
         netz_42F8E0(0);
     }
+    fprintf(stderr, "on_level_finished: pre-return checks. game_state=%d Mission=%d GAME_2_restart=%d\n",
+        (int)game_state, (int)GAME_STATE::Mission, (int)GAME_STATE::GAME_2_restart_mission);
     if (game_state != GAME_STATE::Mission)
     {
         if (game_state != GAME_STATE::GAME_2_restart_mission)
+        {
+            fprintf(stderr, "on_level_finished: return 0 (not mission, not restart)\n");
             return 0;
+        }
+        fprintf(stderr, "on_level_finished: return 1 (restart)\n");
         return 1;
     }
     if (is_game_loading())

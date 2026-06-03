@@ -48,9 +48,23 @@ std::shared_ptr<Window> gWindow = nullptr;
 
 bool is_mission_running = false;
 
+#include <execinfo.h>
+#include <signal.h>
+static void crash_handler(int sig) {
+    void *array[64];
+    size_t size = backtrace(array, 64);
+    fprintf(stderr, "\n*** CRASH: signal %d ***\n", sig);
+    backtrace_symbols_fd(array, size, STDERR_FILENO);
+    fprintf(stderr, "*** END CRASH ***\n");
+    _exit(1);
+}
 
 //----- (00423460) --------------------------------------------------------
 void Game::Run() {
+    signal(SIGSEGV, crash_handler);
+    signal(SIGABRT, crash_handler);
+    signal(SIGFPE, crash_handler);
+    signal(SIGILL, crash_handler);
     int window_width = 640;
     int window_height = 480;
     bool fullscreen = false;
@@ -169,15 +183,25 @@ void Game::Run() {
                         sound_threaded_set_volume(_4690AC_music_volume);
                     }
                 } while (!_47DCF4_wm_quit_received && game_state == GAME_STATE::MainMenu);
+                fprintf(stderr, "Game: mission loop exit. game_state=%d\n", (int)game_state);
                 is_mission_running = false;
-                if (!on_level_finished())
+                fprintf(stderr, "Game: calling on_level_finished...\n");
+                int olf_result = on_level_finished() ? 1 : 0;
+                fprintf(stderr, "Game: on_level_finished returned %d\n", olf_result);
+                if (!olf_result)
                 {
+                    fprintf(stderr, "Game: quit-to-main-menu path\n");
+                    is_async_execution_supported = 0;
+                    sound_resume_all();
                     dword_47CB0C = 0;
                     VIDEO_Play(2);
                     if (!_47DCF4_wm_quit_received)
                         goto LABEL_5;
                     break;
                 }
+                fprintf(stderr, "Game: restart path\n");
+                is_async_execution_supported = 0;
+                sound_resume_all();
             }
         }
         netz_deinit();

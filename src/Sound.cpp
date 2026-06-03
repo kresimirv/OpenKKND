@@ -755,7 +755,7 @@ void _439C10_sound_thread(std::shared_ptr<Sound> sound)
     }
     sound->field_40 = a3;
     sound_buffer = &sound->pdsb;
-    v57.dwBufferBytes = 3 * out_data.nAvgBytesPerSec;
+    v57.dwBufferBytes = out_data.nAvgBytesPerSec / 2;
     v57.lpwfxFormat = &out_data;
     v57.dwSize = 20;
     v57.dwFlags = 232;
@@ -765,6 +765,7 @@ void _439C10_sound_thread(std::shared_ptr<Sound> sound)
         sound->flags = sound->flags & 0xFFFFFFF7 | 0x40;
         return;
     }
+    (*sound_buffer)->device_id = pds->m_stream_device;
     (*sound_buffer)->SetPan(sound_pans[sound->sound_pan_offset]);
     (*sound_buffer)->SetVolume(sound_volumes[sound->sound_volume_offset]);
     v6 = sound->flags;

@@ -5596,8 +5596,10 @@ bool LVL_RunLevel(DataHunk *lvl)
 	is_task_list_initialized = 0;
 	timer_initialized = 0;
 	dword_479DBC = 0;
+	fprintf(stderr, "LVL_RunLevel: currently_running_lvl_sections=%p\n", (void*)currently_running_lvl_sections);
 	if (!currently_running_lvl_sections)
 	{
+		fprintf(stderr, "LVL_RunLevel: initializing new level\n");
 		currently_running_lvl = lvl;
 		currently_running_lvl_sections = lvl->section_table;
 		if (script_list_alloc())
@@ -14086,15 +14088,11 @@ bool UNIT_InitTasks()
 //----- (00449800) --------------------------------------------------------
 void __47CAF0_tasks_evt39030_array_free()
 {
-	Script **v0; // esi@1
-
-	v0 = _47CAF0_tasks_evt39030;
-	do
+	for (int i = 0; i < 7; ++i)
 	{
-		if (*v0)
-			script_deinit(*v0);
-		++v0;
-	} while ((int)v0 < (int)&dword_47CB0C);
+		if (_47CAF0_tasks_evt39030[i])
+			script_deinit(_47CAF0_tasks_evt39030[i]);
+	}
 }
 // 47CB0C: using guessed type int dword_47CB0C;
 
