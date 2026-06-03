@@ -2922,9 +2922,12 @@ void UNIT_Handler_OilPatch(Script *a1)
 	}
 
 	v1->field_88_unused = 1;
-    v7 = &boxd_get_tile(global2map(v1->x), global2map(v1->y))->flags2;
-    //v7 = &_478AA8_boxd_stru0_array[global2map(v1->x) + map_get_width() * global2map(v1->y)].flags2;
-	*v7 |= 0x80u;
+    int map_x = global2map(v1->x);
+    int map_y = global2map(v1->y);
+    if (map_x >= 0 && map_x < map_get_width() && map_y >= 0 && map_y < map_get_height()) {
+        v7 = &boxd_get_tile(map_x, map_y)->flags2;
+        *v7 |= 0x80u;
+    }
 	script_yield(a1, 1, 0);
 	v1->drawjob->flags |= 0x40000000u;
 	if (a1)

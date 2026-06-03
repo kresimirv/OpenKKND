@@ -248,3 +248,7 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
   - Once inside the loop: `++v19;`
 - This caused the loop to only check **odd palette indices** (1, 3, 5, 7...), skipping even indices (2, 4, 6, 8...). The actual most common terrain color was never found, so the minimap defaulted to color 0 (transparent) or 1 (gray).
 - **Fix** (`Map.cpp:373-382`): Removed the extra `++v19;` inside the loop. Now all palette indices 1-255 are properly checked when finding the most common color in each 16x16 tile sample.
+
+### Crash Fix — Oil Patch (UNIT_Handler_OilPatch) Heap-Buffer-Overflow
+- Root cause: In the "Infiltrator" custom mission, oil patch entities were placed outside the map bounds (e.g., `y=84` when `map_height=82`). `UNIT_Handler_OilPatch` called `boxd_get_tile()` to mark the tile's `flags2 |= 0x80u` (marking tile as having oil), but `boxd_get_tile()` only logs an error message without bounds checking — it still returns a pointer into the `_478AA8_boxd_stru0_array` using the out-of-bounds index. ASan detected this as a heap-buffer-overflow when the flag was dereferenced and written to.
+- **Fix** (`kknd.cpp:2925-2930`): Added explicit bounds check before calling `boxd_get_tile()`. The oil deposit creation still proceeds (the entity is still spawned), but the tile flag update is skipped if `map_x` or `map_y` are outside the valid range `[0, map_get_width()-1]` or `[0, map_get_height()-1]`.
