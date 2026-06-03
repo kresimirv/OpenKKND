@@ -28,8 +28,8 @@ int stru28_list_alloc()
             ++v1;
         } while (v1 < 39);
         stru28_list[39].next = 0;
-        stru28_list_47C338 = (stru28 *)&stru28_list_47C338;
-        stru28_list_47C33C = (stru28 *)&stru28_list_47C338;
+        stru28_sentinel.next = (stru28 *)&stru28_sentinel;
+        stru28_sentinel.prev = (stru28 *)&stru28_sentinel;
         result = 1;
     }
     else
@@ -70,8 +70,8 @@ void _4389A0_prolly_create_map_damage_decal(int map_x, int map_y)
             v7 = v5;
             if (!(_478AA8_boxd_stru0_array[global2map(v6) + map_get_width() * global2map(v5)].flags & (BOXD_STRU0_OBSTRUCTED | BOXD_STRU0_BLOCKED | BOXD_STRU0_VEHICLE_BUILDING)))
             {
-                v8 = stru28_list_47C338;
-                if ((stru28 **)stru28_list_47C338 == &stru28_list_47C338)
+                v8 = stru28_sentinel.next;
+                if (stru28_sentinel.next == (stru28 *)&stru28_sentinel)
                 {
                 LABEL_11:
                     v10 = stru28_list_free_pool;
@@ -88,24 +88,24 @@ void _4389A0_prolly_create_map_damage_decal(int map_x, int map_y)
                             stru28_list_free_pool = v10;
                             return;
                         }
-                        v14 = stru28_list_47C338;
-                        v10->prev = (stru28 *)&stru28_list_47C338;
+                        v14 = stru28_sentinel.next;
+                        v10->prev = (stru28 *)&stru28_sentinel;
                         v10->next = v14;
-                        stru28_list_47C338->prev = v10;
-                        stru28_list_47C338 = v10;
+                        stru28_sentinel.next->prev = v10;
+                        stru28_sentinel.next = v10;
                         v13->drawjob->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_448600_oilspot;
                     }
                     else
                     {
-                        v11 = stru28_list_47C33C;
-                        v12 = &stru28_list_47C33C->prev;
-                        stru28_list_47C33C->next->prev = stru28_list_47C33C->prev;
+                        v11 = stru28_sentinel.prev;
+                        v12 = &stru28_sentinel.prev->prev;
+                        stru28_sentinel.prev->next->prev = stru28_sentinel.prev->prev;
                         (*v12)->next = v11->next;
-                        v11->next = stru28_list_47C338;
-                        *v12 = (stru28 *)&stru28_list_47C338;
+                        v11->next = stru28_sentinel.next;
+                        *v12 = (stru28 *)&stru28_sentinel;
                         v10 = v11;
-                        stru28_list_47C338->prev = v11;
-                        stru28_list_47C338 = v11;
+                        stru28_sentinel.next->prev = v11;
+                        stru28_sentinel.next = v11;
                         v13 = v11->sprite;
                     }
                     v13->x = v6;
@@ -123,7 +123,7 @@ void _4389A0_prolly_create_map_damage_decal(int map_x, int map_y)
                         if (v9->x == v6 && v9->y == v5)
                             break;
                         v8 = v8->next;
-                        if ((stru28 **)v8 == &stru28_list_47C338)
+                        if (v8 == (stru28 *)&stru28_sentinel)
                             goto LABEL_11;
                     }
                     v16 = v8->mobd_offset_idx + 1;

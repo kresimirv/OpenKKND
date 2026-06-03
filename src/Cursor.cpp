@@ -152,6 +152,7 @@ void cursor_classify_selected_unit(CursorHandler *a1, Entity *v19)
 
 
 const bool debug_click_crabs = false;
+const bool debug_drag_line = false;
 
 //----- (0042C9E0) --------------------------------------------------------
 void cursor_drag_selection(CursorHandler *a1, int x, int y)
@@ -241,12 +242,14 @@ void cursor_drag_selection(CursorHandler *a1, int x, int y)
             drag_frame_w->y = a1->_70_sprite->y;
         }
 
-        //log("%d %d\t%d %d", x/256, y/256, a1->_70_sprite->x / 256, a1->_70_sprite->y / 256);
-        render_draw_line(
-            x, y,
-            a1->_70_sprite->x, a1->_70_sprite->y,
-            render_get_color_blue()
-        );
+        if(debug_drag_line) {
+            //log("%d %d\t%d %d", x/256, y/256, a1->_70_sprite->x / 256, a1->_70_sprite->y / 256);
+            render_draw_line(
+                x, y,
+                a1->_70_sprite->x, a1->_70_sprite->y,
+                render_get_color_blue()
+            );
+        }
 
         if (debug_click_crabs) {
             //sprite_load_mobd(drag_frame_x, 1216);

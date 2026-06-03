@@ -559,8 +559,7 @@ const int savegames_max = 20;
 extern stru175_savegame _47C050_savegames[savegames_max];
 extern char byte_47C230[256]; // idb
 extern int _47C050_current_savegame_idx; // idb
-extern stru28 *stru28_list_47C338;
-extern stru28 *stru28_list_47C33C;
+extern stru28 stru28_sentinel;
 extern stru28 *stru28_list;
 extern stru28 *stru28_list_free_pool;
 extern int _47C350_num_explosions_min0_max30; // weak

@@ -35,6 +35,24 @@ Sentinel trick: two adjacent pointer globals used as `next`/`prev` of implicit s
 | `stru11unit_sentinel` | `kknd.cpp` | Struct with `next`/`prev` |
 | `entity_default_stru60_ptr` | `_unsorted_data.cpp/.h`, `kknd.cpp`, `EntityFactory.cpp` | `void*` → struct with `next`/`prev` |
 
+### Optimization Fix
+- `-fno-strict-aliasing` added to GCC flags (`CMakeLists.txt`). Original MSVC code uses `*(_DWORD *)ptr` type-punning throughout, which GCC's strict aliasing (`-O2`/`-O3`) breaks. Without this flag, game window was gray (no main menu rendered).
+
+### Sound Compacted — DirectSound→SDL2 Migration & Cleanup
+- Replaced `<dsound.h>` / `<process.h>` with `DirectSoundSdl2.h`, removing DirectSound dependency.
+- Added `Sound::~Sound()` destructor to release `pdsb` buffer properly.
+- `sound_volumes[]` / `sound_pans[]` increased from `[17]` → `[33]` to match 0–32 range (was off-by-one causing silent pans/volumes at index 32).
+- `sound_initialize()`: pre-opens audio device pool via `pds->InitDevices()`.
+- `LVL_LoadSlv()`: added null check for `sound_structure_1` before dereference; `_47C4E0_sounds` pointer is now validated.
+- `sound_play()`: fixed `memcpy` arg order (`v29, script` → `script, v29`); moved `SetPan`/`SetVolume` to `sound_buffer_3` (was `sound->pdsb`) before `Unlock()`.
+- `sound_play_threaded()`: path separator `\\` → `/`, uses `game_data_installation_dir` instead of `OsGetCurrentDirectory()`.
+- `_439C10_sound_thread()` / `sound_cleanup()`: `Sleep()` → `SDL_Delay()` for portability.
+- `_43A370_process_sound()`:
+  - **Fixed volume transition**: `sound_pans[v10]` → `sound_volumes[v10]` (was using pan array for volume value).
+  - Added bounds clamping (`v10 >= 33 → 32`, `< 0 → 0`) for volume/pan index.
+  - Changed infinite `while(1)` loops → bounded `while(counter < 32)` to prevent runaway.
+- Added debug `fprintf` logging throughout for diagnostics.
+
 ### Other Bug Fixes
 - `_47CBC0_fow` loop: `sizeof(array)` → `sizeof(array)/sizeof(array[0])` (`Map.cpp:372`).
 - `stru26_array_initialize()`: sentinel address comparison → counted for loop (`kknd.cpp:4826`).
@@ -44,10 +62,11 @@ Sentinel trick: two adjacent pointer globals used as `next`/`prev` of implicit s
 
 ## Current Status
 - **ASan Debug build**: game runs through main menu → campaign start → gameplay without ASan errors.
-- **Release build (no ASan)**: builds clean, runs 15+ seconds on X display without crash.
+- **Release build (`-O3 -DNDEBUG -fno-strict-aliasing`)**: builds clean, runs with full rendering and sound.
 - Heap corruption ("malloc(): unaligned tcache chunk detected" at `malloc(0xCC)`) observed pre-fixes. May no longer occur after all sentinel overflows fixed — needs verification on real hardware.
 
 ## Remaining Concerns
-- No display for full gameplay test in this environment.
+- No display/audio for full gameplay test in this environment.
 - Heap corruption at `malloc(0xCC)` not yet verified as fixed on non-ASan real-hardware run.
+- `SetCurrentAnimFrame(256): index out of bounds` warning during gameplay (minor, doesn't crash).
 - Low-risk printf-format warnings remain (`%d` → `size_t` args).

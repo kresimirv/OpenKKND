@@ -146,6 +146,9 @@ void _43A370_process_sound();
 void sound_stop(int sound_id);
 void sound_free_sounds();
 void sound_deinit();
+void sound_pause_all();
+void sound_resume_all();
+bool sound_is_suspended();
 
 
 extern int _47C5D4_sound_threaded_snd_id; // idb

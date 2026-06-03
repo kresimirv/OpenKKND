@@ -1,5 +1,6 @@
 #include "src/Application/Scripts/GameMenu.h"
 
+#include "src/Sound.h"
 #include "src/_unsorted_data.h"
 #include "src/_unsorted_functions.h"
 #include "src/Cursor.h"
@@ -329,6 +330,7 @@ void script_ingame_menu_resume(Script *a1)
     script_433640_init_script_ui(a1, SCRIPT_TYPE_INGAME_MENU_BUTTON, -92, v1, 5);
     if (script_434500(a1, INGAME_MENU_CONTROLS_MOBD_840, 0, 0))
     {
+        sound_resume_all();
         script_trigger_event(a1, EVT_MSG_1528_cancel, 0, task_47C028);
         script_sleep(a1, 1);
     }
@@ -633,8 +635,9 @@ void script_ingame_menu_master_script(Script *a1)
             if (dword_47050C == 1)
             {
                 dword_47C030 = 1;
-            LABEL_26:
-                script_ingame_menu_create_dialog(v1);
+    LABEL_26:
+        sound_pause_all();
+        script_ingame_menu_create_dialog(v1);
                 goto LABEL_27;
             }
         }
@@ -724,11 +727,12 @@ void script_ingame_menu_master_script(Script *a1)
                         v7 = 5;
                         script_ingame_menu_create_briefing_dialog(v1);
                         break;
-                    case EVT_MSG_1528_cancel:
-                    LABEL_51:
-                        if (single_player_game || dword_47C030)
-                            a1a = 0;
-                        break;
+    case EVT_MSG_1528_cancel:
+    LABEL_51:
+        sound_resume_all();
+        if (single_player_game || dword_47C030)
+            a1a = 0;
+        break;
                     case EVT_MSG_1527_restart_level: //restart level
                         v7 = 4;
                         script_trigger_event_group(v1, EVT_MSG_1528_cancel, 0, SCRIPT_TYPE_INGAME_MENU_BUTTON);

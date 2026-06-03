@@ -5210,8 +5210,7 @@ int _47C04C_num_explosions_max20; // weak
 stru175_savegame _47C050_savegames[savegames_max];
 char byte_47C230[256]; // idb
 int _47C050_current_savegame_idx; // idb
-stru28 *stru28_list_47C338;
-stru28 *stru28_list_47C33C;
+stru28 stru28_sentinel;
 stru28 *stru28_list;
 stru28 *stru28_list_free_pool;
 int _47C350_num_explosions_min0_max30; // weak

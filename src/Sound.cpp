@@ -41,6 +41,15 @@ struct Sound
     char field_145 = '\0';
     char field_146 = '\0';
     char field_147 = '\0';
+
+    ~Sound()
+    {
+        if (pdsb)
+        {
+            pdsb->Release();
+            pdsb = nullptr;
+        }
+    }
 };
 
 /* 428 */
@@ -56,6 +65,8 @@ struct sound_stru_2
 DSBUFFERDESC video_477DE4_dsb_desc; // weak
 IDirectSoundBuffer *video_477DE4_dsb;
 LPDIRECTSOUND pds; // idb
+
+bool sound_suspended = false;
 
 std::list<std::shared_ptr<Sound>> sound_list_free_pool;
 int sound_list_last_id; // weak
@@ -120,6 +131,25 @@ void _439C10_sound_thread(std::shared_ptr<Sound> sound); // idb
 void sound_list_remove(std::shared_ptr<Sound> snd);
 void sound_cleanup(std::shared_ptr<Sound> snd);
 
+void sound_pause_all()
+{
+    sound_suspended = true;
+    if (pds)
+        pds->PauseAll();
+}
+
+void sound_resume_all()
+{
+    sound_suspended = false;
+    if (pds)
+        pds->ResumeAll();
+}
+
+bool sound_is_suspended()
+{
+    return sound_suspended;
+}
+
 
 void sound_start_video_playback()
 {
@@ -172,6 +202,9 @@ bool sound_initialize()
         return 1;
     }
 
+    // Pre-open audio device pool
+    pds->InitDevices();
+
     //sound initialation done
     sound_initialized = 1;
     return 1;
@@ -195,6 +228,7 @@ bool LVL_LoadSlv(const char *slv_filename)
     {
         data_hunk = LVL_LoadLevel(slv_filename);
         faction_slv = data_hunk;
+        fprintf(stderr, "LVL_LoadSlv(%s): data_hunk=%p\n", slv_filename, (void*)data_hunk);
         if (data_hunk || (data_hunk = LVL_LoadLevel("sound.slv"), (faction_slv = data_hunk) != 0))
         {
             data_section_offset = data_hunk->section_table;
@@ -206,7 +240,10 @@ bool LVL_LoadSlv(const char *slv_filename)
                 do
                 {
                     if (!strncmp("SOUN", data_section_offset->name, 4u))
+                    {
                         _47C4E0_sounds = *(sound_stru_2 ***)offset_pointer;
+                        fprintf(stderr, "  found SOUN section: _47C4E0_sounds=%p\n", (void*)_47C4E0_sounds);
+                    }
                     offset_pointer_data = *((_DWORD *)offset_pointer + 2);
                     offset_pointer += 8;
                     data_section_offset = (DataSectionOffset *)(offset_pointer - 4);
@@ -214,7 +251,7 @@ bool LVL_LoadSlv(const char *slv_filename)
                 sound_structure_1 = _47C4E0_sounds;
             }
             num_sounds = 0;
-            if (*sound_structure_1)
+            if (sound_structure_1 && *sound_structure_1)
             {
                 sound_structure_2 = sound_structure_1;
                 do
@@ -226,6 +263,11 @@ bool LVL_LoadSlv(const char *slv_filename)
             }
             _47C4E8_num_sounds = num_sounds;
             _47C5C0_can_sound = 1;
+            fprintf(stderr, "  num_sounds=%d can_sound=%d\n", num_sounds, _47C5C0_can_sound);
+        }
+        else
+        {
+            fprintf(stderr, "  FAILED to load SLV\n");
         }
     }
     return 1;
@@ -450,6 +492,9 @@ int sound_play(enum SOUND_ID sound_id, int sound_flags, int volume_offset, int p
     const void *v29; // [sp+34h] [bp-8h]@21
     int a3a; // [sp+38h] [bp-4h]@4
 
+    if (sound_suspended)
+        return 0;
+
     flags = sound_flags;
 
     buffer_desc.dwFlags = 0;
@@ -458,6 +503,9 @@ int sound_play(enum SOUND_ID sound_id, int sound_flags, int volume_offset, int p
     a3a = 0;
     buffer_desc.dwReserved = 0;
     buffer_desc.lpwfxFormat = 0;
+    fprintf(stderr, "sound_play(id=%d, flags=%d, vol=%d, pan=%d, script=%p): can_sound=%d num_sounds=%d\n",
+        sound_id, sound_flags, volume_offset, pan_offset, (void*)script,
+        _47C5C0_can_sound, _47C4E8_num_sounds);
     if (volume_offset)
     {
         if (_47C5C0_can_sound && sound_id < _47C4E8_num_sounds)
@@ -498,7 +546,12 @@ int sound_play(enum SOUND_ID sound_id, int sound_flags, int volume_offset, int p
                             || !buffer_desc.dwBufferBytes
                             || sound_buffer_2->Lock(0, buffer_desc.dwBufferBytes, &v26, (LPDWORD)&script, (LPVOID *)&v27, (LPDWORD)&v28, 0))
                         {
-                            (*sound_buffer_1)->Release();
+                            if (*sound_buffer_1)
+                            {
+                                (*sound_buffer_1)->Release();
+                                *sound_buffer_1 = nullptr;
+                            }
+                            sound_list_free_pool.remove(sound);
                             result = 0;
                         }
                         else
@@ -507,12 +560,12 @@ int sound_play(enum SOUND_ID sound_id, int sound_flags, int volume_offset, int p
                             v14 = v28;
                             if (v28)
                             {
-                                memcpy(v27, (char *)script + (_DWORD)v29, v28);
+                                memcpy(v27, (char *)v29 + (unsigned int)script, v28);
                                 v14 = v28;
                             }
+                            sound_buffer_3->SetPan(sound_pans[pan_offset]);
+                            sound_buffer_3->SetVolume(sound_volumes[volume_offset]);
                             sound_buffer_3->Unlock(v26, (DWORD)script, v27, v14);
-                            sound->pdsb->SetPan(sound_pans[pan_offset]);
-                            sound->pdsb->SetVolume(sound_volumes[volume_offset]);
                             v15 = (void *)dword_47C5D0;
                             if (dword_47C5D0)
                                 ++sound->field_18;
@@ -1063,6 +1116,9 @@ void sound_stop(int sound_id)
 // Process sound
 void _43A370_process_sound()
 {
+    if (sound_suspended)
+        return;
+
     IDirectSoundBuffer *sound_buffer_1; // eax@4
     IDirectSoundBuffer *sound_buffer_2; // eax@9
     int *sound_volume_offset_ptr; // edi@9
@@ -1090,10 +1146,11 @@ void _43A370_process_sound()
             break;
         if (!(sound->flags & 8))
         {
-            sound_buffer_1 = sound->pdsb;
+                sound_buffer_1 = sound->pdsb;
             if (sound_buffer_1)
             {
                 sound_buffer_1->GetStatus((LPDWORD)&i);
+                fprintf(stderr, "_43A370_process_sound: sound id=%d status=%d flags=0x%x\n", sound->id, i, sound->flags);
                 if (i & 1 || sound->flags & 4)
                 {
                     if (sound->field_20)
@@ -1106,7 +1163,7 @@ void _43A370_process_sound()
                         loop_counter_1 = 0;
                         v20 = 17;
                         sound_volume_ptr = sound_volumes;
-                        while (1)
+                        while (loop_counter_1 < 32)
                         {
                             v8 = abs(*sound_volume_ptr - *sound_volume_offset_ptr);
                             if (!v8)
@@ -1121,8 +1178,10 @@ void _43A370_process_sound()
                         }
                         sound_buffer_3 = sound->pdsb;
                         v10 = sound->field_24 + loop_counter_1;
+                        if (v10 >= 33) v10 = 32;
+                        if (v10 < 0) v10 = 0;
                         *sound_volume_offset_ptr = v10;
-                        sound_buffer_3->SetVolume(sound_pans[v10]);
+                        sound_buffer_3->SetVolume(sound_volumes[v10]);
                         if (!sound->field_20 && sound->task)
                             script_trigger_event(0, EVT_MSG_sound_neg4, 0, sound->task);
                     }
@@ -1136,7 +1195,7 @@ void _43A370_process_sound()
                         loop_counter_2 = 0;
                         v20 = 16;
                         sound_pans_ptr = sound_pans;
-                        while (1)
+                        while (loop_counter_2 < 32)
                         {
                             v16 = abs(*sound_pans_ptr - *sound_pan_offset_ptr);
                             if (!v16)
@@ -1151,6 +1210,8 @@ void _43A370_process_sound()
                         }
                         sound_buffer_5 = sound->pdsb;
                         v18 = sound->field_30 + loop_counter_2;
+                        if (v18 >= 33) v18 = 32;
+                        if (v18 < 0) v18 = 0;
                         *sound_pan_offset_ptr = v18;
                         sound_buffer_5->SetPan(sound_pans[v18]);
                         if (!sound->field_2C)

@@ -15,7 +15,7 @@
 #include "src/Infrastructure/PlatformSpecific/OsTools.h"
 
 
-const bool debug_outline_tiles = true;
+const bool debug_outline_tiles = false;
 extern bool is_mission_running;
 extern Entity *debug_pathing_entity;
 
