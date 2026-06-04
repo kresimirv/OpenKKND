@@ -94,8 +94,8 @@ std::string msg;
 int count = 1;
 auto i = &_47A714;
 while (i = i->next) ++count;
-//log("count: %d", count);
-//log("%s", stru209type_to_string(a1->type));
+log("count: %d", count);
+log("%s", stru209type_to_string(a1->type));
 
     if (auto i = _428940_list_get())
     {

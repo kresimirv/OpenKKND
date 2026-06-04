@@ -2199,7 +2199,7 @@ void cplc_create_sprite_script(DataCplcItem_ptr1 *a1)
 	{
         if (v1->script_handler_id >= 0)
         {
-            //fprintf(stderr, "cplc_create_sprite_script: script_handler_id=%d\n", v1->script_handler_id);
+            fprintf(stderr, "cplc_create_sprite_script: script_handler_id=%d\n", v1->script_handler_id);
             auto v8 = create_script(v1->script_handler_id);
 			auto v9 = get_script_mobd(v1->script_handler_id);
 			if (v9 >= 0)
@@ -12668,16 +12668,16 @@ void coroutine_main()
 
     coroutine_current->yield_to->resume();
 
-    //log(
-    //    "Coroutine #%u %s(%08X) start",
-    //    coroutine_current->id, coroutine_current->debug_handler_name, arg
-    //);
+    log(
+        "Coroutine #%u %s(%08X) start",
+        coroutine_current->id, coroutine_current->debug_handler_name, arg
+    );
     script_main(arg);
 
-    //log(
-    //    "Coroutine #%u %s(%08X) end",
-    //    coroutine_current->id, coroutine_current->debug_handler_name, arg
-    //);
+    log(
+        "Coroutine #%u %s(%08X) end",
+        coroutine_current->id, coroutine_current->debug_handler_name, arg
+    );
 
     script_terminate(arg);
 }

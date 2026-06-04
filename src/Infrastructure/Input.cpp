@@ -386,7 +386,7 @@ bool input_set_mouse_pos(int x, int y)
 {
     if (input_mouse_window_losing_focus_reset_to_defaults)
     {
-        //log("input_set_mouse_pos(x = %d, y = %d)", x, y);
+        log("input_set_mouse_pos(x = %d, y = %d)", x, y);
         gWindow->SetMousePos(x, y);
 
         input_mouse.cursor_x_x256 = x * 256;
