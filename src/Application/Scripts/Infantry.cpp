@@ -4942,7 +4942,7 @@ void EventHandler_Infantry(Script *receiver, Script *sender, enum SCRIPT_EVENT e
     int v14; // ecx@38
     int v15; // edx@38
 
-    log("EventHandler_Infantry(%u)", event);
+    //log("EventHandler_Infantry(%u)", event);
 
     v4 = (Entity *)receiver->param;
     if (!v4->destroyed)

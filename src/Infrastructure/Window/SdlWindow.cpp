@@ -227,7 +227,7 @@ void SdlWindow::MessageProcessor(SDL_Event &e) {
                     int dx = mouse_right_button_pressed_x - e.motion.x;
                     int dy = mouse_right_button_pressed_y - e.motion.y;
                     if (abs(dx) >= mouse_right_button_drag_min_dx ||abs(dy) >= mouse_right_button_drag_min_dy) {
-                        printf("right mouse scrolling startx:%d starty:%d x:%d, y:%d dx:%d dy:%d\n", mouse_right_button_pressed_x, mouse_right_button_pressed_y, e.motion.x, e.motion.y, dx, dy);
+                        //printf("right mouse scrolling startx:%d starty:%d x:%d, y:%d dx:%d dy:%d\n", mouse_right_button_pressed_x, mouse_right_button_pressed_y, e.motion.x, e.motion.y, dx, dy);
                         observer->OnMouseRightDrag(mouse_right_button_pressed_x, mouse_right_button_pressed_y, e.motion.x, e.motion.y, dx, dy);
                     }
                 }
@@ -252,13 +252,13 @@ void SdlWindow::MessageProcessor(SDL_Event &e) {
 
                     //mouse right button drag - right button pressed
                     if (pressed) {
-                        printf("mouse right button pressed x: %d y: %d\n", x, y);
+                        //printf("mouse right button pressed x: %d y: %d\n", x, y);
                         mouse_right_button_pressed_x = x;
                         mouse_right_button_pressed_y = y;
                         mouse_right_button_down = true;
                     }
                     else { //mouse right button drag - right button released
-                        printf("mouse right button released x: %d y: %d\n", x, y);
+                        //printf("mouse right button released x: %d y: %d\n", x, y);
                         mouse_right_button_pressed_x = -1;
                         mouse_right_button_pressed_y = -1;
                         mouse_right_button_down = false;

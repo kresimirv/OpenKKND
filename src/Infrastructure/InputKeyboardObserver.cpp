@@ -21,15 +21,15 @@ void InputKeyboardObserver::OnCharUp(int key, bool ctrl_status, bool alt_status)
     }
     input_now_pressed_keys.combo_key_param = combo_pressed_vk_param;
 
-    if (combo_pressed_vk) {
-        log->Info(
-            "Pressed: %c\t\tCTRL=%s (param=%d)\tALT=%s",
-            (char)input_combo_pressed_vk,
-            ctrl_status ? "true" : "false",
-            combo_pressed_vk_param,
-            alt_status ? "true" : "false"
-        );
-    }
+    //if (combo_pressed_vk) {
+        //log->Info(
+        //    "Pressed: %c\t\tCTRL=%s (param=%d)\tALT=%s",
+        //    (char)input_combo_pressed_vk,
+        //    ctrl_status ? "true" : "false",
+        //    combo_pressed_vk_param,
+        //    alt_status ? "true" : "false"
+        //);
+    //}
 }
 
 
@@ -46,13 +46,13 @@ void InputKeyboardObserver::OnSpecialKeyUp(int key, bool ctrl_status, bool alt_s
     }
     input_now_pressed_keys.combo_key_param = combo_pressed_vk_param;
 
-    if (combo_pressed_vk) {
-        log->Info(
-            "Pressed: special: %d\tCTRL=%s (param=%d)\tALT=%s",
-            (int)input_combo_pressed_vk,
-            ctrl_status ? "true" : "false",
-            combo_pressed_vk_param,
-            alt_status ? "true" : "false"
-        );
-    }
+    //if (combo_pressed_vk) {
+        //log->Info(
+        //    "Pressed: special: %d\tCTRL=%s (param=%d)\tALT=%s",
+        //    (int)input_combo_pressed_vk,
+        //    ctrl_status ? "true" : "false",
+        //    combo_pressed_vk_param,
+        //    alt_status ? "true" : "false"
+        //);
+    //}
 }
