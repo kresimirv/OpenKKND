@@ -774,6 +774,8 @@ void _439C10_sound_thread(std::shared_ptr<Sound> sound)
         sound->flags = sound->flags & 0xFFFFFFF7 | 0x40;
         return;
     }
+    (*sound_buffer)->device_id = pds->m_stream_device;
+    SDL_PauseAudioDevice(pds->m_stream_device, 0);
     (*sound_buffer)->SetPan(sound_pans[sound->sound_pan_offset]);
     (*sound_buffer)->SetVolume(sound_volumes[sound->sound_volume_offset]);
     v6 = sound->flags;
@@ -811,7 +813,7 @@ void _439C10_sound_thread(std::shared_ptr<Sound> sound)
                 v12 = v10 - v11;
                 v49 = v12;
                 v2 = (char *)a1 + v50;
-                if ((unsigned int)a1 + v50 >= v56.dwBufferBytes)
+                if ((unsigned int)a1 + v50 > v56.dwBufferBytes)
                     v2 -= v56.dwBufferBytes;
                 if (v11 < (unsigned int)a1)
                 {
@@ -830,7 +832,7 @@ void _439C10_sound_thread(std::shared_ptr<Sound> sound)
                     v15 = sound->file->read(v47, v14);
                     v49 = v12 - v15;
                     v2 = (char *)(v50 + num_bytes);
-                    if (v50 + num_bytes >= v56.dwBufferBytes)
+                    if (v50 + num_bytes > v56.dwBufferBytes)
                         v2 -= v56.dwBufferBytes;
                     if (v15 < num_bytes)
                     {
@@ -878,6 +880,12 @@ void _439C10_sound_thread(std::shared_ptr<Sound> sound)
                     v20 = v56.dwBufferBytes + v52 - (_DWORD)v2;
                 else
                     v20 = v52 - (_DWORD)v2;
+                if (v20 == 0 && v52 == 0 && (unsigned int)v2 >= v56.dwBufferBytes)
+                {
+                    unsigned int queued = SDL_GetQueuedAudioSize((*sound_buffer)->device_id);
+                    if (queued < v56.dwBufferBytes)
+                        v20 = v56.dwBufferBytes - queued;
+                }
                 v21 = v20;
                 v22 = sound->pdsb->Lock((DWORD)v2, v20, &v48, (LPDWORD)&a1, &v47, (LPDWORD)&num_bytes, 0);
                 if (v22 == DSERR_BUFFERLOST)
@@ -903,7 +911,7 @@ void _439C10_sound_thread(std::shared_ptr<Sound> sound)
                             v2 += v26;
                         else
                             v2 = &v2[(_DWORD)a1];
-                        if ((unsigned int)v2 >= v56.dwBufferBytes)
+                        if ((unsigned int)v2 > v56.dwBufferBytes)
                             v2 -= v56.dwBufferBytes;
                         if (v26 < (unsigned int)a1 && !v28)
                         {
@@ -924,10 +932,12 @@ void _439C10_sound_thread(std::shared_ptr<Sound> sound)
                                 v2 += v30;
                             else
                                 v2 += num_bytes;
-                            if ((unsigned int)v2 >= v56.dwBufferBytes)
+                            if ((unsigned int)v2 > v56.dwBufferBytes)
                                 v2 -= v56.dwBufferBytes;
                             if (v30 < num_bytes && !v31)
+                            {
                                 memset((char *)v47 + v30, 0, num_bytes - v30);
+                            }
                             v51 = v30 == 0;
                             v23 = a1;
                         }
@@ -983,7 +993,7 @@ void _439C10_sound_thread(std::shared_ptr<Sound> sound)
                 {
                     memset(v48, 0, (unsigned int)a1);
                     v2 = &v2[(_DWORD)a1];
-                    if ((unsigned int)v2 >= v56.dwBufferBytes)
+                    if ((unsigned int)v2 > v56.dwBufferBytes)
                         v2 -= v56.dwBufferBytes;
                     v38 = (char *)v47;
                     if (v47)
@@ -993,7 +1003,7 @@ void _439C10_sound_thread(std::shared_ptr<Sound> sound)
                         memset(v47, 0, 4 * ((unsigned int)num_bytes >> 2));
                         memset(&v38[4 * v40], 0, v39 & 3);
                         v2 += num_bytes;
-                        if ((unsigned int)v2 >= v56.dwBufferBytes)
+                        if ((unsigned int)v2 > v56.dwBufferBytes)
                             v2 -= v56.dwBufferBytes;
                     }
                 }
@@ -1159,7 +1169,6 @@ void _43A370_process_sound()
             if (sound_buffer_1)
             {
                 sound_buffer_1->GetStatus((LPDWORD)&i);
-                fprintf(stderr, "_43A370_process_sound: sound id=%d status=%d flags=0x%x\n", sound->id, i, sound->flags);
                 if (i & 1 || sound->flags & 4)
                 {
                     if (sound->field_20)

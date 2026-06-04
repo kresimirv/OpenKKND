@@ -51,8 +51,6 @@ Sentinel trick: two adjacent pointer globals used as `next`/`prev` of implicit s
   - **Fixed volume transition**: `sound_pans[v10]` → `sound_volumes[v10]` (was using pan array for volume value).
   - Added bounds clamping (`v10 >= 33 → 32`, `< 0 → 0`) for volume/pan index.
   - Changed infinite `while(1)` loops → bounded `while(counter < 32)` to prevent runaway.
-- Added debug `fprintf` logging throughout for diagnostics.
-
 ### Other Bug Fixes
 - `_47CBC0_fow` loop: `sizeof(array)` → `sizeof(array)/sizeof(array[0])` (`Map.cpp:372`).
 - `stru26_array_initialize()`: sentinel address comparison → counted for loop (`kknd.cpp:4826`).
@@ -104,11 +102,10 @@ Sentinel trick: two adjacent pointer globals used as `next`/`prev` of implicit s
 - **Release build (`-O3 -DNDEBUG -fno-strict-aliasing`)**: builds clean, runs with full rendering and sound.
 - **Savegames**: Fully working — save/load, unit selection, unit control, enemy AI, and attack commands all work correctly after loading a save.
 - **Pathfinding**: Fixed — units navigate around hills/obstacles, group move orders settle all units at or near the destination tile without wandering. Both infantry and vehicles work correctly.
-- Heap corruption ("malloc(): unaligned tcache chunk detected" at `malloc(0xCC)`) observed pre-fixes. May no longer occur after all sentinel overflows fixed — needs verification on real hardware.
+- **BGM**: Fixed — background music no longer stalls or stutters during gameplay.
 
 ## Remaining Concerns
 - No display/audio for full gameplay test in this environment.
-- Heap corruption at `malloc(0xCC)` not yet verified as fixed on non-ASan real-hardware run.
 - `SetCurrentAnimFrame(256): index out of bounds` warning during gameplay (minor, doesn't crash).
 - Low-risk printf-format warnings remain (`%d` → `size_t` args).
 
@@ -326,6 +323,12 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
 ### Crash Fix — SIGILL After Entering Player Name in Kaos Mode
 - Root cause: After `input_get_string()` returned (Enter pressed), `script_main_menu_kaos_player_name` (`MainMenu.cpp:1720`) hit `__debugbreak()` which is `__builtin_trap()` → `ud2` instruction → SIGILL. The next line was a `strcpy` to hardcoded absolute EXE address `4695939` (0x47A303) — a decompilation artifact meaningless in the Linux port.
 - **Fix**: Removed `__debugbreak()` and replaced the dead `strcpy` with the proper version `strcpy(netz_47A740[idx + 2].player_name, netz_default_player_name)`, matching the identical pattern already used at line 1623 in the same function.
+
+### BGM Fix — Random Stalling/Stuttering at Ring-Buffer Wrap Boundary
+- **Root cause**: BGM streaming loop used a ring-buffer model (v2 write cursor, v52 play cursor modulo `buffer_size`) on top of SDL2's queue model (monotonic append). When the SDL queue drained completely (`queued == 0`), `GetCurrentPosition` mapped `consumed = buffer_size` → `cursor = 0`. Meanwhile v2 (write pointer) sat at `buffer_size` after the previous write. The standard ring-buffer formula `v20 = buffer_size + v52 - v2` computed `v20 = 0` — the streaming loop wrote nothing and BGM stalled until the SDL queue refilled (several seconds of silence).
+- This was ambiguous with the "buffer full" case (queued ≥ buffer_size → consumed=0 → cursor=0 → v20=0), which should correctly skip writing.
+- **Fix** (`Sound.cpp`): After computing `v20`, added a disambiguation check: when `v20==0 && v52==0 && v2 >= buffer_size`, call `SDL_GetQueuedAudioSize`. If queued < buffer_size, set `v20 = buffer_size - queued` to refill the drained buffer. If queued ≥ buffer_size, leave `v20=0` (buffer genuinely full).
+- Also changed all `>=` buffer_size wrap comparisons to `>` so v2 stays at `buffer_size` instead of wrapping to `0`, preventing a separate permanent deadlock.
 
 ### Crash Fix — Schrap Explosions Global-Buffer-Overflow (dword_46BC98[8])
 - Root cause: `script_438F50_explosions` (`Schrap.cpp:199`) used `(unsigned __int8)((char)kknd_rand_debug() % -8)` to compute an index into `dword_46BC98[8]`. When `kknd_rand_debug()` returned a value whose `char` truncation was negative (e.g., 128–255), C's `%` with negative dividend produced a negative result, and the `(unsigned __int8)` cast wrapped it to 249–255 — far past the array's 8 elements.
