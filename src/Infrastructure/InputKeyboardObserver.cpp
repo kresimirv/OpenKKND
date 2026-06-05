@@ -13,12 +13,8 @@ void InputKeyboardObserver::OnCharUp(int key, bool ctrl_status, bool alt_status)
 
     combo_pressed_vk = key;
     input_combo_pressed_vk = key;
-    int combo_pressed_vk_param = 0;
-    if (ctrl_status) {
-        combo_pressed_vk_param = combo_press_params_map[combo_pressed_vk];
-    } else {
-        combo_pressed_vk_param = 0;
-    }
+    int combo_pressed_vk_param = combo_press_params_map[combo_pressed_vk];
+    input_now_pressed_keys.combo_key_was_ctrl = ctrl_status;
     input_now_pressed_keys.combo_key_param = combo_pressed_vk_param;
 
     if (combo_pressed_vk) {

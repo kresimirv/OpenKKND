@@ -1867,7 +1867,7 @@ void cursor_group_orders(CursorHandler *a1)
     v2 = a1;
     if (_47A700_input.combo_key_param >= 2
         && _47A700_input.combo_key_param <= 11
-        && dword_47A6FC == 29
+        && _47A700_input.combo_key_was_ctrl
         && _47A700_input.combo_key_param - 2 != _468984_last_assigned_group)
     {
         cursor_assign_unit_group(a1, _47A700_input.combo_key_param - 1);
@@ -2753,7 +2753,7 @@ void script_game_cursor_handler(Script *a1)
                     {
                         if (!(_47A700_input.just_pressed_keys_mask & INPUT_KEYBOARD_RETURN_MASK))
                         {
-                            if (v8 < 2 || v8 > 0xB || dword_47A6FC == 29)
+                            if (v8 < 2 || v8 > 0xB || _47A700_input.combo_key_was_ctrl)
                             {
                                 if (false)
                                 {

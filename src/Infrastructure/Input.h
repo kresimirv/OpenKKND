@@ -16,6 +16,7 @@ struct KeyboardInput
     int unpressed_keys_mask;
     int field_C;
     int combo_key_param;
+    bool combo_key_was_ctrl;
 };
 
 

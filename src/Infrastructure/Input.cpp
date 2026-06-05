@@ -245,6 +245,7 @@ void input_reset_keyboard()
     input_keyboard_state.unpressed_keys_mask = 0;
     input_keyboard_state.field_C = 0;
     input_keyboard_state.combo_key_param = 0;
+    input_keyboard_state.combo_key_was_ctrl = false;
 }
 
 //----- (0041AAE0) --------------------------------------------------------
@@ -337,6 +338,8 @@ void input_update_keyboard()
     input_now_pressed_keys.field_C = input_465FE8[input_479B6C_just_pressed_keys_mask];
     memcpy(&input_previous_state, &input_now_pressed_keys, sizeof(input_previous_state));
     memcpy(&input_keyboard_state, &input_now_pressed_keys, sizeof(input_keyboard_state));
+    input_now_pressed_keys.combo_key_param = 0;
+    input_now_pressed_keys.combo_key_was_ctrl = false;
 }
 
 //----- (0041AC30) --------------------------------------------------------
