@@ -347,3 +347,7 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
 - **Fix 3 — Sidestep in fine-snap placement (`Infantry.cpp:3305`)**: In `entity_mode_417A20`, added the same `boxd_41C130` check + `entity_414870_boxd` sidestep before orientation setup for infantry, matching the `entity_414870_boxd` fallback already present in the vehicle branch of the same function. Previously the infantry branch just set orientation and mobd without checking if the path was clear.
 
 - **Verification**: Build succeeds. Infantry now uses all obstacle avoidance behaviors that were previously vehicle-only: sidestep at movement init, cardinal slide during movement ticks, and sidestep during fine-snap placement.
+
+### Crash Fix — Beast Enclosure Upgrade Global-Buffer-Overflow (Kaos Mode)
+- **Root cause**: `__477318_beastenclosure_negindex` was declared as `int __477318_beastenclosure_negindex[] = { 0 };` (single element), but `EventHandler_BeastEnclosure` (`BuildingsMute.cpp:93`) accessed it as `__477318_beastenclosure_negindex[v7->num_upgrades - 1]` where `num_upgrades` ranges 1–4 (indices 0–3). ASan detected global-buffer-overflow when reading/writing past the single element.
+- **Fix** (`_unsorted_data.cpp:5135`): Changed declaration to `int __477318_beastenclosure_negindex[5] = { 0, 0, 0, 0, 0 };` — matching the 5 upgrade levels (indices 0–4), same as `num_buildings_by_level[5]` which is already correctly sized.
