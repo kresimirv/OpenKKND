@@ -101,7 +101,7 @@ Sentinel trick: two adjacent pointer globals used as `next`/`prev` of implicit s
 - **ASan Debug build**: game runs through main menu → campaign start → gameplay without ASan errors.
 - **Release build (`-O3 -DNDEBUG -fno-strict-aliasing`)**: builds clean, runs with full rendering and sound.
 - **Savegames**: Fully working — save/load, unit selection, unit control, enemy AI, and attack commands all work correctly after loading a save.
-- **Pathfinding**: Fixed — units navigate around hills/obstacles, group move orders settle all units at or near the destination tile without wandering. Both infantry and vehicles work correctly.
+- **Pathfinding**: Fixed — all units (infantry and vehicles) navigate around hills/obstacles, group move orders settle at destination, infantry uses same lateral avoidance (sidestep, cardinal slide, fine‑snap sidestep) as vehicles.
 - **BGM**: Fixed — background music no longer stalls or stutters during gameplay.
 
 ## Remaining Concerns
@@ -334,3 +334,16 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
 - Root cause: `script_438F50_explosions` (`Schrap.cpp:199`) used `(unsigned __int8)((char)kknd_rand_debug() % -8)` to compute an index into `dword_46BC98[8]`. When `kknd_rand_debug()` returned a value whose `char` truncation was negative (e.g., 128–255), C's `%` with negative dividend produced a negative result, and the `(unsigned __int8)` cast wrapped it to 249–255 — far past the array's 8 elements.
 - Two other `% -8` sites (lines 148, 179) were safe because their operands were non-negative loop counters (0–7 and 0–5), where the result is the same as `% 8`.
 - **Fix**: Replaced `(unsigned __int8)((char)... % -8)` with `(unsigned __int8)(... % 8)` — the random value is positive, so `% 8` gives a clean 0–7 range.
+
+### Infantry Obstacle Avoidance — Same Logic as Vehicles
+
+- **Symptom**: Infantry units still got stuck when navigating around obstacles even after the Bresenham pathfinding fixes.
+- **Root cause**: Three call sites where vehicles attempt lateral avoidance (sidestep, cardinal slide) were missing for infantry — infantry went directly to the stuck handler with no intermediate avoidance step.
+
+- **Fix 1 — Sidestep at init (`Infantry.cpp:2528`)**: In `entity_mode_attack_move_2_5_4165C0`, added `boxd_41C130` path-clear check + `entity_414870_boxd` sidestep before the orientation/animation setup, matching the vehicle path. If the direct path to the waypoint is blocked, infantry now tries sidestepping to an adjacent tile before falling back to the stuck handler.
+
+- **Fix 2 — Cardinal slide at tick (`Infantry.cpp:2642`)**: In `entity_mode_move_to_target_416790`, changed infantry's move-result handling to match vehicles exactly: `map_40DA90_move_entity` returning 0 or 1 (partially blocked) now calls `entity_414C30_boxd` (tries X-only then Y-only cardinal slide) instead of going directly to `entity_mode_attack_move_4_order_3_7_417E60` (stuck/backoff). Return code 3 (fully occupied) still triggers the nudge mode; return code 4 (success) continues normally.
+
+- **Fix 3 — Sidestep in fine-snap placement (`Infantry.cpp:3305`)**: In `entity_mode_417A20`, added the same `boxd_41C130` check + `entity_414870_boxd` sidestep before orientation setup for infantry, matching the `entity_414870_boxd` fallback already present in the vehicle branch of the same function. Previously the infantry branch just set orientation and mobd without checking if the path was clear.
+
+- **Verification**: Build succeeds. Infantry now uses all obstacle avoidance behaviors that were previously vehicle-only: sidestep at movement init, cardinal slide during movement ticks, and sidestep during fine-snap placement.

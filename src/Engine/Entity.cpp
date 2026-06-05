@@ -197,8 +197,8 @@ void entity_move(Entity *a1, _47CAF0_task_attachment1_move_task *a2)
                 v6 = a2->dst_y;
                 if (v6 >= 0 && v6 < map2global(map_get_height()))
                 {
-                    a1->pathing.field_54 = 0;
-                    a1->pathing.field_50 = 0;
+                    a1->pathing.push_through_timer = 0;
+                    a1->pathing.disperse_timer = 0;
                     script_sleep(a1->script, 1);
 
                     a1->_DC_order = ENTITY_ORDER_MOVE;
@@ -264,8 +264,8 @@ void entity_attack(Entity *a1, _47CAF0_task_attachment1_attack_task *param)
                 game_globals_cpu[param->target->player_side].cash[v3->player_side] = 0;
                 game_globals_cpu[v3->player_side].cash[param->target->player_side] = 0;
             }
-            v3->pathing.field_54 = 0;
-            v3->pathing.field_50 = 0;
+            v3->pathing.push_through_timer = 0;
+            v3->pathing.disperse_timer = 0;
             script_sleep(v3->script, 1);
             v3->_DC_order = ENTITY_ORDER_ATTACK;
             v3->retaliation_target = param->target;

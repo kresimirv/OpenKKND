@@ -15223,10 +15223,10 @@ bool boxd_44D340(int *out_x, int *out_y, int a3, Entity *a1, int *out_idx)
 				v8 = 1;
 				goto LABEL_22;
 			}
-			if (v13 == 1 && (!v5->pathing.field_50 || a1a))
+			if (v13 == 1 && (!v5->pathing.disperse_timer || a1a))
 				goto LABEL_21;
 		}
-		else if (v5->pathing.field_54 || a1a)
+		else if (v5->pathing.push_through_timer || a1a)
 		{
 			goto LABEL_21;
 		}

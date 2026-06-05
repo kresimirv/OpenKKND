@@ -2397,12 +2397,12 @@ int Map_41BE90_add_waypoint(
     switch (tile_classification_result)
     {
     case 1:
-        if (!a5->pathing.field_54)
+        if (!a5->pathing.push_through_timer)
             goto LABEL_6;
         v13 = 0;
         break;
     case 3:
-        if (a5->pathing.field_50)
+        if (a5->pathing.disperse_timer)
             goto LABEL_6;
         v13 = 0;
         break;
@@ -2764,11 +2764,11 @@ bool boxd_41C660(int x, int y, int width, int height, int a5, int a6, Entity *a7
         switch (boxd_40ED00(a7, v15))
         {
         case 1:
-            if (a7->pathing.field_54)
+            if (a7->pathing.push_through_timer)
                 break;
             return 0;
         case 3:
-            if (a7->pathing.field_50)
+            if (a7->pathing.disperse_timer)
                 return 0;
             break;
         case 2:
@@ -2829,11 +2829,11 @@ bool boxd_41C660(int x, int y, int width, int height, int a5, int a6, Entity *a7
         switch (boxd_40ED00(v13, v15))
         {
         case 1:
-            if (v13->pathing.field_54)
+            if (v13->pathing.push_through_timer)
                 goto LABEL_39;
             return 0;
         case 3:
-            if (!v13->pathing.field_50)
+            if (!v13->pathing.disperse_timer)
                 goto LABEL_39;
             return 0;
         case 2:
@@ -2907,11 +2907,11 @@ bool boxd_41C890(int x, int y, int width, int height, int a5, int a6, Entity *a7
         switch (boxd_40ED00(a7, v15))
         {
         case 1:
-            if (a7->pathing.field_54)
+            if (a7->pathing.push_through_timer)
                 break;
             return 0;
         case 3:
-            if (a7->pathing.field_50)
+            if (a7->pathing.disperse_timer)
                 return 0;
             break;
         case 2:
@@ -2971,11 +2971,11 @@ bool boxd_41C890(int x, int y, int width, int height, int a5, int a6, Entity *a7
         switch (boxd_40ED00(v13, v15))
         {
         case 1:
-            if (v13->pathing.field_54)
+            if (v13->pathing.push_through_timer)
                 goto LABEL_39;
             return 0;
         case 3:
-            if (!v13->pathing.field_50)
+            if (!v13->pathing.disperse_timer)
                 goto LABEL_39;
             return 0;
         case 2:

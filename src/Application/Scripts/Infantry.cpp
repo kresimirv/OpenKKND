@@ -534,8 +534,8 @@ bool entity_413860_boxd(Entity *a1)
             goto LABEL_19;
     }
     v10 = boxd_40EA50_classify_tile_objects(v1, v7, v2, boxd_get_tile(v7, v2));
-    v1->pathing.field_50 = 0;
-    v1->pathing.field_54 = 1;
+    v1->pathing.disperse_timer = 0;
+    v1->pathing.push_through_timer = 1;
     if (v10 != 2)
     {
     LABEL_17:
@@ -557,7 +557,7 @@ bool entity_413860_boxd(Entity *a1)
         goto LABEL_17;
     }
     v16 = v1->stats;
-    v1->pathing.field_54 = 0;
+    v1->pathing.push_through_timer = 0;
     v1->sprite_map_x = v7;
     v1->sprite_map_y = v2;
     if (v16->is_infantry)
@@ -925,6 +925,7 @@ bool entity_initialize_order(Entity *a1)
         v35 = v1->sprite;
         v1->sprite_x = v33;
         v1->sprite_y = v34;
+
         if (v35->x - v33 <= 0)
             v36 = v33 - v35->x;
         else
@@ -1448,12 +1449,6 @@ bool entity_414870_boxd(Entity *a1)
             v1->sprite_y = v18->y;
             return 1;
         }
-        if (boxd_41C130(v6 + v16->x, v2 + v16->y, v16->x, v16->y, v1))
-        {
-            v1->sprite_x = v6 + v1->sprite->x;
-            v1->sprite_y = v2 + v1->sprite->y;
-            return 1;
-        }
     }
     else
     {
@@ -1473,12 +1468,6 @@ bool entity_414870_boxd(Entity *a1)
             result = 1;
             v1->sprite_y = v2 + v15;
             return result;
-        }
-        if (boxd_41C130(v6 + v12->x, v2 + v12->y, v12->x, v12->y, v1))
-        {
-            v1->sprite_x = v6 + v1->sprite->x;
-            v1->sprite_y = v2 + v1->sprite->y;
-            return 1;
         }
     }
     return 0;
@@ -1590,111 +1579,53 @@ void entity_414C30_boxd(Entity *a1)
     v1 = a1;
     v2 = _42D560_get_mobd_lookup_id_rotation(a1->sprite_x - a1->sprite->x, a1->sprite_y - a1->sprite->y);
     v3 = v2;
-    int saved_x_speed = v1->stats->speed * _4731A8_speeds[__47CFC4_mobd_lookup_speeds[v2 + 1]] >> 6;
-    int saved_y_speed = -entity_get_mobd_speed_y(v1);
-
-    v1->sprite->x_speed = saved_x_speed;
-    v1->sprite->y_speed = 0;
-    if (map_40DA90_move_entity(v1) == 4)
+    if (v2 & 0x3F)
     {
-        if (v1->sprite->x_speed <= 0)
+        v1->sprite->x_speed = v1->stats->speed * _4731A8_speeds[__47CFC4_mobd_lookup_speeds[v2 + 1]] >> 6;
+        v1->sprite->y_speed = 0;
+        if (map_40DA90_move_entity(v1) == 4)
         {
-            if (map_point_to_tile_global(v1->sprite->x) > 0)
+            if (v1->sprite->x_speed <= 0)
             {
-                v1->sprite_x = map_adjust_entity_in_tile_x(v1, v1->sprite->x - 4096);
+                if (map_point_to_tile_global(v1->sprite->x) > 0)
+                {
+                    v1->sprite_x = map_adjust_entity_in_tile_x(v1, v1->sprite->x - 4096);
+                    v1->sprite_y = v1->sprite->y;
+                    v1->SetMode(entity_mode_move_to_target_416790);
+                    return;
+                }
+            }
+            else if (global2map(v1->sprite->x) < map_get_width() - 1)
+            {
+                v1->sprite_x = map_adjust_entity_in_tile_x(v1, v1->sprite->x + 4096);
                 v1->sprite_y = v1->sprite->y;
                 v1->SetMode(entity_mode_move_to_target_416790);
                 return;
             }
         }
-        else if (global2map(v1->sprite->x) < map_get_width() - 1)
-        {
-            v1->sprite_x = map_adjust_entity_in_tile_x(v1, v1->sprite->x + 4096);
-            v1->sprite_y = v1->sprite->y;
-            v1->SetMode(entity_mode_move_to_target_416790);
-            return;
-        }
-    }
 
-    v1->sprite->x_speed = 0;
-    v1->sprite->y_speed = saved_y_speed;
-    if (map_40DA90_move_entity(v1) == 4)
-    {
-        if (v1->sprite->y_speed <= 0)
+        v1->sprite->x_speed = 0;
+        v1->sprite->y_speed = -entity_get_mobd_speed_y(v1);
+        if (map_40DA90_move_entity(v1) == 4)
         {
-            if (map_point_to_tile_global(v1->sprite->x) > 0)
+            if (v1->sprite->y_speed <= 0)
+            {
+                if (map_point_to_tile_global(v1->sprite->x) > 0)
+                {
+                    v1->sprite_x = v1->sprite->x;
+                    v1->sprite_y = map_adjust_entity_in_tile_y(v1, v1->sprite->y - 4096);
+                    v1->SetMode(entity_mode_move_to_target_416790);
+                    return;
+                }
+            }
+            else if (global2map(v1->sprite->y) < map_get_height() - 1)
             {
                 v1->sprite_x = v1->sprite->x;
-                v1->sprite_y = map_adjust_entity_in_tile_y(v1, v1->sprite->y - 4096);
+                v1->sprite_y = map_adjust_entity_in_tile_y(v1, v1->sprite->y + 4096);
                 v1->SetMode(entity_mode_move_to_target_416790);
                 return;
             }
         }
-        else if (global2map(v1->sprite->y) < map_get_height() - 1)
-        {
-            v1->sprite_x = v1->sprite->x;
-            v1->sprite_y = map_adjust_entity_in_tile_y(v1, v1->sprite->y + 4096);
-            v1->SetMode(entity_mode_move_to_target_416790);
-            return;
-        }
-    }
-
-    v1->sprite->x_speed = -saved_x_speed;
-    v1->sprite->y_speed = 0;
-    if (map_40DA90_move_entity(v1) == 4)
-    {
-        if (v1->sprite->x_speed <= 0)
-        {
-            if (map_point_to_tile_global(v1->sprite->x) > 0)
-            {
-                v1->sprite_x = map_adjust_entity_in_tile_x(v1, v1->sprite->x - 4096);
-                v1->sprite_y = v1->sprite->y;
-                v1->SetMode(entity_mode_move_to_target_416790);
-                return;
-            }
-        }
-        else if (global2map(v1->sprite->x) < map_get_width() - 1)
-        {
-            v1->sprite_x = map_adjust_entity_in_tile_x(v1, v1->sprite->x + 4096);
-            v1->sprite_y = v1->sprite->y;
-            v1->SetMode(entity_mode_move_to_target_416790);
-            return;
-        }
-    }
-
-    v1->sprite->x_speed = 0;
-    v1->sprite->y_speed = -saved_y_speed;
-    if (map_40DA90_move_entity(v1) == 4)
-    {
-        if (v1->sprite->y_speed <= 0)
-        {
-            if (map_point_to_tile_global(v1->sprite->x) > 0)
-            {
-                v1->sprite_x = v1->sprite->x;
-                v1->sprite_y = map_adjust_entity_in_tile_y(v1, v1->sprite->y - 4096);
-                v1->SetMode(entity_mode_move_to_target_416790);
-                return;
-            }
-        }
-        else if (global2map(v1->sprite->y) < map_get_height() - 1)
-        {
-            v1->sprite_x = v1->sprite->x;
-            v1->sprite_y = map_adjust_entity_in_tile_y(v1, v1->sprite->y + 4096);
-            v1->SetMode(entity_mode_move_to_target_416790);
-            return;
-        }
-    }
-    int old_map_x = v1->sprite_map_x;
-    int old_map_y = v1->sprite_map_y;
-    int old_idx = v1->_A4_idx_in_tile;
-
-    if (entity_413A90_boxd(v1))
-    {
-        boxd_40F160(v1, old_map_x, old_map_y, old_idx);
-        v1->sprite->x = map_adjust_entity_in_tile_x(v1, map2global(v1->sprite_map_x));
-        v1->sprite->y = map_adjust_entity_in_tile_y(v1, map2global(v1->sprite_map_y));
-        v1->SetMode(entity_mode_move_to_target_416790);
-        return;
     }
     entity_mode_attack_move_4_order_3_7_417E60(v1);
 }
@@ -2200,12 +2131,12 @@ void entity_mode_move_attack(Entity *a1)
     if (!entity_initialize_order(a1))
     {
         entity_load_idle_mobd(a1);
-        v4 = a1->pathing.field_50;
+        v4 = a1->pathing.disperse_timer;
         if (v4)
-            a1->pathing.field_50 = v4 - 1;
-        v5 = a1->pathing.field_54;
+            a1->pathing.disperse_timer = v4 - 1;
+        v5 = a1->pathing.push_through_timer;
         if (v5)
-            a1->pathing.field_54 = v5 - 1;
+            a1->pathing.push_through_timer = v5 - 1;
 
         a1->pathing._41B970_result = Map_41B970_straight_line_pathing(a1, a1->sprite_x, a1->sprite_y);
         switch (a1->pathing._41B970_result)
@@ -2222,26 +2153,14 @@ void entity_mode_move_attack(Entity *a1)
             break;
 
         case 4:
-            if (abs(a1->sprite->x - a1->sprite_x_2) < 16384 && abs(a1->sprite->y - a1->sprite_y_2) < 16384)
-            {
-                a1->sprite_x_2 = map_adjust_entity_in_tile_x(a1, a1->sprite->x);
-                a1->sprite_y_2 = map_adjust_entity_in_tile_y(a1, a1->sprite->y);
-                entity_initialize_order(a1);
-                return;
-            }
-            entity_414C30_boxd(a1);
+            v12 = a1->_DC_order;
+            if (v12 == ENTITY_ORDER_7 || v12 == ENTITY_ORDER_3)
+                entity_mode_attack_move_4_order_3_7_417E60(a1);
+            else
+                entity_mode_attack_move_4_417550(a1);
             return;
 
         case 3:
-            for (int i = 0; i < a1->pathing.num_waypoints - 1; ++i) {
-                a1->_1AC_waypoints_xs[i] = a1->_1FC_waypoints_xs[i];
-                a1->_1AC_waypoints_ys[i] = a1->_1FC_waypoints_ys[i];
-            }
-            if (a1->pathing.num_waypoints > 1) {
-                int last = a1->pathing.num_waypoints - 1;
-                a1->_1AC_waypoints_xs[last] = a1->_1FC_waypoints_xs[last - 1];
-                a1->_1AC_waypoints_ys[last] = a1->_1FC_waypoints_ys[last - 1];
-            }
             v15 = a1->field_124;
             LOBYTE_HEXRAYS(v15) = v15 | 6;
             a1->field_124 = v15;
@@ -2249,10 +2168,6 @@ void entity_mode_move_attack(Entity *a1)
             return;
 
         case 1:
-            for (int i = 0; i < a1->pathing.num_waypoints; ++i) {
-                a1->_1AC_waypoints_xs[i] = a1->_1FC_waypoints_xs[i];
-                a1->_1AC_waypoints_ys[i] = a1->_1FC_waypoints_ys[i];
-            }
             v16 = a1->field_124;
             LOBYTE_HEXRAYS(v16) = v16 & 0xF9;
             a1->field_124 = v16;
@@ -2260,83 +2175,7 @@ void entity_mode_move_attack(Entity *a1)
             return;
 
         case 5:
-            if (a1->pathing.destination_map_x || a1->pathing.destination_map_y)
-            {
-                a1->sprite_x = map_adjust_entity_in_tile_x(a1, map2global(a1->pathing.destination_map_x));
-                a1->sprite_y = map_adjust_entity_in_tile_y(a1, map2global(a1->pathing.destination_map_y));
-                entity_mode_attack_move_2_5_4165C0(a1);
-            }
-            else if (abs(a1->sprite->x - a1->sprite_x_2) < 16384 && abs(a1->sprite->y - a1->sprite_y_2) < 16384)
-            {
-                a1->sprite_x_2 = map_adjust_entity_in_tile_x(a1, a1->sprite->x);
-                a1->sprite_y_2 = map_adjust_entity_in_tile_y(a1, a1->sprite->y);
-                entity_initialize_order(a1);
-            }
-            else
-            {
-                int unit_tile_x = a1->sprite_map_x;
-                int unit_tile_y = a1->sprite_map_y;
-                int dest_tile_x = global2map(a1->sprite_x);
-                int dest_tile_y = global2map(a1->sprite_y);
-                int path_dx = dest_tile_x - unit_tile_x;
-                int path_dy = dest_tile_y - unit_tile_y;
-
-                bool search_vertical = abs(path_dx) >= abs(path_dy);
-
-                int new_tile_x = -1, new_tile_y = -1;
-                for (int offset = 1; offset <= 3; offset++)
-                {
-                    for (int sign = -1; sign <= 1; sign += 2)
-                    {
-                        int try_x = search_vertical ? unit_tile_x : unit_tile_x + sign * offset;
-                        int try_y = search_vertical ? unit_tile_y + sign * offset : unit_tile_y;
-
-                        if (try_x < 0 || try_x >= map_get_width() || try_y < 0 || try_y >= map_get_height())
-                            continue;
-
-                        DataBoxd_stru0_per_map_unit *tile = boxd_get_tile(try_x, try_y);
-                        if (boxd_40EA50_classify_tile_objects(a1, try_x, try_y, tile) == 2)
-                        {
-                            new_tile_x = try_x;
-                            new_tile_y = try_y;
-                            break;
-                        }
-                    }
-                    if (new_tile_x != -1) break;
-                }
-
-                if (new_tile_x != -1)
-                {
-                    int old_map_x = a1->sprite_map_x;
-                    int old_map_y = a1->sprite_map_y;
-                    int old_idx = a1->_A4_idx_in_tile;
-
-                    a1->sprite_map_x = new_tile_x;
-                    a1->sprite_map_y = new_tile_y;
-
-                    int place_x = 4096, place_y = 4096;
-                    if (a1->IsInfantry())
-                    {
-                        place_y = map_get_entity_placement_inside_tile_y(a1, old_idx);
-                        place_x = map_get_entity_placement_inside_tile_x(a1, old_idx);
-                    }
-                    else if (a1->stats->field_4C != 128)
-                    {
-                        place_x = 7424;
-                        place_y = 7424;
-                    }
-
-                    a1->_A4_idx_in_tile = map_place_entity(a1, (new_tile_x << 13) + place_x, (new_tile_y << 13) + place_y, 0);
-                    boxd_40F160(a1, old_map_x, old_map_y, old_idx);
-                    a1->sprite->x = map_adjust_entity_in_tile_x(a1, map2global(new_tile_x));
-                    a1->sprite->y = map_adjust_entity_in_tile_y(a1, map2global(new_tile_y));
-                    a1->SetMode(entity_mode_move_to_target_416790);
-                }
-                else
-                {
-                    entity_414C30_boxd(a1);
-                }
-            }
+            entity_mode_attack_move_4_order_3_7_417E60(a1);
             break;
         case 0:
             entity_mode_attack_move_2_5_4165C0(a1);
@@ -2367,7 +2206,7 @@ void entity_mode_attack_move_1_415D30(Entity *a1)
     v2 = --a1->pathing.num_waypoints;
     if (v2 < 0)
     {
-        if (a1->pathing.field_54)
+        if (a1->pathing.push_through_timer)
         {
             if (a1->pathing.destination_map_x || a1->pathing.destination_map_y)
             {
@@ -2393,7 +2232,7 @@ void entity_mode_attack_move_1_415D30(Entity *a1)
         }
         else
         {
-            a1->pathing.field_54 = 4;
+            a1->pathing.push_through_timer = 4;
             entity_mode_attack_move_4_order_3_7_417E60(a1);
         }
     }
@@ -2521,8 +2360,8 @@ void entity_mode_416060(Entity *a1)
                 if (*v4 == v5->x >> 13 && *v3 == v5->y >> 13)
                 {
                 LABEL_63:
-                    v1->pathing.field_54 = 0;
-                    v1->pathing.field_50 = 2;
+                    v1->pathing.push_through_timer = 0;
+                    v1->pathing.disperse_timer = 2;
                     v1->mode_return = entity_mode_attack_move_4_order_3_7_417E60;
                     entity_mode_416A70_infantry(v1);
                     return;
@@ -2686,6 +2525,15 @@ void entity_mode_attack_move_2_5_4165C0(Entity *a1)
 
     if (a1->IsInfantry())
     {
+        if (!boxd_41C130(a1->sprite_x, a1->sprite_y, a1->sprite->x, a1->sprite->y, a1))
+        {
+            if (!entity_414870_boxd(a1))
+            {
+                entity_mode_attack_move_4_order_3_7_417E60(a1);
+                return;
+            }
+        }
+
         a1->SetCurrentAnimFrame(
             _42D560_get_mobd_lookup_id_rotation(
                 a1->sprite_x - a1->sprite->x,
@@ -2794,54 +2642,36 @@ void entity_mode_move_to_target_416790(Entity *a1)
         if (v1->IsInfantry())
         {
             v23 = map_40DA90_move_entity(v1);
-            if (v23 >= 0)
-            {
-                if (v23 <= 1)
-                {
-                    if (abs(v1->sprite->x - v1->sprite_x_2) < 16384 && abs(v1->sprite->y - v1->sprite_y_2) < 16384)
-                    {
-                        v1->sprite_x_2 = map_adjust_entity_in_tile_x(v1, v1->sprite->x);
-                        v1->sprite_y_2 = map_adjust_entity_in_tile_y(v1, v1->sprite->y);
-                        entity_mode_move_attack(v1);
-                        return;
-                    }
-                    entity_414C30_boxd(v1);
-                    return;
-                }
-            LABEL_43:
-                if (v23 == 3)
-                {
-                    v25 = v1->stats;
-                    v1->mode_return = entity_mode_attack_move_2_5_4165C0;
-                    entity_load_idle_mobd(v1);
-                    v26 = v1->sprite;
-                    v1->pathing._2C_waypoint_map_x = v26->x_speed;
-                    v1->pathing._2C_waypoint_map_y = v26->y_speed;
-                    v26->x_speed = 0;
-                    v1->sprite->y_speed = 0;
-                    v27 = v1->field_124;
-                    LOBYTE_HEXRAYS(v27) = v27 & 0xBF;
-                    v1->_128_spawn_param = (void *)60;
-                    v1->field_124 = v27;
-                    v1->SetMode(entity_mode_417FC0);
-                    return;
-                }
-                goto LABEL_46;
-            }
+            if (v23 && v23 != 1)
+                goto LABEL_43;
+            entity_414C30_boxd(v1);
         }
         else
         {
             v23 = map_40DA90_move_entity(v1);
             if (v23 && v23 != 1)
                 goto LABEL_43;
-            if (abs(v1->sprite->x - v1->sprite_x_2) < 16384 && abs(v1->sprite->y - v1->sprite_y_2) < 16384)
-            {
-                v1->sprite_x_2 = map_adjust_entity_in_tile_x(v1, v1->sprite->x);
-                v1->sprite_y_2 = map_adjust_entity_in_tile_y(v1, v1->sprite->y);
-                entity_mode_move_attack(v1);
-                return;
-            }
             entity_414C30_boxd(v1);
+        }
+        goto LABEL_46;
+
+    LABEL_43:
+        if (v23 == 3)
+        {
+            v25 = v1->stats;
+            v1->mode_return = entity_mode_attack_move_2_5_4165C0;
+            entity_load_idle_mobd(v1);
+            v26 = v1->sprite;
+            v1->pathing._2C_waypoint_map_x = v26->x_speed;
+            v1->pathing._2C_waypoint_map_y = v26->y_speed;
+            v26->x_speed = 0;
+            v1->sprite->y_speed = 0;
+            v27 = v1->field_124;
+            LOBYTE_HEXRAYS(v27) = v27 & 0xBF;
+            v1->_128_spawn_param = (void *)60;
+            v1->field_124 = v27;
+            v1->SetMode(entity_mode_417FC0);
+            return;
         }
     LABEL_46:
         entity_414AD0_vehicle_collide_vehicle(v1);
@@ -3146,8 +2976,8 @@ void entity_mode_417360_infantry(Entity *a1)
                 if (!v10)
                 {
                     v14 = v1->script;
-                    v1->pathing.field_54 = 0;
-                    v1->pathing.field_50 = 0;
+                    v1->pathing.push_through_timer = 0;
+                    v1->pathing.disperse_timer = 0;
                     script_sleep(v14, 1);
                     v15 = v1->sprite_height_3;
                     v1->sprite_x_2 = v1->sprite_width_3;
@@ -3163,8 +2993,8 @@ void entity_mode_417360_infantry(Entity *a1)
                 if (v10 == 1)
                 {
                     v11 = v1->script;
-                    v1->pathing.field_54 = 0;
-                    v1->pathing.field_50 = 0;
+                    v1->pathing.push_through_timer = 0;
+                    v1->pathing.disperse_timer = 0;
                     script_sleep(v11, 1);
                     v12 = v1->_2A8_entity;
                     v13 = v1->_2A8_entity_id;
@@ -3474,6 +3304,15 @@ void entity_mode_417A20(Entity *a1)
                     v5 = v1->stats;
                     if (v5->is_infantry)
                     {
+                        if (!boxd_41C130(v1->sprite_x, v1->sprite_y, v1->sprite->x, v1->sprite->y, v1))
+                        {
+                            if (!entity_414870_boxd(v1))
+                            {
+                                entity_mode_attack_move_4_order_3_7_417E60(v1);
+                                return;
+                            }
+                        }
+
                         v6 = (signed __int16)_42D560_get_mobd_lookup_id_rotation(
                             v1->sprite_x - v1->sprite->x,
                             v1->sprite_y - v1->sprite->y);
@@ -3744,7 +3583,7 @@ void entity_mode_417FC0(Entity *a1)
         v3->x += v1->pathing._2C_waypoint_map_x;
         v1->sprite->y += v1->pathing._2C_waypoint_map_y;
         v1->SetMode(v1->mode_return);
-        v1->pathing.field_50 = 0;
+        v1->pathing.disperse_timer = 0;
         return;
     }
     v4 = entity_40E000_boxd(v1, v1->pathing._2C_waypoint_map_x + v3->x, v1->pathing._2C_waypoint_map_y + v3->y);
@@ -3757,7 +3596,7 @@ void entity_mode_417FC0(Entity *a1)
     v1->_128_spawn_param = v5 - 1;
     if (!v5)
     {
-        v1->pathing.field_50 = 2;
+        v1->pathing.disperse_timer = 2;
         entity_mode_attack_move_4_order_3_7_417E60(v1);
         return;
     }
@@ -3778,7 +3617,7 @@ void entity_mode_417FC0(Entity *a1)
                 {
                     if (v6->stats->speed < v1->stats->speed)
                     {
-                        v1->pathing.field_50 = 2;
+                        v1->pathing.disperse_timer = 2;
                         entity_mode_move_attack(v1);
                         return;
                     }
@@ -3844,7 +3683,7 @@ void entity_mode_4181B0(Entity *a1)
         {
             if (*v5 && (*v5)->stats->speed < v1->stats->speed)
             {
-                v1->pathing.field_50 = 2;
+                v1->pathing.disperse_timer = 2;
                 entity_mode_move_attack(v1);
                 return;
             }
@@ -3859,7 +3698,7 @@ void entity_mode_4181B0(Entity *a1)
         }
         else
         {
-            v1->pathing.field_50 = 2;
+            v1->pathing.disperse_timer = 2;
             entity_mode_attack_move_4_order_3_7_417E60(v1);
         }
     }

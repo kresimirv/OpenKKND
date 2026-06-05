@@ -50,8 +50,8 @@ struct EntityPathing
     int destination_map_x;
     int destination_map_y;
     int _41B970_result; // 4C
-    int field_50;
-    int field_54;
+    int disperse_timer; // field_50 - temporarily treat partially occupied tiles as impassible to avoid congestion
+    int push_through_timer; // field_54 - temporarily treat partially occupied tiles as clear to push through
 };
 
 enum ENTITY_ORDER : int
