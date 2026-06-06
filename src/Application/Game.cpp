@@ -56,7 +56,8 @@ static void crash_handler(int sig) {
     fprintf(stderr, "\n*** CRASH: signal %d ***\n", sig);
     backtrace_symbols_fd(array, size, STDERR_FILENO);
     fprintf(stderr, "*** END CRASH ***\n");
-    _exit(1);
+    signal(sig, SIG_DFL);
+    raise(sig);
 }
 
 //----- (00423460) --------------------------------------------------------
@@ -91,7 +92,22 @@ void Game::Run() {
     if (VIDEO_Play(0))
     {
     LABEL_5:
-        MainMenu();
+        bool is_auto_loading = false;
+        char *auto_load = getenv("OPENKKND_LOAD");
+        if (auto_load) {
+            int slot = atoi(auto_load);
+            _438630_read_save_lst();
+            if (_47C050_savegames[slot].name[0]) {
+                _47C050_current_savegame_idx = slot;
+                if (_438740_update_save_lst_and_gamestate()) {
+                    is_auto_loading = true;
+                }
+            }
+        }
+
+        if (!is_auto_loading) {
+            MainMenu();
+        }
 
         if (is_game_loading())
         {

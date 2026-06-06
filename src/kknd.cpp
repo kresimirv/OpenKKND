@@ -7072,10 +7072,10 @@ void script_4280A0_stru38_list__production_loop(Script *task)
 		{
 			while (1)
 			{
-				v5 = v3->_18_pcash;
-				if (v5 == (int *)((char *)&game_globals_per_player + 4 * player_side) && i && v3->_20_pcost_plus1)
-					break;
-				if (*v5)
+			v5 = v3->_18_pcash;
+			if (v5 == (int *)((char *)&game_globals_per_player + 4 * player_side) && i && v3->_20_pcost_plus1)
+				break;
+			if (v5 && *v5)
 				{
 					v3->field_1C += v3->_C_cost_per_time_step;
 					if (v3->field_1C >= 256)

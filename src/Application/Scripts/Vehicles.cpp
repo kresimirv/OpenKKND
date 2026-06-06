@@ -50,6 +50,8 @@ void UNIT_Handler_OilTanker(Script *a1)
         if (!v1)
             return;
 
+        if (!v1->HasMode())
+            v1->SetMode(entity_mode_4444D0_oiltanker);
         v1->ExecMode();
         v1->script->script_type = SCRIPT_TANKER_CONVOY_HANDLER;
         v2 = v1->_12C_prison_bunker_spawn_type;

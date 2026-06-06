@@ -1821,22 +1821,21 @@ bool GAME_Save_PackEntities(
     }
 
     auto entity_memory = entity_save_data;
-    for (unsigned int i = 0; i < entities.size(); ++i) {
-        auto entity = *std::next(entities.begin(), i);
-        auto entity_index = std::next(entity_save_index.begin(), i);
+    auto index_iter = entity_save_index.begin();
+    for (auto entity : entities) {
+        if (entity->destroyed)
+            continue;
 
-        if (!entity->destroyed)
+        if (!GAME_Save_PackEntity(entity, (int)entity_memory, index_iter->entity_save_size))
         {
-            if (!GAME_Save_PackEntity(entity, (int)entity_memory, entity_index->entity_save_size))
-            {
-                entity_save_index.clear();
-                delete[] entity_save_data;
-                game_save_in_progress = 0;
-                errmsg_save[0] = "Could not save unit information";
-                return false;
-            }
-            entity_memory += entity_index->entity_save_size;
+            entity_save_index.clear();
+            delete[] entity_save_data;
+            game_save_in_progress = 0;
+            errmsg_save[0] = "Could not save unit information";
+            return false;
         }
+        entity_memory += index_iter->entity_save_size;
+        ++index_iter;
     }
 
     *out_entity_data = entity_save_data;
@@ -2585,7 +2584,7 @@ bool GAME_Load_UnpackAiPlayers(void *save_data)
             v42->_C_cost = v45;
             if (v45 > 0)
                 stru37_list_427D80_enqueue_item(
-                (int *)(4 * v4->_2A0_player_side + 4704680),
+                (int *)&game_globals_per_player + v4->_2A0_player_side,
                     &v42->_C_cost,
                     v42->_14_cost,
                     v42->_18_cost_per_time_step,
@@ -2638,7 +2637,8 @@ bool GAME_Load_UnpackAiPlayers(void *save_data)
 
                 auto v53 = entityRepo->FindById(*(_DWORD *)a2);
                 v51->entity = v53;
-                v53->_24_ai_node_per_player_side._0_ai_node_per_player_side[v4->_2A0_player_side] = (int)v51;
+                if (v53)
+                    v53->_24_ai_node_per_player_side._0_ai_node_per_player_side[v4->_2A0_player_side] = (int)v51;
                 v51->ptr_28 = 0;
                 v54 = (stru24 *)v4->power_plant_list_F4;
                 if ((stru24_PowerPlantNode **)v54 != &v4->power_plant_list_F4)
@@ -2738,7 +2738,8 @@ bool GAME_Load_UnpackAiPlayers(void *save_data)
                     v64->entity = v66;
                     v64->drillrig_node = v51;
                     ++v63;
-                    v66->_24_ai_node_per_player_side._0_ai_node_per_player_side[v4->_2A0_player_side] = (int)v64;
+                    if (v66)
+                        v66->_24_ai_node_per_player_side._0_ai_node_per_player_side[v4->_2A0_player_side] = (int)v64;
                     v64->next = *(stru24_OilTankerNode **)v62;
                     v64->prev = (stru24_OilTankerNode *)v62;
                     *(_DWORD *)(*(_DWORD *)v62 + 4) = (int)v64;
@@ -2763,7 +2764,8 @@ bool GAME_Load_UnpackAiPlayers(void *save_data)
             v69->entity = v71;
             v69->drillrig_node = 0;
             ++k;
-            v71->_24_ai_node_per_player_side._0_ai_node_per_player_side[v4->_2A0_player_side] = (int)v69;
+            if (v71)
+                v71->_24_ai_node_per_player_side._0_ai_node_per_player_side[v4->_2A0_player_side] = (int)v69;
             v69->next = v4->tanker_list_DC;
             v69->prev = (stru24_OilTankerNode *)&v4->tanker_list_DC;
             v4->tanker_list_DC->prev = v69;

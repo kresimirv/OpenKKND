@@ -263,10 +263,15 @@ Entity *EntityFactory::Unpack(EntitySerialized *save_data)
                 v3->turret = 0;
             }
 
-            EntityMode m = (void(*)(Entity *))get_handler(v2->entity_mode - 1);
-            if (!m)
-                return delete v3, nullptr;
-            v3->SetMode(m);
+            if (v2->entity_mode > 0) {
+                EntityMode m = (void(*)(Entity *))get_handler(v2->entity_mode - 1);
+                if (!m) {
+                    m = (void(*)(Entity *))get_handler(v2->entity_mode);
+                }
+                if (m) {
+                    v3->SetMode(m);
+                }
+            }
 
             v20 = v2->entity_mode_idle;
             v3->mode_idle = v20 ? (void(*)(Entity *))get_handler(v20 - 1) : 0;
@@ -576,7 +581,7 @@ Entity *EntityFactory::Unpack(EntitySerialized *save_data)
                     v70->param = (void *)v74;
                     v3->sprite->parent = *(Sprite **)(*(_DWORD *)(v74 + 16) + 304);
                     stru37_list_427D80_enqueue_item(
-                        (int *)(4 * v3->player_side + 4704680),
+                        (int *)&game_globals_per_player + v3->player_side,
                         a2a,
                         300,
                         42,

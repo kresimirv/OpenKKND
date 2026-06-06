@@ -97,6 +97,26 @@ Sentinel trick: two adjacent pointer globals used as `next`/`prev` of implicit s
 - Root cause: `input_get_string()` Delete and Backspace handlers used `v5 += 0xFFFF` (lines 5417, 5423). In the original 16-bit x86 assembly, `add ax, 0FFFFh` wraps to `ax -= 1`. In the 32-bit C++ translation, `v5` is `int`, so `0xFFFF` is the literal 65535 — adding 65535 instead of subtracting 1 produced a huge cursor position (e.g., 65536). This was passed to `draw_handler()` → `render_string_443EE0()`, which used it to traverse a linked list — walking past the end into freed memory → crash.
 - **Fix**: replaced `v5 += 0xFFFF` with `v5--` in both the Delete and Backspace handlers.
 
+### Crash Fix — Savegame with Destroyed Entities (New Missions Save/Load)
+- **Root cause 1 (`SaveLoad.cpp`): `GAME_Save_PackEntities()`** iterated `entities.size()` times but `entity_save_index` has fewer entries (destroyed entities skipped at line 1765). `std::next(entity_save_index.begin(), i)` went past `end()` for any destroyed entity, producing UB. The entity data buffer was filled with wrong data at wrong offsets, corrupting the save file. On load, `EntityFactory::Unpack()` parsed corrupt data → returned null → entity loading loop `break`-ed early → AI player data referenced entity IDs not in the repo.
+- **Root cause 2 (`SaveLoad.cpp`): `GAME_Load_UnpackAiPlayers()`** had 3 locations (drill rig line 2641, tanker line 2741, tanker_DC line 2766) that dereferenced `entityRepo->FindById()` results without null checks. When entities were missing due to corrupt save data, this caused null pointer dereference → SIGSEGV.
+- **Fix 1**: `GAME_Save_PackEntities()` now uses a separate `index_iter` that only advances when a non-destroyed entity is actually packed, keeping entity buffer and index entries perfectly aligned.
+- **Fix 2-4**: Added `if (v53/v66/v71)` guards around the `_24_ai_node_per_player_side` access in all 3 locations, matching the null-check pattern used by every other list in the same function.
+
+### Crash Fix — Production Loop Hardcoded Address (New Missions Save/Load)
+- **Root cause (`EntityFactory.cpp:579`, `SaveLoad.cpp:2587`)**: Two call sites used hardcoded address `4704680` (`0x47C8A8`) — the Windows EXE address of `game_globals_per_player` (actual BSS address: `0x322460`). The wrong address caused `_18_pcash` in production `stru37` entries to point to unmapped memory. When the production loop (`kknd.cpp:7078`) dereferenced `_18_pcash`, it triggered SIGSEGV.
+- **Root cause (`kknd.cpp:7078`)**: The production loop had no null guard for `_18_pcash`, so stale `stru37` entries with null `_18_pcash` (from pre-save state) also crashed.
+- **Fix 1**: Replaced hardcoded `4704680` with `(int *)&game_globals_per_player` in both call sites.
+- **Fix 2**: Added `if (v5 && *v5)` null guard around the `_18_pcash` dereference in the production loop.
+- **Verification**: New Missions save files (114KB) load successfully without crashes. Game proceeds from main menu through save load into gameplay.
+
+### Crash Fix — Use-After-Free in Oil Tanker Entity (game6.sav)
+- **Root cause**: `EntityFactory::Unpack()` deleted the entity when `entity_mode` was invalid/unspecified (`0` or `-1` in old save format), but `v3->script->param` still pointed to the freed entity. Later `UNIT_Handler_OilTanker` dereferenced `a1->param` → use-after-free → `ExecMode` called on garbage memory.
+- **Fix 1**: `EntityFactory::Unpack()` no longer deletes the entity for invalid `entity_mode`. Values ≤ 0 are treated as "not set" (backward compat for old saves). For positive values, tries 1-based lookup then 0-based fallback. If still no match, leaves mode as `nullptr` instead of deleting.
+- **Fix 2**: `UNIT_Handler_OilTanker` checks `v1->HasMode()` before calling `ExecMode()`. If mode is null (loaded from old save without a mode), sets a default (`entity_mode_4444D0_oiltanker`).
+- **Fix 3**: Added `Entity::HasMode()` public accessor.
+- **Verification**: game6.sav loads without crash. All save files 0-6 load past this point (only pre-existing minimap `heap-buffer-overflow` in `Map.cpp:697` remains as ASan error).
+
 ## Current Status
 - **ASan Debug build**: game runs through main menu → campaign start → gameplay without ASan errors.
 - **Release build (`-O3 -DNDEBUG -fno-strict-aliasing`)**: builds clean, runs with full rendering and sound.

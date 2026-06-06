@@ -103,6 +103,7 @@ struct Entity
     bool IsMode(EntityMode mode) const;
     void ExecMode();
     int ModeHandlerId() const;
+    bool HasMode() const { return mode != nullptr; }
 
     void SetReturnModeFromMode();
 
