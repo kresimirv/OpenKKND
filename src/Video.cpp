@@ -1317,6 +1317,8 @@ int VIDEO_Play(int id)
         sprintf(a1, (const char *)aSFmvMh_fmv_vbc, app_root_dir);
         if (VIDEO_ReadAndAllocDrawJob(a1, 0, 0, 100) == 1 && !VIDEO_IsVideoInvalid())
         {
+            video_477978_draw_job->job_details.x = (render_width - 640) / 2;
+            video_477978_draw_job->job_details.y = (render_height - 480) / 2;
             while (1)
             {
                 input_update_keyboard();
@@ -1336,6 +1338,8 @@ int VIDEO_Play(int id)
         sprintf(a1, (const char *)aSFmvS, app_root_dir, intro_vbc);
         if (VIDEO_ReadAndAllocDrawJob(a1, 0, 0, 100) != 1 || VIDEO_IsVideoInvalid())
             goto LABEL_43;
+        video_477978_draw_job->job_details.x = (render_width - 640) / 2;
+        video_477978_draw_job->job_details.y = (render_height - 480) / 2;
         while (1)
         {
             input_update_keyboard();
@@ -1368,6 +1372,8 @@ int VIDEO_Play(int id)
             VIDEO_free();
             return 1;
         }
+        video_477978_draw_job->job_details.x = (render_width - 640) / 2;
+        video_477978_draw_job->job_details.y = (render_height - 480) / 2;
         while (1)
         {
             input_update_keyboard();
@@ -1407,17 +1413,28 @@ int VIDEO_Play(int id)
             render_default_stru1->clip_z = render_width;
             render_default_stru1->clip_y = 0;
             render_default_stru1->clip_w = render_height;
-            _47A010_mapd_item_being_drawn[0] = MAPD_Draw(MAPD_MAP, 0, 0);
-            v8 = &LVL_FindMapd()->items[0];
-            _40E400_set_palette(v8->GetPalette());
-            render_copy_palette(&_477990_video_palette, GetSysPalette());
-            sprite_47A400.pstru7 = array_466028;
-            cplc_select(0);
-            cplc_406320();
-            sprintf(v14, (const char *)aSFmvS, app_root_dir, levels[current_level_idx].vbc_filename);
-            v9 = render_create_stru1(0, 38, 31, 320, 240);
-            v10 = render_create_stru1(0, 240, 313, 160, 128);
-            v11 = render_string_create(0, currently_running_lvl_mobd[26].items, 400, 40, 25, 28, 90, 8, 8);
+            {
+                int briefing_ox = (render_width - 640) / 2;
+                int briefing_oy = (render_height - 480) / 2;
+                _47A010_mapd_item_being_drawn[0] = MAPD_Draw(MAPD_MAP, 0, 0);
+                v8 = &LVL_FindMapd()->items[0];
+                _40E400_set_palette(v8->GetPalette());
+                v8->GetPalette()->entires[0].peRed = 0;
+                v8->GetPalette()->entires[0].peGreen = 0;
+                v8->GetPalette()->entires[0].peBlue = 0;
+                render_copy_palette(&_477990_video_palette, GetSysPalette());
+                sprite_47A400.pstru7 = array_466028;
+                cplc_select(0);
+                cplc_406320();
+                _47C380_mapd.mapd_cplc_render_x = -(briefing_ox << 8);
+                _47C380_mapd.mapd_cplc_render_y = -(briefing_oy << 8);
+                __47C380_mapd_cplc_item0_ptr_field_4_minus_3FFF = _47C380_mapd.mapd_cplc_render_x - 0x3FFF;
+                _47C384_mapd_cplc_item0_ptr_field_8_minus_3FFF = _47C380_mapd.mapd_cplc_render_y - 0x3FFF;
+                sprintf(v14, (const char *)aSFmvS, app_root_dir, levels[current_level_idx].vbc_filename);
+                v9 = render_create_stru1(0, 38 + briefing_ox, 31 + briefing_oy, 320, 240);
+                v10 = render_create_stru1(0, 240 + briefing_ox, 313 + briefing_oy, 160, 128);
+                v11 = render_string_create(0, currently_running_lvl_mobd[26].items, 400 + briefing_ox, 40 + briefing_oy, 25, 28, 90, 8, 8);
+            }
             VIDEO_ReadAndAllocDrawJob_2(v14, v9, v10, v11, 320, 240, 100);
             if (!VIDEO_IsVideoInvalid())
             {

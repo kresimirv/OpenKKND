@@ -18,6 +18,8 @@
 using Engine::EntityFactory;
 
 #include "src/Engine/Infrastructure/EntityRepository.h"
+#include "src/Application/Scripts/MainMenu.h"
+#include "src/Application/Scripts/GameMenu.h"
 
 using Engine::Infrastructure::EntityRepository;
 
@@ -136,8 +138,8 @@ void script_424CE0_mission_outcome_modal(Script *a1)
             script_sleep(v1, 30);
             sprite_load_mobd(v3, v6);
             v3->drawjob->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_4483E0_ui;
-            v3->x = (int)a1;
-            v3->y = v8;
+            v3->x = (int)a1 + menu_offset_x * 256;
+            v3->y = v8 + menu_offset_y * 256;
             v3->z_index = 999;
             script_yield(v1, SCRIPT_FLAGS_20_10000000, 0);
             sound_play(SOUND_MISSION_OUTCOME_LETTER_APPEARING, 0, _4690A8_sfx_volume, 16, 0);
@@ -542,8 +544,8 @@ void script_4252C0(Script *a1, void *param)
     {
         v3->drawjob->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_4483E0_ui;
         sprite_load_mobd(v3, SPRITE_OUTCOME_MODAL_MOBD_OFFSET_LEFT);
-        v4->x = 81920;
-        v4->y = 61440;
+        v4->x = 81920 + menu_offset_x * 256;
+        v4->y = 61440 + menu_offset_y * 256;
         v4->z_index = 997;
     }
     v5 = sprite_create(MOBD_MISSION_OUTCOME_MODAL, 0, 0);
@@ -552,8 +554,8 @@ void script_4252C0(Script *a1, void *param)
     {
         sprite_load_mobd(v5, SPRITE_OUTCOME_MODAL_MOBD_OFFSET_RIGHT);
         v6->drawjob->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_4483E0_ui;
-        v6->x = 81920;
-        v6->y = 61440;
+        v6->x = 81920 + menu_offset_x * 256;
+        v6->y = 61440 + menu_offset_y * 256;
         v6->z_index = 997;
     }
     v7 = sprite_create(MOBD_MISSION_OUTCOME_MODAL, 0, 0);
@@ -562,8 +564,8 @@ void script_4252C0(Script *a1, void *param)
     {
         sprite_load_mobd(v7, SPRITE_OUTCOME_MODAL_MOBD_OFFSET_MISSION);
         v8->drawjob->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_4483E0_ui;
-        v8->x = 81920;
-        v8->y = 61440;
+        v8->x = 81920 + menu_offset_x * 256;
+        v8->y = 61440 + menu_offset_y * 256;
         v8->z_index = 998;
     }
     v9 = sprite_create_scripted(

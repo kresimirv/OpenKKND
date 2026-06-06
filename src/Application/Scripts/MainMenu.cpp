@@ -16,6 +16,12 @@
 #include "src/Infrastructure/PlatformSpecific/OsTools.h"
 
 
+// Global offset to center 640x480 main menu content in larger render viewports.
+// Set by Game::MainMenu() based on (render_width - 640) / 2.
+int menu_offset_x = 0;
+int menu_offset_y = 0;
+
+
 #define MOBD_45_NEW_CAMPAIGN_FACTION_LOGO   1380
 #define MOBD_45_NEW_CAMPAIGN_CANCEL         2044
 
@@ -35,7 +41,7 @@ void script_main_menu_new_campaign(Script *a1)
     DataMapd *v8; // eax@13
 
     _47C65C_render_string = 0;
-    a1->sprite->y = 240 * 256;
+    a1->sprite->y = (240 + BTN_CENTER_Y) * 256;
     a1->sprite->z_index = 4;
     sprite_create_scripted(MOBD_79, a1->sprite, script_main_menu_play_mission, SCRIPT_COROUTINE, 0);
     sprite_create_scripted(MOBD_79, a1->sprite, script_main_menu_new_missions, SCRIPT_COROUTINE, 0);
@@ -87,7 +93,8 @@ void script_main_menu_load(Script *a1)
 
     is_demo_build = 0;
     single_player_game = 1;
-    a1->sprite->y = 270 * 256;
+
+    a1->sprite->y = (270 + BTN_CENTER_Y) * 256;
     a1->sprite->z_index = 6;
     script_sleep(a1, 1);
     v1 = a1->sprite;
@@ -137,7 +144,8 @@ void script_main_menu_play_mission(Script *a1)
     Sprite *v4; // esi@3
     DataMapd *v8; // eax@13
 
-    a1->sprite->y = 300 * 256;
+
+    a1->sprite->y = (300 + BTN_CENTER_Y) * 256;
     a1->sprite->z_index = 8;
     script_sleep(a1, 1);
     v1 = a1->sprite;
@@ -187,7 +195,8 @@ void script_main_menu_multiplayer(Script *a1)
     DataMapd *v8; // eax@13
 
     script_sleep(a1, 1);
-    a1->sprite->y = 330 * 256;
+
+    a1->sprite->y = (330 + BTN_CENTER_Y) * 256;
     a1->sprite->z_index = 10;
     v1 = a1->sprite;
     v2 = sprite_create(MOBD_79, 0, v1);
@@ -234,7 +243,8 @@ void script_main_menu_new_missions(Script *a1)
     Sprite *v4; // esi@3
     DataMapd *v8; // eax@13
 
-    a1->sprite->y = 360 * 256;
+
+    a1->sprite->y = (360 + BTN_CENTER_Y) * 256;
     a1->sprite->z_index = 11;
     script_sleep(a1, 1);
     v1 = a1->sprite;
@@ -282,7 +292,8 @@ void script_main_menu_kaos_mode(Script *a1)
     Sprite *v4; // esi@3
     DataMapd *v8; // eax@13
 
-    a1->sprite->y = 390 * 256;
+
+    a1->sprite->y = (390 + BTN_CENTER_Y) * 256;
     a1->sprite->z_index = 12;
     script_sleep(a1, 1);
     v1 = a1->sprite;
@@ -331,7 +342,8 @@ void script_main_menu_quit(Script *a1)
     Sprite *v4; // esi@3
 
     script_sleep(a1, 1);
-    a1->sprite->y = 420 * 256;
+
+    a1->sprite->y = (420 + BTN_CENTER_Y) * 256;
     a1->sprite->z_index = 13;
     v1 = a1->sprite;
     v2 = sprite_create(MOBD_79, 0, v1);
@@ -384,7 +396,7 @@ void script_mobd79__main_menu_mouse_handler(Script *a1)
     v14 = 18000;
     v17 = v2;
     sprite_load_mobd(v2, 312);
-    v2->drawjob->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_4483E0_ui;
+    v2->drawjob->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_menu_cursor_with_cplc;
     v2->z_index = 2560;
     dword_47C6F0 = 0;
     dword_47C6EC = 1;
@@ -410,6 +422,8 @@ void script_mobd79__main_menu_mouse_handler(Script *a1)
     }
     while (1)
     {
+        _47C380_mapd.mapd_cplc_render_x = -menu_offset_x * 256;
+        _47C380_mapd.mapd_cplc_render_y = -menu_offset_y * 256;
         sub_443F20();
         if (!netz_47C6C0_mapd_idx && !_47C65C_render_string && --v14 < 0)
         {
@@ -585,7 +599,7 @@ void script_main_menu_new_campaign_surv(Script *a1)
 
     v1 = a1->sprite;
     v1->x = 48640;
-    v1->y = 43008;
+    v1->y = (168 + FACTION_CENTER_Y) * 256;
     v2 = a1->sprite;
     v2->parent = 0;
     a1->script_type = SCRIPT_TYPE_15;
@@ -636,7 +650,7 @@ void script_main_menu_new_campaign_mute(Script *a1)
 
     v1 = a1->sprite;
     v1->x = 0x1AC00;
-    v1->y = 0xA800;
+    v1->y = (168 + FACTION_CENTER_Y) * 256;
     v2 = a1->sprite;
     v2->parent = 0;
     a1->script_type = SCRIPT_TYPE_15;
@@ -856,20 +870,20 @@ void script_main_menu_create_kaos_dialog(Script *a1)
         v3 = sprite_create_scripted(MOBD_45, v2, script_main_menu_kaos_allies, SCRIPT_COROUTINE, 0);
         if (v3)
         {
-            v3->x = 10240;
-            v3->y = 62976;
+            v3->x = (40 + KAOS_CENTER_X) * 256;
+            v3->y = (246 + KAOS_CENTER_Y) * 256;
         }
         v4 = sprite_create_scripted(MOBD_45, v2, script_main_menu_kaos_enemies, SCRIPT_COROUTINE, 0);
         if (v4)
         {
-            v4->x = 45056;
-            v4->y = 62976;
+            v4->x = (176 + KAOS_CENTER_X) * 256;
+            v4->y = (246 + KAOS_CENTER_Y) * 256;
         }
         v5 = sprite_create_scripted(MOBD_45, v2, script_main_menu_kaos_difficulty, SCRIPT_COROUTINE, 0);
         if (v5)
         {
-            v5->x = 83968;
-            v5->y = 62976;
+            v5->x = (328 + KAOS_CENTER_X) * 256;
+            v5->y = (246 + KAOS_CENTER_Y) * 256;
         }
     }
     else if (netz_47C6BC_mapd_idx != 4)
@@ -898,14 +912,14 @@ void script_main_menu_create_kaos_dialog(Script *a1)
     v11 = sprite_create_scripted(MOBD_45, v2, script_main_menu_kaos_starting_cash, SCRIPT_COROUTINE, 0);
     if (v11)
     {
-        v11->x = 75264;
-        v11->y = 17152;
+        v11->x = (294 + KAOS_CENTER_X) * 256;
+        v11->y = (67 + KAOS_CENTER_Y) * 256;
     }
     v12 = sprite_create_scripted(MOBD_45, v2, script_main_menu_kaos_color, SCRIPT_COROUTINE, 0);
     if (v12)
     {
-        v12->x = 14080;
-        v12->y = 27904;
+        v12->x = (55 + KAOS_CENTER_X) * 256;
+        v12->y = (109 + KAOS_CENTER_Y) * 256;
         v13 = v12->script;
         if (v13)
             v13->script_type = v1->script_type;
@@ -913,8 +927,8 @@ void script_main_menu_create_kaos_dialog(Script *a1)
     v14 = sprite_create_scripted(MOBD_45, v2, script_main_menu_kaos_map, SCRIPT_COROUTINE, 0);
     if (v14)
     {
-        v14->x = 70656;
-        v14->y = 27904;
+        v14->x = (276 + KAOS_CENTER_X) * 256;
+        v14->y = (109 + KAOS_CENTER_Y) * 256;
     }
     if (netz_47C6C0_mapd_idx == 15)
     {
@@ -925,21 +939,21 @@ void script_main_menu_create_kaos_dialog(Script *a1)
         v15 = sprite_create_scripted(MOBD_45, v2, script_main_menu_kaos_max_tech_level, SCRIPT_COROUTINE, 0);
         if (v15)
         {
-            v15->x = 97280;
-            v15->y = 38400;
+            v15->x = (380 + KAOS_CENTER_X) * 256;
+            v15->y = (150 + KAOS_CENTER_Y) * 256;
         }
     }
     v16 = sprite_create_scripted(MOBD_45, v2, script_main_menu_kaos_bunkers_toggle, SCRIPT_COROUTINE, 0);
     if (v16)
     {
-        v16->x = 58368;
-        v16->y = 38400;
+        v16->x = (228 + KAOS_CENTER_X) * 256;
+        v16->y = (150 + KAOS_CENTER_Y) * 256;
     }
     v17 = sprite_create_scripted(MOBD_45, v2, script_main_menu_kaos_team, SCRIPT_COROUTINE, 0);
     if (v17)
     {
-        v17->x = 0x2000;
-        v17->y = 38400;
+        v17->x = (32 + KAOS_CENTER_X) * 256;
+        v17->y = (150 + KAOS_CENTER_Y) * 256;
         v18 = v17->script;
         if (v18)
             v18->script_type = v1->script_type;
@@ -972,7 +986,7 @@ void script_main_menu_kaos_allies(Script *a1)
 
     if (netz_47C6C0_mapd_idx == LEVEL_MUTE_01)
     {
-        v1 = render_string_create(0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 150, 252, 10, 3, 9, 14, 16);
+        v1 = render_string_create(0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 150 + menu_offset_x, 252 + menu_offset_y, 10, 3, 9, 14, 16);
         v2 = a1->sprite;
         v3 = sprite_create(MOBD_45, 0, a1->sprite);
         v2->mobd_id = MOBD_45;
@@ -1015,8 +1029,8 @@ void script_main_menu_kaos_allies(Script *a1)
     v9 = sprite_create_scripted(MOBD_45, v5, (void(*)(Script *))script_main_menu_kaos_color, SCRIPT_COROUTINE, 0);
     if (v9)
     {
-        v9->x = 14080;
-        v9->y = 27904;
+        v9->x = (55 + KAOS_CENTER_X) * 256;
+        v9->y = (109 + KAOS_CENTER_Y) * 256;
         v10 = v9->script;
         if (v10)
             v10->script_type = a1->script_type;
@@ -1024,8 +1038,8 @@ void script_main_menu_kaos_allies(Script *a1)
     v11 = sprite_create_scripted(MOBD_45, v5, (void(*)(Script *))script_main_menu_kaos_team, SCRIPT_COROUTINE, 0);
     if (v11)
     {
-        v11->x = 0x2000;
-        v11->y = 38400;
+        v11->x = (32 + KAOS_CENTER_X) * 256;
+        v11->y = (150 + KAOS_CENTER_Y) * 256;
         v12 = v11->script;
         if (v12)
             v12->script_type = a1->script_type;
@@ -1033,26 +1047,26 @@ void script_main_menu_kaos_allies(Script *a1)
     v13 = sprite_create_scripted(MOBD_45, v5, (void(*)(Script *))script_441550_mobd45_evt8, SCRIPT_COROUTINE, 0);
     if (v13)
     {
-        v13->x = 75264;
-        v13->y = 17152;
+        v13->x = (294 + KAOS_CENTER_X) * 256;
+        v13->y = (67 + KAOS_CENTER_Y) * 256;
     }
     v14 = sprite_create_scripted(MOBD_45, v5, (void(*)(Script *))script_441340_mobd45_evt8, SCRIPT_COROUTINE, 0);
     if (v14)
     {
-        v14->x = 58368;
-        v14->y = 38400;
+        v14->x = (228 + KAOS_CENTER_X) * 256;
+        v14->y = (150 + KAOS_CENTER_Y) * 256;
     }
     v15 = sprite_create_scripted(MOBD_45, v5, (void(*)(Script *))script_441150_mobd45_evt8, SCRIPT_COROUTINE, 0);
     if (v15)
     {
-        v15->x = 70656;
-        v15->y = 27904;
+        v15->x = (276 + KAOS_CENTER_X) * 256;
+        v15->y = (109 + KAOS_CENTER_Y) * 256;
     }
     v16 = sprite_create_scripted(MOBD_45, v5, (void(*)(Script *))script_main_menu_kaos_enemies, SCRIPT_COROUTINE, 0);
     if (v16)
     {
-        v16->x = 97280;
-        v16->y = 38400;
+        v16->x = (380 + KAOS_CENTER_X) * 256;
+        v16->y = (150 + KAOS_CENTER_Y) * 256;
     }
     sprite_list_remove(v5);
     script_terminate(a1);
@@ -1075,7 +1089,7 @@ void script_main_menu_kaos_enemies(Script *a1)
 
     if (netz_47C6C0_mapd_idx == LEVEL_MUTE_01)
     {
-        v1 = render_string_create(0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 284, 252, 10, 3, 9, 14, 16);
+        v1 = render_string_create(0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 284 + menu_offset_x, 252 + menu_offset_y, 10, 3, 9, 14, 16);
         v2 = a1->sprite;
         v3 = sprite_create(MOBD_45, 0, a1->sprite);
         v2->mobd_id = MOBD_45;
@@ -1102,7 +1116,7 @@ void script_main_menu_kaos_enemies(Script *a1)
     }
     v5 = currently_running_lvl_mobd[MOBD_FONT_ITALIC].items;
     *(_DWORD *)a2 = -1;
-    v6 = render_string_create(0, v5, 500, 156, 10, 3, 9, 14, 16);
+    v6 = render_string_create(0, v5, 500 + menu_offset_x, 156 + menu_offset_y, 10, 3, 9, 14, 16);
     v7 = a1->sprite;
     v8 = sprite_create(MOBD_45, 0, a1->sprite);
     v7->mobd_id = MOBD_45;
@@ -1150,7 +1164,7 @@ void script_main_menu_kaos_difficulty(Script *a1)
 
     if (netz_47C6C0_mapd_idx == 15)
     {
-        v1 = render_string_create(0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 456, 252, 10, 3, 9, 14, 16);
+        v1 = render_string_create(0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 456 + menu_offset_x, 252 + menu_offset_y, 10, 3, 9, 14, 16);
         v2 = a1->sprite;
         v3 = sprite_create(MOBD_45, 0, a1->sprite);
         v2->mobd_id = MOBD_45;
@@ -1247,7 +1261,7 @@ void script_main_menu_kaos_starting_cash(Script *a1)
 
     if (netz_47C6C0_mapd_idx == LEVEL_MUTE_01)
         LOBYTE_HEXRAYS(_46E420_starting_cash_idx) = 0;
-    v1 = render_string_create(0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 424, 74, 10, 3, 9, 14, 16);
+    v1 = render_string_create(0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 424 + menu_offset_x, 74 + menu_offset_y, 10, 3, 9, 14, 16);
     v2 = a1->sprite;
     v3 = sprite_create(MOBD_45, 0, a1->sprite);
     v2->mobd_id = MOBD_45;
@@ -1292,7 +1306,7 @@ void script_main_menu_kaos_color(Script *a1)
         byte_47C654 = 0;
     else
         byte_47C654 = netz_47A740[(int)__47CA80_array_idx_and_netz_player_side + 2].field_9;
-    v1 = render_string_create(0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 164, 116, 10, 3, 9, 14, 16);
+    v1 = render_string_create(0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 164 + menu_offset_x, 116 + menu_offset_y, 10, 3, 9, 14, 16);
     v2 = a1->sprite;
     v3 = sprite_create(MOBD_45, 0, a1->sprite);
     v2->mobd_id = MOBD_45;
@@ -1394,7 +1408,7 @@ void script_main_menu_kaos_map(Script *a1)
 
     if (netz_47C6C0_mapd_idx == 15)
         BYTE3(_46E420_starting_cash_idx) = 0;
-    v1 = render_string_create(0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 406, 116, 20, 3, 9, 14, 16);
+    v1 = render_string_create(0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 406 + menu_offset_x, 116 + menu_offset_y, 20, 3, 9, 14, 16);
     v2 = a1->sprite;
     v3 = sprite_create(MOBD_45, 0, a1->sprite);
     v2->mobd_id = MOBD_45;
@@ -1435,7 +1449,7 @@ void script_main_menu_kaos_max_tech_level(Script *a1)
 
     if (netz_47C6C0_mapd_idx == 15)
         BYTE1(_46E420_starting_cash_idx) = 5;
-    v1 = render_string_create(0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 500, 156, 10, 3, 9, 14, 16);
+    v1 = render_string_create(0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 500 + menu_offset_x, 156 + menu_offset_y, 10, 3, 9, 14, 16);
     v2 = a1->sprite;
     v3 = sprite_create(MOBD_45, 0, a1->sprite);
     v2->mobd_id = MOBD_45;
@@ -1474,7 +1488,7 @@ void script_main_menu_kaos_bunkers_toggle(Script *a1)
 
     if (netz_47C6C0_mapd_idx == 15)
         BYTE2(_46E420_starting_cash_idx) = 0;
-    v1 = render_string_create(0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 340, 156, 10, 3, 9, 14, 16);
+    v1 = render_string_create(0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 340 + menu_offset_x, 156 + menu_offset_y, 10, 3, 9, 14, 16);
     v2 = a1->sprite;
     v3 = sprite_create(MOBD_45, 0, a1->sprite);
     v2->mobd_id = MOBD_45;
@@ -1516,7 +1530,7 @@ void script_main_menu_kaos_team(Script *a1)
         _47C658_faction_index = 0;
     else
         _47C658_faction_index = netz_47A740[(int)__47CA80_array_idx_and_netz_player_side + 2].field_A;
-    v1 = render_string_create(0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 142, 156, 10, 3, 9, 14, 16);
+    v1 = render_string_create(0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 142 + menu_offset_x, 156 + menu_offset_y, 10, 3, 9, 14, 16);
     v2 = a1->sprite;
     v3 = sprite_create(MOBD_45, 0, a1->sprite);
     v2->mobd_id = MOBD_45;
@@ -1599,8 +1613,8 @@ void script_main_menu_kaos_player_name(Script *a1)
     _47C65C_render_string = render_string_create(
         0,
         currently_running_lvl_mobd[MOBD_FONT_ITALIC].items,
-        144,
-        72,
+        144 + menu_offset_x,
+        72 + menu_offset_y,
         14,
         3,
         9,
@@ -1638,9 +1652,9 @@ void script_main_menu_kaos_player_name(Script *a1)
             --v4;
         } while (v4);
     }
-    _47C664_ingame_menu_sprite->x = v3->drawjob->job_details.x << 8;
+    _47C664_ingame_menu_sprite->x = (v3->drawjob->job_details.x - menu_offset_x) << 8;
     _47C664_ingame_menu_sprite->field_88_unused = 1;
-    _47C664_ingame_menu_sprite->y = 22528;
+    _47C664_ingame_menu_sprite->y = (88 + KAOS_CENTER_Y) * 256;
     v2->parent = _47C664_ingame_menu_sprite;
     v5 = v1->sprite;
     v6 = _47C65C_render_string;
@@ -1648,9 +1662,9 @@ void script_main_menu_kaos_player_name(Script *a1)
     v1->script_type = SCRIPT_TYPE_18;
     stru29_list_4439F0(v5, v6, 0, 0, 0);
     sprite_load_mobd(v5, 1368);
-    v2->x = 40960;
+    v2->x = (160 + KAOS_CENTER_X) * 256;
     v2->field_88_unused = 1;
-    v2->y = 22528;
+    v2->y = (88 + KAOS_CENTER_Y) * 256;
     while (1)
     {
         if (netz_47C6C0_mapd_idx != 15)
@@ -1684,9 +1698,9 @@ void script_main_menu_kaos_player_name(Script *a1)
             }
         } while (!v8);
         _47C664_ingame_menu_sprite->field_88_unused = 1;
-        _47C664_ingame_menu_sprite->x = 40960;
+        _47C664_ingame_menu_sprite->x = (160 + KAOS_CENTER_X) * 256;
         _47C664_ingame_menu_sprite->field_88_unused = 1;
-        _47C664_ingame_menu_sprite->y = 22528;
+        _47C664_ingame_menu_sprite->y = (88 + KAOS_CENTER_Y) * 256;
         _47C664_ingame_menu_sprite->z_index = 10;
         sprite_load_mobd(_47C664_ingame_menu_sprite, 1096);
         dword_47C6C4 = 1;
@@ -1709,9 +1723,9 @@ void script_main_menu_kaos_player_name(Script *a1)
         } while (v15 < 7);
         LOBYTE_HEXRAYS(dword_468CE8) = 0;
         _47C664_ingame_menu_sprite->field_88_unused = 1;
-        _47C664_ingame_menu_sprite->x = 40960;
+        _47C664_ingame_menu_sprite->x = (160 + KAOS_CENTER_X) * 256;
         _47C664_ingame_menu_sprite->field_88_unused = 1;
-        _47C664_ingame_menu_sprite->y = 22528;
+        _47C664_ingame_menu_sprite->y = (88 + KAOS_CENTER_Y) * 256;
         sprite_release_mobd_item(_47C664_ingame_menu_sprite);
         if (netz_47C6C0_mapd_idx != 15 && netz_47A834)
         {
@@ -1733,9 +1747,9 @@ void script_main_menu_kaos_player_name(Script *a1)
                 --v19;
             } while (v19);
         }
-        _47C664_ingame_menu_sprite->x = v18->drawjob->job_details.x << 8;
+        _47C664_ingame_menu_sprite->x = (v18->drawjob->job_details.x - menu_offset_x) << 8;
         _47C664_ingame_menu_sprite->field_88_unused = 1;
-        _47C664_ingame_menu_sprite->y = 22528;
+        _47C664_ingame_menu_sprite->y = (88 + KAOS_CENTER_Y) * 256;
         if (netz_47C6C0_mapd_idx != 15)
             netz_42E450((void *)netz_47C6C0_mapd_idx, 0, 65);
         v1 = a1;

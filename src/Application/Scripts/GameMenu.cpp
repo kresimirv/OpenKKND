@@ -355,7 +355,7 @@ void script_ingame_menu_create_briefing_dialog(Script *script)
 
     script_trigger_event_group(script, EVT_MSG_1528_cancel, 0, SCRIPT_TYPE_INGAME_MENU_BUTTON);
     render_string = render_string_create(
-        0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 120, 70, 42, 15, 0x200003E9, 14, 5
+        0, currently_running_lvl_mobd[MOBD_FONT_ITALIC].items, 120 + menu_offset_x, 70 + menu_offset_y, 42, 15, 0x200003E9, 14, 5
     );
     _47C65C_render_string = render_string;
     if (render_string)
@@ -584,7 +584,7 @@ void script_ingame_menu_master_script(Script *a1)
     v5 = render_width;
     v3->field_88_unused = 1;
     LOBYTE_HEXRAYS(v5) = v5 & 0xFE;
-    v3->y = 0x4000;
+    v3->y = 0x4000 + menu_offset_y * 256;
     v3->x = v5 << 7;
     v3->z_index = 1000;
     v4->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_4483E0_ui;
@@ -748,8 +748,8 @@ void script_ingame_menu_master_script(Script *a1)
                         _47C65C_render_string = render_string_create(
                             0,
                             currently_running_lvl_mobd[MOBD_FONT_ITALIC].items,
-                            256,
-                            96,
+                            256 + menu_offset_x,
+                            96 + menu_offset_y,
                             22,
                             8,
                             0x200003E9,
@@ -772,8 +772,8 @@ void script_ingame_menu_master_script(Script *a1)
                         _47C65C_render_string = render_string_create(
                             0,
                             currently_running_lvl_mobd[MOBD_FONT_ITALIC].items,
-                            256,
-                            96,
+                            256 + menu_offset_x,
+                            96 + menu_offset_y,
                             22,
                             8,
                             0x200003E9,
@@ -832,8 +832,8 @@ void script_ingame_menu_create_options_dialog(Script *a1)
     _47C65C_render_string = render_string_create(
         0,
         currently_running_lvl_mobd[MOBD_FONT_ITALIC].items,
-        248,
-        88,
+        248 + menu_offset_x,
+        88 + menu_offset_y,
         22,
         8,
         0x200003E9,

@@ -1,6 +1,8 @@
 #include "src/kknd.h"
 #include "src/_unsorted_data.h"
 #include "src/Map.h"
+#include "src/Render.h"
+#include "src/Config.h"
 #include "src/RenderDrawHandlers.h"
 #include "src/ScriptEvent.h"
 #include "src/Sprite.h"
@@ -1715,12 +1717,12 @@ bool GAME_Load_UnpackMiscInfo(void *save_data)
                 v13->__47C970_sidebar_task->sprite = v13->_8_sprite;
                 v13->_8_sprite->script = v13->__47C970_sidebar_task;
                 v13->_C_sprite_sidebar->field_88_unused = 1;
-                v13->_C_sprite_sidebar->x = 155648;
+                v13->_C_sprite_sidebar->x = ((render_width > 0 ? render_width : Config::vga_width) - 32) << 8;
                 v13->_C_sprite_sidebar->field_88_unused = 1;
                 v13->_C_sprite_sidebar->y = 73728;
                 v13->_C_sprite_sidebar->z_index = 2;
                 v13->_8_sprite->field_88_unused = 1;
-                v13->_8_sprite->x = 156672;
+                v13->_8_sprite->x = (((render_width > 0 ? render_width : Config::vga_width) - 32) + 4) << 8;
                 v13->_8_sprite->field_88_unused = 1;
                 v13->_8_sprite->y = 79872;
                 v13->_8_sprite->z_index = 3;

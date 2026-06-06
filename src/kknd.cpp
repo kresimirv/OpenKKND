@@ -11,6 +11,7 @@
 #include "src/Pathfind.h"
 #include "src/Random.h"
 #include "src/Render.h"
+#include "src/Config.h"
 #include "src/RenderDrawHandlers.h"
 #include "src/Script.h"
 #include "src/ScriptEvent.h"
@@ -27,6 +28,7 @@ using Application::Game;
 using Application::GameFactory;
 
 #include "src/Application/Scripts/GameMenu.h"
+#include "src/Application/Scripts/MainMenu.h"
 
 #include "src/Engine/BuildingLimits.h"
 #include "src/Engine/Entity.h"
@@ -5548,8 +5550,8 @@ bool LVL_SysInit()
 	currently_running_lvl_sections = 0;
 	if (stru2_list_alloc())
 	{
-        int window_width = 640;
-        int window_height = 480;
+        int window_width = Config::vga_width;
+        int window_height = Config::vga_height;
         bool fullsreen = false;
 
         /*if (render_create_window(window_width, window_height, fullsreen))*/ {
@@ -8648,7 +8650,7 @@ void _41AC50_string_draw_handler(const char *a1, int cursor_pos)
 	_47C664_ingame_menu_sprite->field_88_unused = 1;
 	_47C664_ingame_menu_sprite->x = render_string_443EE0(_47C65C_render_string, cursor_pos, 6) << 8;
 	_47C664_ingame_menu_sprite->field_88_unused = 1;
-	_47C664_ingame_menu_sprite->y = 0xC200;
+    _47C664_ingame_menu_sprite->y = 0xC200 + menu_offset_y * 256;
 }
 
 //----- (00432990) --------------------------------------------------------
@@ -8670,14 +8672,18 @@ void script_ingame_menu_saveload(Script *a1, int appearance, int mode)
 	int v24; // [sp+14h] [bp-50h]@4
 	int v26; // [sp+1Ch] [bp-48h]@1
 	Sprite *a1a; // [sp+20h] [bp-44h]@1
-	int v30; // [sp+2Ch] [bp-38h]@1
-	char a2a[12]; // [sp+30h] [bp-34h]@20
+    int v30; // [sp+2Ch] [bp-38h]@1
+    int menu_y; // ingame menu vertical centering offset
+    int menu_x; // ingame menu horizontal centering offset
+    char a2a[12]; // [sp+30h] [bp-34h]@18
 
-	v3 = a1->sprite;
-	a1a = a1->sprite;
-	v4 = appearance == SAVEGAME_LIST_APPEARANCE_MAIN_MENU ? 256 : 96;
-	v26 = 0;
-	v30 = appearance == SAVEGAME_LIST_APPEARANCE_MAIN_MENU ? 256 : 96;
+    v3 = a1->sprite;
+    a1a = a1->sprite;
+    menu_y = (appearance == SAVEGAME_LIST_APPEARANCE_INGAME_MENU) ? menu_offset_y : 0;
+    menu_x = (appearance == SAVEGAME_LIST_APPEARANCE_INGAME_MENU) ? menu_offset_x : 0;
+    v4 = (appearance == SAVEGAME_LIST_APPEARANCE_MAIN_MENU ? 256 : 96) + menu_y;
+    v26 = 0;
+    v30 = (appearance == SAVEGAME_LIST_APPEARANCE_MAIN_MENU ? 256 : 96) + menu_y;
 	if (appearance == SAVEGAME_LIST_APPEARANCE_MAIN_MENU)
 		a1->script_type = SCRIPT_TYPE_DA000008;
 	else
@@ -8686,8 +8692,8 @@ void script_ingame_menu_saveload(Script *a1, int appearance, int mode)
 	v5 = render_string_create(
 		0,
 		currently_running_lvl_mobd[MOBD_FONT_ITALIC].items,
-		216,
-        appearance == SAVEGAME_LIST_APPEARANCE_MAIN_MENU ? 240 : 80,
+        216 + menu_offset_x,
+        (appearance == SAVEGAME_LIST_APPEARANCE_MAIN_MENU ? 240 : 80) + menu_offset_y,
 		22,
 		10,
 		0x200007D0,
@@ -8720,12 +8726,13 @@ void script_ingame_menu_saveload(Script *a1, int appearance, int mode)
 			{
 				v8->script->field_1C = 1;
 				v8->script->param = (void *)v6;
-				v8->x = 0xE800;
-				v8->y = v7;
+                v8->x = 0xE800 + menu_x * 256;
+                v8->y = v7;
 				v8->z_index = 2560;
 				if (appearance == SAVEGAME_LIST_APPEARANCE_MAIN_MENU)
 				{
 					v8->script->script_type = SCRIPT_TYPE_DA000008;
+					v8->drawjob->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_menu_cursor_with_cplc;
 					stru29_list_4439F0(v8, 0, 0, 1, 0);
 				}
 				else
@@ -8737,7 +8744,10 @@ void script_ingame_menu_saveload(Script *a1, int appearance, int mode)
 			v7 += 4096;
 		} while (v6 < 5);
 	}
-	a1a->drawjob->on_update_handler = (DrawUpdateHandler)drawjob_update_handler_4483E0_ui;
+	if (appearance == SAVEGAME_LIST_APPEARANCE_MAIN_MENU)
+		a1a->drawjob->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_menu_cursor_with_cplc;
+	else
+		a1a->drawjob->on_update_handler = (DrawUpdateHandler)drawjob_update_handler_4483E0_ui;
 	a1a->z_index = 1280;
 
     bool loading = false;
@@ -8752,8 +8762,8 @@ void script_ingame_menu_saveload(Script *a1, int appearance, int mode)
 				render_string_445AE0(_47C65C_render_string);
 				_47C65C_render_string->field_18 = 0;
 				_47C65C_render_string->num_lines = 0;
-				a1a->x = 59392;
-				a1a->y = (16 * v23 + v30 + 14) << 8;
+                a1a->x = 59392 + menu_x * 256;
+                a1a->y = (16 * v23 + v30 + 14) << 8;
 				sprite_load_mobd(a1a, 1064);
 				v9 = v24;
 				v10 = 5;
@@ -8885,7 +8895,7 @@ void script_ingame_menu_saveload(Script *a1, int appearance, int mode)
 				break;
 		LABEL_59:
 			_47C664_ingame_menu_sprite->field_88_unused = 1;
-			_47C664_ingame_menu_sprite->y = 0xC200;
+        _47C664_ingame_menu_sprite->y = 0xC200 + menu_y * 256;
 			sprite_load_mobd(a1a, 1096);
 			dword_47C6C4 = 1;
 			if (input_get_string(
@@ -8996,6 +9006,11 @@ void script_434220_ingame_menu(Script *a1)
 {
 	_438630_read_save_lst();
 	script_4336E0(a1, SCRIPT_TYPE_DA000007, 100, 105, 3);
+	a1->sprite->drawjob->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_menu_cursor_with_cplc;
+	if (a1->param)
+	{
+		((Sprite *)a1->param)->drawjob->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_menu_cursor_with_cplc;
+	}
 	stru29_list_4439F0(a1->sprite, 0, 0, 1, 0);
 	while (true)
 	{
@@ -9014,6 +9029,11 @@ void script_434220_ingame_menu(Script *a1)
 void script_4342A0_ingame_menu(Script *a1)
 {
 	script_4336E0(a1, SCRIPT_TYPE_DA000006, 10, 105, 3);
+	a1->sprite->drawjob->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_menu_cursor_with_cplc;
+	if (a1->param)
+	{
+		((Sprite *)a1->param)->drawjob->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_menu_cursor_with_cplc;
+	}
 	stru29_list_4439F0(a1->sprite, 0, 0, 1, 0);
 	while (true)
 	{
@@ -9034,6 +9054,11 @@ void script_4342A0_ingame_menu(Script *a1)
 void script_434310_ingame_menu(Script *a1)
 {
 	script_4336E0(a1, SCRIPT_TYPE_DA000006, 10, 139, 3);
+	a1->sprite->drawjob->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_menu_cursor_with_cplc;
+	if (a1->param)
+	{
+		((Sprite *)a1->param)->drawjob->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_menu_cursor_with_cplc;
+	}
 	stru29_list_4439F0(a1->sprite, 0, 0, 1, 0);
 	while (true)
 	{
@@ -9054,6 +9079,11 @@ void script_434310_ingame_menu(Script *a1)
 void script_434390_ingame_menu(Script *a1)
 {
 	script_4336E0(a1, SCRIPT_TYPE_DA000007, 100, 139, 3);
+	a1->sprite->drawjob->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_menu_cursor_with_cplc;
+	if (a1->param)
+	{
+		((Sprite *)a1->param)->drawjob->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_menu_cursor_with_cplc;
+	}
 	stru29_list_4439F0(a1->sprite, 0, 1, 1, 0);
 	if (script_434500(a1, CURSOR_MOBD_OFFSET_1752, 1, 1))
 	{
@@ -9084,7 +9114,7 @@ void script_434460_DA000007(Script *a1)
 	v1 = 0;
 	v2 = a1->sprite;
 	a1->script_type = SCRIPT_TYPE_DA000007;
-	v2->drawjob->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_4483E0_ui;
+	v2->drawjob->on_update_handler = (void(*)(void *, DrawJob *))drawjob_update_handler_menu_cursor_with_cplc;
 	v3 = v2->y;
 	v4 = v2->z_index;
 	v2->x += 25600;

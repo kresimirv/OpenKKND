@@ -2,6 +2,23 @@
 #include "src/Script.h"
 
 
+// Centering offsets (in pixels) for main menu screens in the 640x480 coordinate space.
+// Enables a nice centered look when the game is scaled to higher resolutions.
+#define BTN_CENTER_X      0       // main menu buttons: shift right to center
+#define BTN_CENTER_Y      0       // main menu buttons: shift up to center in 480px
+#define FACTION_CENTER_Y  0       // faction selection (New Campaign): shift down
+#define KAOS_CENTER_X     0       // Kaos dialog: shift right
+#define KAOS_CENTER_Y     0       // Kaos dialog: shift down
+#define SAVELOAD_CENTER_Y 0       // save/load dialog (in main menu): shift up
+
+// Global offset to center the 640x480 main menu content within the render viewport.
+// Set based on (render_width - 640) / 2 and (render_height - 480) / 2.
+// When cplc_render_x/y are set to -menu_offset * 256, all sprites that use cplc_render
+// in their draw handlers (background via drawjob_update_handler_mapd_menu, buttons via
+// drawjob_update_handler_44C430_default_sprite) automatically shift to the correct position.
+// The cursor uses drawjob_update_handler_menu_cursor_with_cplc which subtracts cplc_render
+// from its position, so its sprite.x/y is in the shifted 640x480 space (cplc_render + cursor).
+// This ensures the cursor's sprite.x matches button sprite.x values for BOXD hit-testing.
 // =========== MAIN MENU dialog scripts ===================
 void script_main_menu_new_campaign(Script *a1);
 void script_main_menu_load(Script *a1);

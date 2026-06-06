@@ -9,6 +9,7 @@
 #include "src/Video.h"
 #include "src/Pathfind.h"
 #include "src/Map.h"
+#include "src/Config.h"
 
 #include "src/Engine/Entity.h"
 
@@ -230,6 +231,8 @@ void render_draw_list(DrawJobList *list)
         //render_locked_surface_ptr = ddsd_primary.lpSurface;
         render_locked_surface_ptr = pixels_8bpp;
 
+        memset(pixels_8bpp, 0, render_width * render_height);
+
         render_execute_draw_list(list);
 
 
@@ -258,7 +261,7 @@ void render_draw_list(DrawJobList *list)
             }
         }
 
-        gRenderer->ClearTarget(64, 64, 64);
+        gRenderer->ClearTarget(0, 0, 0);
         gRenderer->DrawImageCentered(render_width, render_height, pixels_32bpp);
         gRenderer->Present();
 
@@ -450,12 +453,12 @@ void debug_mission_pathing_outline(int map_x, int map_y, int draw_x, int draw_y)
         for (int _y = draw_y; _y < draw_y + h; ++_y) {
             if (_y < 0)
                 continue;
-            if (_y >= 480)
+            if (_y >= render_height)
                 break;
             for (int _x = draw_x; _x < draw_x + w; ++_x) {
                 if (_x < 0)
                     continue;
-                if (_x >= 640)
+                if (_x >= render_width)
                     break;
                 int y_off = render_locked_surface_width_px * (render_clip_y + _y);
                 int x_off = _x + render_clip_x;
@@ -610,12 +613,12 @@ void render_outline_tile(
     for (int _y = draw_y; _y < draw_y + border_size; ++_y) {
         if (_y < 0)
             continue;
-        if (_y >= 480)
+        if (_y >= render_height)
             break;
         for (int _x = draw_x; _x < draw_x + tile_width; ++_x) {
             if (_x < 0)
                 continue;
-            if (_x >= 640)
+            if (_x >= render_width)
                 break;
             render_put_pixel(_x, _y, color_idx);
             /*int y_off = render_locked_surface_width_px * (render_clip_y + _y);
@@ -628,12 +631,12 @@ void render_outline_tile(
     for (int _y = draw_y + tile_height - border_size; _y < draw_y + tile_height; ++_y) {
         if (_y < 0)
             continue;
-        if (_y >= 480)
+        if (_y >= render_height)
             break;
         for (int _x = draw_x; _x < draw_x + tile_width; ++_x) {
             if (_x < 0)
                 continue;
-            if (_x >= 640)
+            if (_x >= render_width)
                 break;
             render_put_pixel(_x, _y, color_idx);
             /*int y_off = render_locked_surface_width_px * (render_clip_y + _y);
@@ -647,12 +650,12 @@ void render_outline_tile(
     for (int _y = draw_y; _y < draw_y + tile_height; ++_y) {
         if (_y < 0)
             continue;
-        if (_y >= 480)
+        if (_y >= render_height)
             break;
         for (int _x = draw_x; _x < draw_x + border_size; ++_x) {
             if (_x < 0)
                 continue;
-            if (_x >= 640)
+            if (_x >= render_width)
                 break;
             render_put_pixel(_x, _y, color_idx);
             /*int y_off = render_locked_surface_width_px * (render_clip_y + _y);
@@ -666,12 +669,12 @@ void render_outline_tile(
     for (int _y = draw_y; _y < draw_y + tile_height; ++_y) {
         if (_y < 0)
             continue;
-        if (_y >= 480)
+        if (_y >= render_height)
             break;
         for (int _x = draw_x + tile_width - border_size; _x < draw_x + tile_width; ++_x) {
             if (_x < 0)
                 continue;
-            if (_x >= 640)
+            if (_x >= render_width)
                 break;
             render_put_pixel(_x, _y, color_idx);
             /*int y_off = render_locked_surface_width_px * (render_clip_y + _y);
@@ -936,8 +939,8 @@ int render_video_draw_handler(DrawJobDetails *a1, int mode)
 //----- (0040E2A0) --------------------------------------------------------
 int REND_SetRoutines()
 {
-    render_width = 640;
-    render_height = 480;
+    render_width = Config::vga_width;
+    render_height = Config::vga_height;
     render_478A94 = 1;
     render_478A0C = 1;
     p_render_set_clip = REND_SetClip;
@@ -1015,9 +1018,9 @@ void render_draw_tile_outlines(int x, int y, int w, int h) {
     for (int _y = y, _x = x; _x < x + w; ++_x) {
         if (_x < 0)
             continue;
-        if (_x >= 640)
+        if (_x >= render_width)
             break;
-        if (_y < 0 || _y >= 480)
+        if (_y < 0 || _y >= render_height)
             break;
         int y_off = render_locked_surface_width_px * (render_clip_y + _y);
         int x_off = _x + render_clip_x;
@@ -1025,11 +1028,11 @@ void render_draw_tile_outlines(int x, int y, int w, int h) {
         *dst = 123;
     }
     for (int _y = y, _x = x; _y < y + h; ++_y) {
-        if (_x < 0 || _x >= 640)
+        if (_x < 0 || _x >= render_width)
             break;
         if (_y < 0)
             continue;
-        if (_y >= 480)
+        if (_y >= render_height)
             break;
         int y_off = render_locked_surface_width_px * (render_clip_y + _y);
         int x_off = _x + render_clip_x;

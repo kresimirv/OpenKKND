@@ -4,6 +4,8 @@ using Application::Game;
 
 #include "src/_unsorted_functions.h"
 #include "src/_unsorted_data.h"
+#include "src/Application/Scripts/MainMenu.h"
+#include "src/Application/Scripts/GameMenu.h"
 #include "src/Cursor.h"
 #include "src/Coroutine.h"
 #include "src/kknd.h"
@@ -27,6 +29,8 @@ using Application::GameWindowObserver;
 #include "src/Infrastructure/File.h"
 #include "src/Infrastructure/Input.h"
 #include "src/Infrastructure/PlatformSpecific/OsTools.h"
+
+#include "src/Config.h"
 
 #include "src/Infrastructure/Renderer/RendererConfigFactory.h"
 #include "src/Infrastructure/Renderer/RendererFactory.h"
@@ -66,8 +70,14 @@ void Game::Run() {
     signal(SIGABRT, crash_handler);
     signal(SIGFPE, crash_handler);
     signal(SIGILL, crash_handler);
-    int window_width = 640;
-    int window_height = 480;
+
+    {
+        std::string exe_dir = OsGetExecutableDirectory();
+        Config::load(exe_dir.c_str());
+    }
+
+    int window_width = Config::vga_width;
+    int window_height = Config::vga_height;
     bool fullscreen = false;
 
     auto windowObserver = std::make_shared<GameWindowObserver>(shared_from_this());
@@ -273,6 +283,12 @@ void Game::MainMenu() {
     }
 
     GAME_PrepareSuperLvl(mapd_idx);
+    menu_offset_x = (render_width - 640) / 2;
+    menu_offset_y = (render_height - 480) / 2;
+    if (menu_offset_x < 0) menu_offset_x = 0;
+    if (menu_offset_y < 0) menu_offset_y = 0;
+    _47C380_mapd.mapd_cplc_render_x = -menu_offset_x * 256;
+    _47C380_mapd.mapd_cplc_render_y = -menu_offset_y * 256;
     game_state = GAME_STATE::MainMenu;
     do
     {
@@ -284,6 +300,8 @@ void Game::MainMenu() {
         stru1_animate();
         script_list_update();
         _4393F0_call_mapd();
+        _47C380_mapd.mapd_cplc_render_x = -menu_offset_x * 256;
+        _47C380_mapd.mapd_cplc_render_y = -menu_offset_y * 256;
         VIDEO_DoFrame();
         draw_list_update_and_draw();
         TimedMessagePump();

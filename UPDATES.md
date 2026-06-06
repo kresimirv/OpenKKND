@@ -386,3 +386,65 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
 - **Fix 2** (`Input.cpp:341-342`): Clear both `combo_key_param` and `combo_key_was_ctrl` after memcpy to `input_keyboard_state`.
 - **Fix 3** (`Input.h:19`): Added `bool combo_key_was_ctrl` to `KeyboardInput` struct so it propagates through the memcpy pipeline (`input_now_pressed_keys` → `input_keyboard_state` → `_47A700_input`).
 - **Fix 4** (`Cursor.cpp:1870,2756`): Replaced `dword_47A6FC == 29` with `_47A700_input.combo_key_was_ctrl` — uses the CTRL status captured at key-up time instead of polling current physical state.
+
+### Main Menu Centering for Higher Resolutions
+
+- **Problem**: Main menu content (background, buttons, dialogs, cursor) rendered at fixed 640×480 coordinates. At higher resolutions (set via `vga_resolution_width/height` in `config.txt`), content appeared stuck in the top-left corner and mouse hit-testing (BOXD) failed.
+
+- **Architecture**: Three coordinate spaces:
+  1. **640×480 internal space** — `data.tix`, mobd sprites, button positions, y-expressions. All `sprite.x/y` values in this session are in this space.
+  2. **cplc_render** (`mapd_cplc_render_x/y`) — global scroll offset applied by most draw handlers at render time. Set to `-menu_offset * 256` during main menu, shifting world-relative sprites right/down by `menu_offset`.
+  3. **Screen pixel space** — final display pixel.
+
+  Draw handlers fall into three categories:
+  - `drawjob_update_handler_4483E0_ui` (UI handler): Ignores `cplc_render` — `job.x = sprite.x/256`. Used for ingame menu sprites.
+  - `drawjob_update_handler_426C40_mobd` / `drawjob_update_handler_44C430_default_sprite` (default/camera handlers): Subtracts `cplc_render` — `job.x = sprite.x/256 + menu_offset`. Used for most sprites including cursor.
+  - Custom `drawjob_update_handler_menu_cursor_with_cplc`: Like default handler but with `z_index + 0x20000000` (UI z-range). Created specifically for main menu sprites that need both cplc shift and proper UI z-ordering.
+
+  Render strings (`render_string_create`) are drawn at absolute screen coordinates — they must be manually offset with `+ menu_offset_x/y`.
+
+  BOXD collision in `Pathfind.cpp` compares `sprite.x` directly (ignoring `cplc_render`). For hit-testing to work, cursor and button `sprite.x` must be in the same space. The cursor's `sprite.x = cplc_render_x + mouse_x` (line 455), converting window-pixel mouse position back to 640×480 space. Button sprites with the UI handler also need their `sprite.x` in 640×480 space — but UI handler sprites that were shifted by `+ menu_offset * 256` had `sprite.x` in screen-pixel space, breaking BOXD.
+
+- **Fix strategy**: Use `cplc_render` as the sole centering mechanism for sprites. Sprites that need to shift with the background use a cplc-aware handler (default or `menu_cursor_with_cplc`). Sprites using the UI handler must NOT have `menu_offset` baked into their `sprite.x`, because the UI handler renders at `sprite.x/256` (screen space) but BOXD compares `sprite.x` against the cursor's 640×480-space value. By keeping all sprites' `sprite.x` in 640×480 space and using cplc handlers to shift rendering, both rendering and BOXD work correctly.
+
+- **Implementation** (`src/Application/Scripts/MainMenu.h`, `MainMenu.cpp`, `src/kknd.cpp`, `src/RenderDrawHandlers.cpp/.h`, `src/Application/Game.cpp`):
+
+  - **Globals** (`MainMenu.h:22-23`): `int menu_offset_x/y` — set to `(render_width - 640) / 2` and `(render_height - 480) / 2` in `Game::MainMenu()`.
+
+  - **cplc_render override** (`MainMenu.cpp:425-426`, `Game.cpp`): `mapd_cplc_render_x/y = -menu_offset * 256` applied in three places:
+    - `Game::MainMenu()` after MAPD init
+    - Game loop after `_4393F0_call_mapd()` (overwrites game-world cplc)
+    - Mouse handler main loop (line 425-426, every frame)
+
+  - **Cursor** (`MainMenu.cpp:399`): Handler changed from `drawjob_update_handler_cursors` to `drawjob_update_handler_menu_cursor_with_cplc`. Cursor `sprite.x/y` kept at `cplc_render_x + mouse_pos` (converts window pixel → 640×480 space). New handler uses `z_index + 0x20000000` (UI range) instead of `+ 0x40000000` (overlay range) so the cursor renders above buttons but below the existing overlay cursor.
+
+  - **Centering defines** (`MainMenu.h:7-12`): All reverted to 0 (`BTN_CENTER_X/Y`, `FACTION_CENTER_Y`, `KAOS_CENTER_X/Y`, `SAVELOAD_CENTER_Y`). Cplc-based centering replaces explicit position offsets.
+
+  - **Button scripts** (`MainMenu.cpp:44,97,148,199,247,296,346`): Removed `a1->sprite->y = ... + BTN_CENTER_Y * 256` — buttons now use default handler `drawjob_update_handler_426C40_mobd` (cplc-aware), so their 640×480 sprite positions render correctly shifted.
+
+  - **Kaos dialog render strings** (`MainMenu.cpp:989,1092,1119,1167,1264,1309,1411,1452,1491,1533`): Added `menu_offset_x/y` to positions — render strings don't use cplc and need explicit offset.
+
+  - **Load dialog buttons** (`kknd.cpp:8997-9128`): Five scripts (`script_434220`, `4342A0`, `434310`, `434390` and `434460_DA000007`) had their draw handler changed from `drawjob_update_handler_4483E0_ui` to `drawjob_update_handler_menu_cursor_with_cplc`. Removed `a1->sprite->x/y += menu_offset * 256` — the cplc handler shifts rendering without modifying sprite.x, keeping BOXD-compatible 640×480 coordinates. Both parent and child (`a1->param`) sprites get the new handler.
+
+  - **Savegame list** (`kknd.cpp:8657-8919`):
+    - `a1a` (highlight indicator) and `v8` (5 slot sprites): handler switched to `drawjob_update_handler_menu_cursor_with_cplc` when `appearance == SAVEGAME_LIST_APPEARANCE_MAIN_MENU`.
+    - Removed `menu_offset_x * 256` from `v8->x` and `a1a->x` — they now use raw 640×480 coordinates.
+    - `v4`/`v30` (y-base): removed `+ menu_offset_y` (was `256 + menu_offset_y`, now `256`) — the cplc handler adds `menu_offset_y` once via cplc_render.
+    - `render_string_create` x: changed from `216` to `216 + menu_offset_x` for main menu — render strings need explicit offset.
+    - `render_string_create` y: already had `240 + menu_offset_y`.
+
+  - **Blinking cursor** (`MainMenu.cpp:1750`): Added missing `- menu_offset_x` to `_47C664_ingame_menu_sprite->x` after `input_get_string()`. The cursor uses default handler `drawjob_update_handler_426C40_mobd` which adds `menu_offset_x` via cplc_render — the render string's `job_details.x` is in screen-pixel space, so `menu_offset_x` must be subtracted before the handler adds it back.
+
+### UI Centering — In-Game Menu Dialogs for Higher Resolutions
+
+- After main menu centering (cplc-based), in-game menu dialogs and mission outcome modals still rendered at fixed 640×480 coordinates, appearing in the top-left at higher resolutions.
+- In-game menu master dialog (`GameMenu.cpp`): Uses `drawjob_update_handler_4483E0_ui` (ignore cplc_render), so explicit `menu_offset_y * 256` added to sprite y position.
+- Sub-dialogs (restart/quit confirmation, options, briefing) (`GameMenu.cpp`): render_string positions shifted by `+ menu_offset_x/y`.
+- Savegame list (`kknd.cpp`, `script_ingame_menu_saveload`): slot sprites, highlight indicator, cursor, and render_string positions conditioned on `menu_x`/`menu_y` for `SAVEGAME_LIST_APPEARANCE_INGAME_MENU` only (main menu uses cplc handlers).
+
+### Bug Fix — Savegame List Title Not Centered / Slot y Double-Offset
+
+- Main menu save/load dialog title render_string used `menu_x`/`menu_y` which are 0 for main menu (they exist only to skip offset for cplc-shifted sprites). render_string doesn't use cplc handlers, so it needs `menu_offset_x/y` directly. **Fix**: changed `menu_x/menu_y` → `menu_offset_x/menu_offset_y` at `kknd.cpp:8695-8696`.
+- Ingame menu save slots had `menu_y` added twice — once in `v4` (which flows into `v7 = (v4+14)<<8`) and again in `v8->y = v7 + menu_y*256`. **Fix**: removed `+ menu_y*256` from `v8->y` at `kknd.cpp:8730`.
+- Mission outcome letter sprite (`Mission.cpp` `script_424CE0_mission_outcome_modal`): `v3->x/y` already used `menu_offset_x/y * 256` (previous fix). Not in original entry.
+- Mission outcome background sprites (`Mission.cpp`, outcome dialog creation): Three sprites (left panel offset 0, right panel offset 12, mission text frame offset 24) had hardcoded `x=81920, y=61440`. Added `+ menu_offset_x/y * 256` to match the outcome letter sprite on top.

@@ -7,6 +7,7 @@ add_subdirectory(Infrastructure)
 
 set(UNSORTED_SOURCES
 	_unsorted_data.cpp
+    Config.cpp
 	Coroutine.cpp
     Cursor.cpp
     kknd.cpp
@@ -28,6 +29,7 @@ set(UNSORTED_SOURCES
 
 set(UNSORTED_HEADERS
 	_unsorted_data.h
+    Config.h
     _unsorted_functions.h
     Coroutine.h
     Cursor.h

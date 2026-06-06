@@ -1,6 +1,17 @@
 #pragma once
 #include "src/Script.h"
 
+class GameMenu {
+public:
+    static int offset_x;
+    static int offset_y;
+
+    static void SetCenterOffsets(int x, int y);
+};
+
+extern int menu_offset_x;
+extern int menu_offset_y;
+
 // master script to control all menu UIs
 void script_ingame_menu_master_script(Script *a1);
 

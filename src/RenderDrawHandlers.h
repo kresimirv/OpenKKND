@@ -13,6 +13,7 @@ void drawjob_update_handler_448580_entity_aircraft_turret(Sprite *sprite, DrawJo
 
 void drawjob_update_handler_4483E0_ui(Sprite *a1, DrawJob *a2);
 void drawjob_update_handler_cursors(Sprite *a1, DrawJob *a2);
+void drawjob_update_handler_menu_cursor_with_cplc(Sprite *a1, DrawJob *a2);
 void drawjob_update_handler_mapd_menu(Bitmap *a1, DrawJob *a2);
 void drawjob_update_handler_426C40_mobd(Sprite *a1, DrawJob *a2);
 void drawjob_update_handler_44C430_default_sprite(Sprite *a1, DrawJob *a2);

@@ -229,6 +229,28 @@ void drawjob_update_handler_cursors(Sprite *a1, DrawJob *a2)
     a2->job_details.params = render_default_stru1;
 }
 
+// Custom cursor handler for main menu: subtracts cplc_render for positioning
+// but keeps z_index in the UI range (0x20000000) so the cursor stays on top
+// of buttons but below the existing cursor handler's range.
+void drawjob_update_handler_menu_cursor_with_cplc(Sprite *a1, DrawJob *a2)
+{
+    DataMobdItem_stru0 *v2;
+
+    v2 = a1->_54_inside_mobd_ptr4;
+    if (v2)
+    {
+        a2->job_details.x = (a1->x >> 8) - (_47C380_mapd.mapd_cplc_render_x >> 8) - v2->x_offset;
+        a2->job_details.y = (a1->y >> 8) - (_47C380_mapd.mapd_cplc_render_y >> 8) - v2->y_offset;
+        a2->job_details.image = v2->sprt;
+    }
+    else
+    {
+        a2->job_details.image = 0;
+    }
+    a2->job_details.z_index = a1->z_index + 0x20000000;
+    a2->job_details.params = render_default_stru1;
+}
+
 //----- (004484A0) --------------------------------------------------------
 void drawjob_update_handler_4484A0_explosions(Sprite *a1, DrawJob *a2)
 {
