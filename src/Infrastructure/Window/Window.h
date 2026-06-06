@@ -28,6 +28,7 @@ namespace Infrastructure {
         // appearance
         virtual void SetFullscreen() = 0;
         virtual void SetWindowed() = 0;
+        virtual void ToggleFullscreen() = 0;
 
         // behaviour
         virtual bool GetIsActive() const = 0;

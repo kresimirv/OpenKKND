@@ -78,7 +78,7 @@ void Game::Run() {
 
     int window_width = Config::vga_width;
     int window_height = Config::vga_height;
-    bool fullscreen = false;
+    bool fullscreen = Config::vga_fullscreen;
 
     auto windowObserver = std::make_shared<GameWindowObserver>(shared_from_this());
     auto windowConfig = WindowConfigFactory().Create(

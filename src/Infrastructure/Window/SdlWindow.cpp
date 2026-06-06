@@ -76,7 +76,7 @@ bool SdlWindow::Initialize() {
         SDL_WINDOWPOS_UNDEFINED,    // initial y position
         config->width,              // width, in pixels
         config->height,             // height, in pixels
-        SDL_WINDOW_OPENGL           // flags - see below
+        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE   // flags - see below
     );
 
     if (window == nullptr) {
@@ -112,6 +112,8 @@ void SdlWindow::SetHeight(int height) {
 }
 
 void SdlWindow::SetFullscreen() {
+    if (_isFullscreen) return;
+    _isFullscreen = true;
 #if !defined(_DEBUG) || defined(_RELEASE)
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 #else
@@ -153,6 +155,20 @@ void *SdlWindow::GetHwnd() const {
 }
 
 void SdlWindow::SetWindowed() {
+    if (_isFullscreen) {
+        SDL_SetWindowFullscreen(window, 0);
+        SDL_SetWindowSize(window, config->width, config->height);
+        SDL_SetWindowGrab(window, SDL_TRUE);
+        _isFullscreen = false;
+    }
+}
+
+void SdlWindow::ToggleFullscreen() {
+    if (_isFullscreen) {
+        SetWindowed();
+    } else {
+        SetFullscreen();
+    }
 }
 
 int SdlWindow::GetWidth() const {
@@ -209,6 +225,13 @@ void SdlWindow::MessageProcessor(SDL_Event &e) {
         case SDL_QUIT: {
             for (auto observer : windowObservers) {
                 observer->OnClose();
+            }
+            break;
+        }
+
+        case SDL_WINDOWEVENT: {
+            if (e.window.event == SDL_WINDOWEVENT_MAXIMIZED) {
+                SetFullscreen();
             }
             break;
         }
@@ -289,7 +312,11 @@ void SdlWindow::MessageProcessor(SDL_Event &e) {
                 //key = VK_ESCAPE  (convert into platform-independed KKND_INPUT_ESCAPE)
                 NofifySpecialKeyUp(INPUT_KEYBOARD_ESCAPE_MASK, ctrlStatus, altStatus);
             } else if (scan == SDL_SCANCODE_RETURN) {
-                NofifySpecialKeyUp(INPUT_KEYBOARD_RETURN_MASK, ctrlStatus, altStatus);
+                if (altStatus) {
+                    ToggleFullscreen();
+                } else {
+                    NofifySpecialKeyUp(INPUT_KEYBOARD_RETURN_MASK, ctrlStatus, altStatus);
+                }
             } else if (scan == SDL_SCANCODE_BACKSPACE) {
                 NofifyCharUp(8, ctrlStatus, altStatus);            // VK_BACK
             } else if (scan == SDL_SCANCODE_DELETE) {

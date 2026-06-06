@@ -40,6 +40,7 @@ namespace Infrastructure {
         // appearance
         virtual void SetFullscreen() override;
         virtual void SetWindowed() override;
+        virtual void ToggleFullscreen() override;
 
         // behaviour
         virtual bool GetIsActive() const override;
@@ -81,5 +82,6 @@ namespace Infrastructure {
         KeyboardObservers keyboardObservers;
 
         SDL_Window *window = nullptr;
+        bool _isFullscreen = false;
     };
 };

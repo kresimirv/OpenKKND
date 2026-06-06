@@ -4,6 +4,7 @@
 
 int Config::vga_width = 640;
 int Config::vga_height = 480;
+bool Config::vga_fullscreen = false;
 
 void Config::load(const char *directory) {
     char path[512];
@@ -27,6 +28,8 @@ void Config::load(const char *directory) {
                 vga_width = value;
             } else if (strcmp(key, "vga_resolution_height") == 0 && value > 0) {
                 vga_height = value;
+            } else if (strcmp(key, "vga_fullscreen") == 0) {
+                vga_fullscreen = value != 0;
             }
         }
     }

@@ -53,8 +53,10 @@ void SdlRenderer::Present() {
 }
 
 void SdlRenderer::DrawImageCentered(int imageWidth, int imageHeight, const void *imagePixels) {
-    int draw_x = config->width / 2 - imageWidth / 2;
-    int draw_y = config->height / 2 - imageHeight / 2;
+    int windowWidth = config->window->GetWidth();
+    int windowHeight = config->window->GetHeight();
+    int draw_x = windowWidth / 2 - imageWidth / 2;
+    int draw_y = windowHeight / 2 - imageHeight / 2;
 
     auto surface = SDL_CreateRGBSurfaceFrom(
         (void *)imagePixels, imageWidth, imageHeight, 32, 4 * imageWidth,

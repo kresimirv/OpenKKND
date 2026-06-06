@@ -448,3 +448,23 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
 - Ingame menu save slots had `menu_y` added twice — once in `v4` (which flows into `v7 = (v4+14)<<8`) and again in `v8->y = v7 + menu_y*256`. **Fix**: removed `+ menu_y*256` from `v8->y` at `kknd.cpp:8730`.
 - Mission outcome letter sprite (`Mission.cpp` `script_424CE0_mission_outcome_modal`): `v3->x/y` already used `menu_offset_x/y * 256` (previous fix). Not in original entry.
 - Mission outcome background sprites (`Mission.cpp`, outcome dialog creation): Three sprites (left panel offset 0, right panel offset 12, mission text frame offset 24) had hardcoded `x=81920, y=61440`. Added `+ menu_offset_x/y * 256` to match the outcome letter sprite on top.
+- 
+- ### Window Maximize / Fullscreen Toggle (ALT+ENTER)
+- 
+- - **Problem**: Game window lacked maximize support and ALT+ENTER fullscreen toggle. The maximize button was disabled (no `SDL_WINDOW_RESIZABLE` flag), `SetWindowed()` was a no-op, and no code handled the Alt+Enter combination.
+- - **Fix 1 — Resizable window** (`SdlWindow.cpp:79`): Added `SDL_WINDOW_RESIZABLE` to `SDL_CreateWindow` flags so the maximize button is enabled.
+- - **Fix 2 — Maximize button** (`SdlWindow.cpp:232-236`): Added `SDL_WINDOWEVENT` handler — when `SDL_WINDOWEVENT_MAXIMIZED` fires (user clicks maximize), calls `SetFullscreen()`.
+- - **Fix 3 — ALT+ENTER** (`SdlWindow.cpp:314-319`): In `SDL_KEYUP` for `SDL_SCANCODE_RETURN`, checks `altStatus` — if Alt is held, calls `ToggleFullscreen()` instead of dispatching a normal Enter event.
+- - **Fix 4 — SetWindowed** (`SdlWindow.cpp:157-163`): Implemented `SetWindowed()` — calls `SDL_SetWindowFullscreen(window, 0)`, restores window to configured size, re-enables grab.
+- - **Fix 5 — ToggleFullscreen** (`SdlWindow.cpp:166-172`): Added `ToggleFullscreen()` — delegates to `SetWindowed()` or `SetFullscreen()` based on `_isFullscreen` state.
+- - **Interface** (`Window.h`, `SdlWindow.h`): Added `ToggleFullscreen()` pure virtual and `_isFullscreen` state member.
+- 
+- ### Config — vga_fullscreen Property
+- 
+- - **Config** (`Config.h:7`, `Config.cpp:7,31-33`): Added `static bool vga_fullscreen` defaulting to `false`. Parsed from `config.txt` as `vga_fullscreen=0` or `vga_fullscreen=1`.
+- - **Game startup** (`Game.cpp:81`, `kknd.cpp:5555`): Both `Game::Run()` and `LVL_SysInit()` now use `Config::vga_fullscreen` instead of hardcoded `false`.
+- 
+- ### Fullscreen Toggle — Sidebar Off-Screen Fix
+- 
+- - **Root cause**: `SdlRenderer::DrawImageCentered` used cached `config->width/height` (stored at init time) for centering. When starting in fullscreen, `config` was replaced with desktop dimensions (e.g. 1920×1080). After toggling to windowed mode (640×480), `config->width/height` still held the stale desktop resolution. `draw_x = 1920/2 - 640/2 = 640` placed the entire 640×480 game image at x=640 on a 640-wide window — completely off-screen.
+- - **Fix** (`SdlRenderer.cpp:57-58`): `DrawImageCentered` now queries actual window size via `config->window->GetWidth()/GetHeight()` instead of using the cached `config->width/height`. This always reflects the current window dimensions regardless of fullscreen/windowed state.

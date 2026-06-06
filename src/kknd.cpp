@@ -5552,7 +5552,7 @@ bool LVL_SysInit()
 	{
         int window_width = Config::vga_width;
         int window_height = Config::vga_height;
-        bool fullsreen = false;
+        bool fullsreen = Config::vga_fullscreen;
 
         /*if (render_create_window(window_width, window_height, fullsreen))*/ {
             if (render_init(window_width, window_height, 8, fullsreen)) {
