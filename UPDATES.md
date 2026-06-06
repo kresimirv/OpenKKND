@@ -68,6 +68,12 @@ Sentinel trick: two adjacent pointer globals used as `next`/`prev` of implicit s
 - `Game.cpp`: `boxd_40EA20_gameloop_update()` and `_44C4B0_mess_with_turrets()` skipped when `single_player_game && is_async_execution_supported`.
 - All changes guarded with `single_player_game` — multiplayer behavior is completely unaffected.
 
+### In-Game Menu — True Game Freeze (Combat, Construction, Production)
+- **Root cause**: `script_list_update()` (`Script.cpp`) ran ALL scripts every frame, including game-world scripts (entity combat AI, building construction, production queues, resource gathering, enemy AI) — only `entity_move()` and `cursor_group_orders()` were blocked. Units fought and buildings were built during the menu pause because their entity-mode handlers executed unconditionally.
+- **Fix 1** (`Script.cpp:1360-1361`): Added `field_1C` guard in `script_list_update()` — scripts with `field_1C & 1 == 0` (game-world scripts) are skipped during single-player pause. UI scripts (menu, cursor, input handler, network) already set `field_1C = 1` and continue running. This freezes all entity modes (move, attack, build, produce, repair, research), enemy AI decision-making, production timer countdowns, and resource processing.
+- **Fix 2** (`Entity.cpp:228-229`): Added `entity_attack()` pause guard matching the existing `entity_move()` guard — prevents combat orders from being issued while paused.
+- **How it works**: The existing sprite update functions (`sprite_list_init_mobd_items`, `sprite_list_update_positions`) already used the same `field_1C` check to skip game-world sprite animation/position updates during pause. With game scripts also frozen, the entire simulation stands still. On resume, script yield timers are preserved exactly where they were paused. BGM continues playing via the existing `PauseAll()`/`ResumeAll()` stream isolation.
+
 ### AI Fix — Enemy Units Now Attack Without a Base
 - `EnemyAI.cpp`: Generic AI initializes `_278_x_offset = -1` (no base). When `== -1`, the entire attacker marshalling and attack decision code was skipped via `goto LABEL_272` — enemies never attacked.
 - Fix (formation creation): Inside the no-base block, before the `goto`, added code that forms non-scout attackers from `attacker_list_48` into a formation and inserts it into `list_11C`. The existing `list_11C` attack loop then calls `stru24_40B020()` to find the nearest enemy and issue `EVT_CMD_ENTITY_ATTACK`.

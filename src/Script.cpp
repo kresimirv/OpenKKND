@@ -1357,6 +1357,9 @@ void script_list_update()
         }
         else 
         {
+            if (single_player_game && is_async_execution_supported && !(script->field_1C & 1))
+                continue;
+            
             if (script->num_runs_to_skip > 0)
             {
                 script->num_runs_to_skip -= 1;

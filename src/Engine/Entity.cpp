@@ -225,6 +225,9 @@ void entity_move(Entity *a1, _47CAF0_task_attachment1_move_task *a2)
 //----- (00419F00) --------------------------------------------------------
 void entity_attack(Entity *a1, _47CAF0_task_attachment1_attack_task *param)
 {
+    if (single_player_game && is_async_execution_supported)
+        return;
+
     Entity *v3; // esi@1
     enum PLAYER_SIDE v4; // ecx@1
     Entity *v5; // edx@2
