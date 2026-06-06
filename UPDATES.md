@@ -468,3 +468,16 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
 - 
 - - **Root cause**: `SdlRenderer::DrawImageCentered` used cached `config->width/height` (stored at init time) for centering. When starting in fullscreen, `config` was replaced with desktop dimensions (e.g. 1920×1080). After toggling to windowed mode (640×480), `config->width/height` still held the stale desktop resolution. `draw_x = 1920/2 - 640/2 = 640` placed the entire 640×480 game image at x=640 on a 640-wide window — completely off-screen.
 - - **Fix** (`SdlRenderer.cpp:57-58`): `DrawImageCentered` now queries actual window size via `config->window->GetWidth()/GetHeight()` instead of using the cached `config->width/height`. This always reflects the current window dimensions regardless of fullscreen/windowed state.
+
+### Bug Fix — Cursor Warp to Cancel Button at Higher Resolutions
+
+- **Problem**: When opening dialogs (New Game, Kaos Mode, Multiplayer Game, Kaos Difficulty) at 640×480, the cursor correctly jumps to the Cancel button. At 1024×768, the cursor warps to the wrong position — missing the button entirely.
+
+- **Root cause**: `_43BAB0_move_cursor` (`kknd.cpp:9780`) warped the SDL mouse to `sprite.x/256` (640×480 internal space) via `input_set_mouse_pos(v7 >> 8, v8 >> 8)`. At higher resolutions, button rendering is shifted right/down by `menu_offset` via `mapd_cplc_render` (subtracted in draw handlers), but the mouse warp didn't account for this offset — the cursor and button ended up `menu_offset` pixels apart.
+
+- **Fix** (`kknd.cpp:9780`) — one line change:
+  ```
+  - input_set_mouse_pos(v7 >> 8, v8 >> 8);
+  + input_set_mouse_pos((v7 >> 8) - (_47C380_mapd.mapd_cplc_render_x >> 8), (v8 >> 8) - (_47C380_mapd.mapd_cplc_render_y >> 8));
+  ```
+  Since `mapd_cplc_render_x = -menu_offset_x * 256`, subtracting `cplc_render_x >> 8` adds `menu_offset_x` to the warp target, matching the button's actual screen position. At 640×480, `cplc_render = 0` so behavior is unchanged.

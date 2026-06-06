@@ -9777,7 +9777,7 @@ LABEL_21:
 	v8 = v4 + a1->y;
 	v1->field_88_unused = 1;
 	v1->y = v8;
-	input_set_mouse_pos(v7 >> 8, v8 >> 8);
+	input_set_mouse_pos((v7 >> 8) - (_47C380_mapd.mapd_cplc_render_x >> 8), (v8 >> 8) - (_47C380_mapd.mapd_cplc_render_y >> 8));
 }
 
 //----- (0043C040) --------------------------------------------------------
