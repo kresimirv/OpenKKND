@@ -449,6 +449,25 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
 - Mission outcome letter sprite (`Mission.cpp` `script_424CE0_mission_outcome_modal`): `v3->x/y` already used `menu_offset_x/y * 256` (previous fix). Not in original entry.
 - Mission outcome background sprites (`Mission.cpp`, outcome dialog creation): Three sprites (left panel offset 0, right panel offset 12, mission text frame offset 24) had hardcoded `x=81920, y=61440`. Added `+ menu_offset_x/y * 256` to match the outcome letter sprite on top.
 - 
+### Bug Fix — Kaos Player Name Cursor Position at Custom Resolutions
+
+- **Problem**: At default 640×480, clicking the Player name field in Kaos mode shows the blinking cursor one character past the last typed letter (correct). At any custom resolution (e.g. 1280×720), the cursor appears shifted rightward — way outside the field into the neighboring field.
+
+- **Root cause**: `input_get_string_440770_handler` (`kknd.cpp:11508`) set the cursor sprite's x to `v4->drawjob->job_details.x << 8`, where `job_details.x` is in screen-pixel space (already offset by `menu_offset_x`). The cursor's draw handler (`drawjob_update_handler_menu_cursor_with_cplc`, `RenderDrawHandlers.cpp:242`) adds `menu_offset_x` back via `-cplc_render_x` (where `cplc_render_x = -menu_offset_x * 256`). At default resolution `menu_offset_x = 0`, so both renderings coincide. At higher resolutions, the offset is double-counted — the cursor ends up `menu_offset_x` pixels to the right of the intended position.
+
+- **Fix** (`kknd.cpp:11508`): Added `- menu_offset_x` to the cursor x assignment, matching the pattern already used in the initial cursor setup at `MainMenu.cpp:1655`:
+  ```cpp
+  _47C664_ingame_menu_sprite->x = (v4->drawjob->job_details.x - menu_offset_x) << 8;
+  ```
+
+### Crash Fix — Minimap Fog-of-War Heap-Buffer-Overflow (First Survivors Mission)
+
+- **Problem**: When starting the first Survivors campaign mission, ASan reports heap-buffer-overflow at `Map.cpp:697` in `is_map_revealed_at`, crashing the game.
+
+- **Root cause**: `is_map_revealed_at` computed `index = (x>>13) + 2 + __4793F8_map_width_plus4 * ((y>>13) + 2)` and accessed `map_fog_of_war_scrl_tiles[index]` without bounds checking. Sprite coordinates can fall outside the map bounds (e.g. cursor hovering over off-map areas), producing an index past the allocated `(map_width+4) × (map_height+4)` array.
+
+- **Fix** (`Map.cpp:695-701`): Added bounds check for column and row indices against `__4793F8_map_width_plus4` and `__478AAC_map_height_plus4`. Returns `false` (not revealed) when out of bounds instead of reading past the allocation.
+
 - ### Window Maximize / Fullscreen Toggle (ALT+ENTER)
 - 
 - - **Problem**: Game window lacked maximize support and ALT+ENTER fullscreen toggle. The maximize button was disabled (no `SDL_WINDOW_RESIZABLE` flag), `SetWindowed()` was a no-op, and no code handled the Alt+Enter combination.

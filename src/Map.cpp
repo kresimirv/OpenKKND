@@ -694,7 +694,11 @@ void mapd_44AE30_fog_of_war()
 //----- (0044B0D0) --------------------------------------------------------
 bool is_map_revealed_at(int x, int y)
 {
-    return *(&map_fog_of_war_scrl_tiles[(x >> 13) + 2] + __4793F8_map_width_plus4 * ((y >> 13) + 2)) != fog_of_war_tile_1;
+    int col = (x >> 13) + 2;
+    int row = (y >> 13) + 2;
+    if (col < 0 || col >= __4793F8_map_width_plus4 || row < 0 || row >= __478AAC_map_height_plus4)
+        return false;
+    return map_fog_of_war_scrl_tiles[col + __4793F8_map_width_plus4 * row] != fog_of_war_tile_1;
 }
 
 //----- (0044B100) --------------------------------------------------------

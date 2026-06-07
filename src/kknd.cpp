@@ -11505,7 +11505,7 @@ void input_get_string_440770_handler(const char *a1, int a2)
 			--v5;
 		} while (v5);
 	}
-	_47C664_ingame_menu_sprite->x = v4->drawjob->job_details.x << 8;
+	_47C664_ingame_menu_sprite->x = (v4->drawjob->job_details.x - menu_offset_x) << 8;
 	_47C664_ingame_menu_sprite->field_88_unused = 1;
 	_47C664_ingame_menu_sprite->y = 22528;
 }
