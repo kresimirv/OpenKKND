@@ -2020,6 +2020,22 @@ bool cplc_init()
 			}
 			_47C380_mapd.mapd_cplc_render_x = v11->x;
 			_47C380_mapd.mapd_cplc_render_y = v11->y;
+			if (_47A010_mapd_item_being_drawn[0])
+			{
+				DrawJobDetails *djd = &_47A010_mapd_item_being_drawn[0]->draw_job->job_details;
+				int cmax_x = 32 - render_width + render_call_draw_handler_mode1(djd);
+				if (cmax_x < 0) cmax_x = 0;
+				int cmax_y = render_call_draw_handler_mode2(djd) - render_height;
+				if (cmax_y < 0) cmax_y = 0;
+				if (_47C380_mapd.mapd_cplc_render_x < 0)
+					_47C380_mapd.mapd_cplc_render_x = 0;
+				else if (_47C380_mapd.mapd_cplc_render_x > cmax_x << 8)
+					_47C380_mapd.mapd_cplc_render_x = cmax_x << 8;
+				if (_47C380_mapd.mapd_cplc_render_y < 0)
+					_47C380_mapd.mapd_cplc_render_y = 0;
+				else if (_47C380_mapd.mapd_cplc_render_y > cmax_y << 8)
+					_47C380_mapd.mapd_cplc_render_y = cmax_y << 8;
+			}
 			_47C380_mapd.mapd_cplc_item0_ptr_field_C = v11->z_index;
 			__47C380_mapd_cplc_item0_ptr_field_4_minus_3FFF = _47C380_mapd.mapd_cplc_render_x - 0x3FFF;
 			_47C384_mapd_cplc_item0_ptr_field_8_minus_3FFF = _47C380_mapd.mapd_cplc_render_y - 0x3FFF;
@@ -2100,6 +2116,22 @@ bool cplc_select(int id)
 		}
 		_47C380_mapd.mapd_cplc_render_x = v11->x;
 		_47C380_mapd.mapd_cplc_render_y = v11->y;
+		if (_47A010_mapd_item_being_drawn[0])
+		{
+			DrawJobDetails *djd = &_47A010_mapd_item_being_drawn[0]->draw_job->job_details;
+			int cmax_x = 32 - render_width + render_call_draw_handler_mode1(djd);
+			if (cmax_x < 0) cmax_x = 0;
+			int cmax_y = render_call_draw_handler_mode2(djd) - render_height;
+			if (cmax_y < 0) cmax_y = 0;
+			if (_47C380_mapd.mapd_cplc_render_x < 0)
+				_47C380_mapd.mapd_cplc_render_x = 0;
+			else if (_47C380_mapd.mapd_cplc_render_x > cmax_x << 8)
+				_47C380_mapd.mapd_cplc_render_x = cmax_x << 8;
+			if (_47C380_mapd.mapd_cplc_render_y < 0)
+				_47C380_mapd.mapd_cplc_render_y = 0;
+			else if (_47C380_mapd.mapd_cplc_render_y > cmax_y << 8)
+				_47C380_mapd.mapd_cplc_render_y = cmax_y << 8;
+		}
 		_47C380_mapd.mapd_cplc_item0_ptr_field_C = v11->z_index;
 		__47C380_mapd_cplc_item0_ptr_field_4_minus_3FFF = _47C380_mapd.mapd_cplc_render_x - 0x3FFF;
 		_47C384_mapd_cplc_item0_ptr_field_8_minus_3FFF = _47C380_mapd.mapd_cplc_render_y - 0x3FFF;
@@ -5701,7 +5733,11 @@ void LVL_Deinit()
 	if (_479DD0_mobd_initialized)
 		sprite_list_free();
 	if (_479DF0_mapd_initialized)
+	{
 		bitmap_list_free();
+		for (int i = 0; i < 3; i++)
+			_47A010_mapd_item_being_drawn[i] = 0;
+	}
 	if (draw_list_initialized)
 		draw_list_free();
 	if (stru2_list_elements_initialized)

@@ -499,4 +499,57 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
   - input_set_mouse_pos(v7 >> 8, v8 >> 8);
   + input_set_mouse_pos((v7 >> 8) - (_47C380_mapd.mapd_cplc_render_x >> 8), (v8 >> 8) - (_47C380_mapd.mapd_cplc_render_y >> 8));
   ```
-  Since `mapd_cplc_render_x = -menu_offset_x * 256`, subtracting `cplc_render_x >> 8` adds `menu_offset_x` to the warp target, matching the button's actual screen position. At 640×480, `cplc_render = 0` so behavior is unchanged.
+   Since `mapd_cplc_render_x = -menu_offset_x * 256`, subtracting `cplc_render_x >> 8` adds `menu_offset_x` to the warp target, matching the button's actual screen position. At 640×480, `cplc_render = 0` so behavior is unchanged.
+
+### Game Camera (Viewport) Centering for Higher Resolutions
+
+- **Problem**: At resolutions higher than 640×480 (e.g. 1280×720, 1920×1080), the in-game camera that follows units started off-center or allowed scrolling past map edges, showing black void. `render_width`/`render_height` were already set from `Config::vga_width/height` but the camera clamping logic didn't correctly handle viewports larger than the map.
+
+- **Root cause 1 — negative `view_max` clamping**: Camera bounds computed `view_max_x = map_width - render_width` and `view_max_y = map_height - render_height`. When `map_width < render_width` (e.g. small campaign map at 1280×720), `view_max_x` was negative. The original code then did `view_max_x << 8`, producing a large *negative* shift result. The `>=` guard against this wrapped negative value failed to prevent the camera from scrolling past the map edge into void.
+
+- **Root cause 2 — missing camera center on mission start**: `script_425400` (`Mission.cpp`) didn't center the camera on the player's start position at mission start. At 640×480 the level init happened to leave `cplc_render_x/y` at sensible defaults, but at higher resolutions the camera started at a wrong offset.
+
+- **Root cause 3 — stale `_47A010_mapd_item_being_drawn[]` after deinit**: `LVL_Deinit()` freed the bitmap list but didn't null the `mapd_item_being_drawn` pointers. On level restart, stale pointers caused camera clamp computations to dereference freed memory.
+
+- **Fix 1 — clamp `view_max` to zero** (`Mission.cpp:1394-1397`, `Cursor.cpp:637-650`, `Map.cpp:109-120`, `kknd.cpp:2020-2036,2100-2116`, `Level.cpp:129-144`): Extract `view_max_x/y` into local variables, clamp to `>= 0` before `<< 8`:
+  ```cpp
+  int view_max_x = render_call_draw_handler_mode1(djd) - render_width;
+  if (view_max_x < 0) view_max_x = 0;
+  int view_max_y = render_call_draw_handler_mode2(djd) - render_height;
+  if (view_max_y < 0) view_max_y = 0;
+  ```
+  Prevents negative max values from wrapping via `<< 8`, so the camera stays within valid map bounds.
+
+- **Fix 2 — center camera on player start** (`Mission.cpp:644-672`): In `script_425400`, first frame after the mission briefing loop closes, find the player's start position in `_47A378_stru48_array[]` and set `cplc_render_x/y` to center on it:
+  ```cpp
+  _47C380_mapd.mapd_cplc_render_x = sprite_x - ((render_width & 0xFFFFFF) << 7);
+  _47C380_mapd.mapd_cplc_render_y = sprite_y - ((render_height & 0xFFFFFF) << 7);
+  ```
+  Camera centers on the player's starting base/units, clamped to valid map bounds.
+
+- **Fix 3 — clear mapd_item pointers on deinit** (`kknd.cpp:5736-5739`): Added `_47A010_mapd_item_being_drawn[i] = 0` loop in `LVL_Deinit()` after `bitmap_list_free()`, preventing stale pointer dereference on level restart.
+
+### Savegame Load — Camera Viewport Clamping
+
+- **Problem**: Loading an older savegame could position the camera viewport outside the map bounds. The camera (cplc_render_x/y) stored in the save file was restored without validation, so a save created at a different resolution or map size could restore an out-of-bounds camera position.
+
+- **Root cause**: `GAME_Load()` (`SaveLoad.cpp:2020-2021`) assigned `cplc_render_x/y` directly from the save file with no bounds clamping. The clamping in `Level.cpp:139-146` ran *before* `GAME_Load()`, so `GAME_Load()` overwrote the clamped values with raw save data. No second clamp existed after load.
+
+- **Fix** (`SaveLoad.cpp:2022-2041`): Added camera bounds clamping after the save-file restore, matching the same `cmax_x`/`cmax_y` pattern used in `cplc_init()`, `cplc_select()`, `Level.cpp`, and `Cursor.cpp`:
+  ```cpp
+  if (_47A010_mapd_item_being_drawn[0]) {
+      DrawJobDetails *djd = &_47A010_mapd_item_being_drawn[0]->draw_job->job_details;
+      int cmax_x = 32 - render_width + render_call_draw_handler_mode1(djd);
+      if (cmax_x < 0) cmax_x = 0;
+      int cmax_y = render_call_draw_handler_mode2(djd) - render_height;
+      if (cmax_y < 0) cmax_y = 0;
+      if (_47C380_mapd.mapd_cplc_render_x < 0)
+          _47C380_mapd.mapd_cplc_render_x = 0;
+      else if (_47C380_mapd.mapd_cplc_render_x > cmax_x << 8)
+          _47C380_mapd.mapd_cplc_render_x = cmax_x << 8;
+      if (_47C380_mapd.mapd_cplc_render_y < 0)
+          _47C380_mapd.mapd_cplc_render_y = 0;
+      else if (_47C380_mapd.mapd_cplc_render_y > cmax_y << 8)
+          _47C380_mapd.mapd_cplc_render_y = cmax_y << 8;
+  }
+  ```

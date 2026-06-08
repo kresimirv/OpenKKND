@@ -109,8 +109,10 @@ void script_44A500_fog_of_war(Script *a1)
                 v5 = 16 * (v6.cursor_y_x256 - _47CB58_minimap_sprite->y) - (render_height << 7);
                 if (v4 >= 0)
                 {
-                    if (v4 > (32 - render_width + render_call_draw_handler_mode1(v3)) << 8)
-                        v4 = (32 - render_width + render_call_draw_handler_mode1(v3)) << 8;
+                    int mm_max_x = 32 - render_width + render_call_draw_handler_mode1(v3);
+                    if (mm_max_x < 0) mm_max_x = 0;
+                    if (v4 > mm_max_x << 8)
+                        v4 = mm_max_x << 8;
                 }
                 else
                 {
@@ -118,8 +120,10 @@ void script_44A500_fog_of_war(Script *a1)
                 }
                 if (v5 >= 0)
                 {
-                    if (v5 > (render_call_draw_handler_mode2(v3) - render_height) << 8)
-                        v5 = (render_call_draw_handler_mode2(v3) - render_height) << 8;
+                    int mm_max_y = render_call_draw_handler_mode2(v3) - render_height;
+                    if (mm_max_y < 0) mm_max_y = 0;
+                    if (v5 > mm_max_y << 8)
+                        v5 = mm_max_y << 8;
                 }
                 else
                 {

@@ -129,6 +129,22 @@ void GAME_PrepareLevel()
     render_default_stru1->clip_y = 0;
     render_default_stru1->clip_w = render_height;
     sprite_47A400.pstru7 = array_466028;
+    if (_47A010_mapd_item_being_drawn[0])
+    {
+        DrawJobDetails *djd = &_47A010_mapd_item_being_drawn[0]->draw_job->job_details;
+        int cmax_x = 32 - render_width + render_call_draw_handler_mode1(djd);
+        if (cmax_x < 0) cmax_x = 0;
+        int cmax_y = render_call_draw_handler_mode2(djd) - render_height;
+        if (cmax_y < 0) cmax_y = 0;
+        if (_47C380_mapd.mapd_cplc_render_x < 0)
+            _47C380_mapd.mapd_cplc_render_x = 0;
+        else if (_47C380_mapd.mapd_cplc_render_x > cmax_x << 8)
+            _47C380_mapd.mapd_cplc_render_x = cmax_x << 8;
+        if (_47C380_mapd.mapd_cplc_render_y < 0)
+            _47C380_mapd.mapd_cplc_render_y = 0;
+        else if (_47C380_mapd.mapd_cplc_render_y > cmax_y << 8)
+            _47C380_mapd.mapd_cplc_render_y = cmax_y << 8;
+    }
     if (is_game_loading())
     {
         prev_level_idx = -1;

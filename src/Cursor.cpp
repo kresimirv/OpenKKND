@@ -637,8 +637,10 @@ LABEL_27:
     if (_47C380_mapd.mapd_cplc_render_x >= 0)
     {
         v25 = a1a;
-        if (_47C380_mapd.mapd_cplc_render_x >= (32 - render_width + render_call_draw_handler_mode1(a1a)) << 8)
-            _47C380_mapd.mapd_cplc_render_x = (32 - render_width + render_call_draw_handler_mode1(a1a)) << 8;
+        int drag_max_x = 32 - render_width + render_call_draw_handler_mode1(a1a);
+        if (drag_max_x < 0) drag_max_x = 0;
+        if (_47C380_mapd.mapd_cplc_render_x >= drag_max_x << 8)
+            _47C380_mapd.mapd_cplc_render_x = drag_max_x << 8;
     }
     else
     {
@@ -648,8 +650,10 @@ LABEL_27:
     _47C380_mapd.mapd_cplc_render_y += 2 * _47A5E0_mouse_input.cursor_dy_x256 - dword_47789C;
     if (_47C380_mapd.mapd_cplc_render_y >= 0)
     {
-        if (_47C380_mapd.mapd_cplc_render_y >= (render_call_draw_handler_mode2(v25) - render_height) << 8)
-            _47C380_mapd.mapd_cplc_render_y = (render_call_draw_handler_mode2(v25) - render_height) << 8;
+        int drag_max_y = render_call_draw_handler_mode2(v25) - render_height;
+        if (drag_max_y < 0) drag_max_y = 0;
+        if (_47C380_mapd.mapd_cplc_render_y >= drag_max_y << 8)
+            _47C380_mapd.mapd_cplc_render_y = drag_max_y << 8;
     }
     else
     {

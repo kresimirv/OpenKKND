@@ -594,7 +594,9 @@ void script_425400(Script *a1)
     int j; // eax@27
     void *v12; // edx@46
     char v13; // al@49
+    int camera_centered;
 
+    camera_centered = 0;
     dword_47A180 = 0;
     script_create_coroutine(SCRIPT_TYPE_INVALID, script_425BE0_check_special_victory_conditions, 0);
     if (is_demo_build)
@@ -642,6 +644,35 @@ void script_425400(Script *a1)
         {
             while (script_sleep(a1, 30) != 0x80000000)
             {
+                if (!camera_centered)
+                {
+                    camera_centered = 1;
+                    if (_47A010_mapd_item_being_drawn[0] && _47A378_stru48_array_num_items > 0)
+                    {
+                        for (int si = 0; si < _47A378_stru48_array_num_items; si++) {
+                            if (_47A378_stru48_array[si]._8_sprite_cplc == player_side) {
+                                DrawJobDetails *djd = &_47A010_mapd_item_being_drawn[0]->draw_job->job_details;
+                                int map_w = render_call_draw_handler_mode1(djd);
+                                int map_h = render_call_draw_handler_mode2(djd);
+                                int view_max_x = map_w - render_width;
+                                if (view_max_x < 0) view_max_x = 0;
+                                int view_max_y = map_h - render_height;
+                                if (view_max_y < 0) view_max_y = 0;
+                                _47C380_mapd.mapd_cplc_render_x = _47A378_stru48_array[si].sprite_x - ((render_width & 0xFFFFFF) << 7);
+                                if (_47C380_mapd.mapd_cplc_render_x < 0)
+                                    _47C380_mapd.mapd_cplc_render_x = 0;
+                                else if (_47C380_mapd.mapd_cplc_render_x > view_max_x << 8)
+                                    _47C380_mapd.mapd_cplc_render_x = view_max_x << 8;
+                                _47C380_mapd.mapd_cplc_render_y = _47A378_stru48_array[si].sprite_y - ((render_height & 0xFFFFFF) << 7);
+                                if (_47C380_mapd.mapd_cplc_render_y < 0)
+                                    _47C380_mapd.mapd_cplc_render_y = 0;
+                                else if (_47C380_mapd.mapd_cplc_render_y > view_max_y << 8)
+                                    _47C380_mapd.mapd_cplc_render_y = view_max_y << 8;
+                                break;
+                            }
+                        }
+                    }
+                }
                 v3 = 0;
                 for (i = script_get_next_event(a1); i; i = script_get_next_event(a1))
                 {
@@ -1394,11 +1425,15 @@ LABEL_28:
         v24 = &_47A010_mapd_item_being_drawn[0]->draw_job->job_details;
         v25 = _47A378_stru48_array[*(_DWORD *)v77].sprite_y;
         v76 = *(_DWORD *)v77;
+        int view_max_x = render_call_draw_handler_mode1(v24) - render_width;
+        if (view_max_x < 0) view_max_x = 0;
+        int view_max_y = render_call_draw_handler_mode2(v24) - render_height;
+        if (view_max_y < 0) view_max_y = 0;
         _47C380_mapd.mapd_cplc_render_x = _47A378_stru48_array[*(_DWORD *)v77].sprite_x - ((render_width & 0xFFFFFF) << 7);
         if (_47C380_mapd.mapd_cplc_render_x >= 0)
         {
-            if (_47C380_mapd.mapd_cplc_render_x >= (render_call_draw_handler_mode1(v24) - render_width) << 8)
-                _47C380_mapd.mapd_cplc_render_x = (render_call_draw_handler_mode1(v24) - render_width) << 8;
+            if (_47C380_mapd.mapd_cplc_render_x >= view_max_x << 8)
+                _47C380_mapd.mapd_cplc_render_x = view_max_x << 8;
         }
         else
         {
@@ -1407,8 +1442,8 @@ LABEL_28:
         _47C380_mapd.mapd_cplc_render_y = v25 - ((render_height & 0xFFFFFF) << 7);
         if (_47C380_mapd.mapd_cplc_render_y >= 0)
         {
-            if (_47C380_mapd.mapd_cplc_render_y >= (render_call_draw_handler_mode2(v24) - render_height) << 8)
-                _47C380_mapd.mapd_cplc_render_y = (render_call_draw_handler_mode2(v24) - render_height) << 8;
+            if (_47C380_mapd.mapd_cplc_render_y >= view_max_y << 8)
+                _47C380_mapd.mapd_cplc_render_y = view_max_y << 8;
         }
         else
         {
@@ -1572,11 +1607,15 @@ LABEL_28:
                 v59 = *(int *)((char *)& _47A378_stru48_array[0].sprite_y + v56);
                 if (v55 == player_side)
                 {
+                    int view_max_x = render_call_draw_handler_mode1(v57) - render_width;
+                    if (view_max_x < 0) view_max_x = 0;
+                    int view_max_y = render_call_draw_handler_mode2(v57) - render_height;
+                    if (view_max_y < 0) view_max_y = 0;
                     _47C380_mapd.mapd_cplc_render_x = v58 - ((render_width & 0xFFFFFF) << 7);
                     if (_47C380_mapd.mapd_cplc_render_x >= 0)
                     {
-                        if (_47C380_mapd.mapd_cplc_render_x >= (render_call_draw_handler_mode1(v57) - render_width) << 8)
-                            _47C380_mapd.mapd_cplc_render_x = (render_call_draw_handler_mode1(v57) - render_width) << 8;
+                        if (_47C380_mapd.mapd_cplc_render_x >= view_max_x << 8)
+                            _47C380_mapd.mapd_cplc_render_x = view_max_x << 8;
                     }
                     else
                     {
@@ -1585,8 +1624,8 @@ LABEL_28:
                     _47C380_mapd.mapd_cplc_render_y = v59 - ((render_height & 0xFFFFFF) << 7);
                     if (_47C380_mapd.mapd_cplc_render_y >= 0)
                     {
-                        if (_47C380_mapd.mapd_cplc_render_y >= (render_call_draw_handler_mode2(v57) - render_height) << 8)
-                            _47C380_mapd.mapd_cplc_render_y = (render_call_draw_handler_mode2(v57) - render_height) << 8;
+                        if (_47C380_mapd.mapd_cplc_render_y >= view_max_y << 8)
+                            _47C380_mapd.mapd_cplc_render_y = view_max_y << 8;
                     }
                     else
                     {

@@ -2019,6 +2019,22 @@ int GAME_Load()
         goto LABEL_56;
     _47C380_mapd.mapd_cplc_render_x = mapd_cplc_dim[0];
     _47C380_mapd.mapd_cplc_render_y = mapd_cplc_dim[1];
+    if (_47A010_mapd_item_being_drawn[0])
+    {
+        DrawJobDetails *djd = &_47A010_mapd_item_being_drawn[0]->draw_job->job_details;
+        int cmax_x = 32 - render_width + render_call_draw_handler_mode1(djd);
+        if (cmax_x < 0) cmax_x = 0;
+        int cmax_y = render_call_draw_handler_mode2(djd) - render_height;
+        if (cmax_y < 0) cmax_y = 0;
+        if (_47C380_mapd.mapd_cplc_render_x < 0)
+            _47C380_mapd.mapd_cplc_render_x = 0;
+        else if (_47C380_mapd.mapd_cplc_render_x > cmax_x << 8)
+            _47C380_mapd.mapd_cplc_render_x = cmax_x << 8;
+        if (_47C380_mapd.mapd_cplc_render_y < 0)
+            _47C380_mapd.mapd_cplc_render_y = 0;
+        else if (_47C380_mapd.mapd_cplc_render_y > cmax_y << 8)
+            _47C380_mapd.mapd_cplc_render_y = cmax_y << 8;
+    }
     if (!fread(&block_size, 1u, 4u, v4))
         goto LABEL_56;
     oil_save_data = (OilDepositSaveStruct *)malloc(block_size);
