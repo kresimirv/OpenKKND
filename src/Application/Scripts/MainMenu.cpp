@@ -41,7 +41,7 @@ void script_main_menu_new_campaign(Script *a1)
     DataMapd *v8; // eax@13
 
     _47C65C_render_string = 0;
-    a1->sprite->y = (240 + BTN_CENTER_Y) * 256;
+    a1->sprite->y = 240 * 256;
     a1->sprite->z_index = 4;
     sprite_create_scripted(MOBD_79, a1->sprite, script_main_menu_play_mission, SCRIPT_COROUTINE, 0);
     sprite_create_scripted(MOBD_79, a1->sprite, script_main_menu_new_missions, SCRIPT_COROUTINE, 0);
@@ -94,7 +94,7 @@ void script_main_menu_load(Script *a1)
     is_demo_build = 0;
     single_player_game = 1;
 
-    a1->sprite->y = (270 + BTN_CENTER_Y) * 256;
+    a1->sprite->y = 270 * 256;
     a1->sprite->z_index = 6;
     script_sleep(a1, 1);
     v1 = a1->sprite;
@@ -145,7 +145,7 @@ void script_main_menu_play_mission(Script *a1)
     DataMapd *v8; // eax@13
 
 
-    a1->sprite->y = (300 + BTN_CENTER_Y) * 256;
+    a1->sprite->y = 300 * 256;
     a1->sprite->z_index = 8;
     script_sleep(a1, 1);
     v1 = a1->sprite;
@@ -196,7 +196,7 @@ void script_main_menu_multiplayer(Script *a1)
 
     script_sleep(a1, 1);
 
-    a1->sprite->y = (330 + BTN_CENTER_Y) * 256;
+    a1->sprite->y = 330 * 256;
     a1->sprite->z_index = 10;
     v1 = a1->sprite;
     v2 = sprite_create(MOBD_79, 0, v1);
@@ -244,7 +244,7 @@ void script_main_menu_new_missions(Script *a1)
     DataMapd *v8; // eax@13
 
 
-    a1->sprite->y = (360 + BTN_CENTER_Y) * 256;
+    a1->sprite->y = 360 * 256;
     a1->sprite->z_index = 11;
     script_sleep(a1, 1);
     v1 = a1->sprite;
@@ -293,7 +293,7 @@ void script_main_menu_kaos_mode(Script *a1)
     DataMapd *v8; // eax@13
 
 
-    a1->sprite->y = (390 + BTN_CENTER_Y) * 256;
+    a1->sprite->y = 390 * 256;
     a1->sprite->z_index = 12;
     script_sleep(a1, 1);
     v1 = a1->sprite;
@@ -343,7 +343,7 @@ void script_main_menu_quit(Script *a1)
 
     script_sleep(a1, 1);
 
-    a1->sprite->y = (420 + BTN_CENTER_Y) * 256;
+    a1->sprite->y = 420 * 256;
     a1->sprite->z_index = 13;
     v1 = a1->sprite;
     v2 = sprite_create(MOBD_79, 0, v1);
@@ -599,7 +599,7 @@ void script_main_menu_new_campaign_surv(Script *a1)
 
     v1 = a1->sprite;
     v1->x = 48640;
-    v1->y = (168 + FACTION_CENTER_Y) * 256;
+    v1->y = 168 * 256;
     v2 = a1->sprite;
     v2->parent = 0;
     a1->script_type = SCRIPT_TYPE_15;
@@ -650,7 +650,7 @@ void script_main_menu_new_campaign_mute(Script *a1)
 
     v1 = a1->sprite;
     v1->x = 0x1AC00;
-    v1->y = (168 + FACTION_CENTER_Y) * 256;
+    v1->y = 168 * 256;
     v2 = a1->sprite;
     v2->parent = 0;
     a1->script_type = SCRIPT_TYPE_15;
@@ -870,20 +870,20 @@ void script_main_menu_create_kaos_dialog(Script *a1)
         v3 = sprite_create_scripted(MOBD_45, v2, script_main_menu_kaos_allies, SCRIPT_COROUTINE, 0);
         if (v3)
         {
-            v3->x = (40 + KAOS_CENTER_X) * 256;
-            v3->y = (246 + KAOS_CENTER_Y) * 256;
+            v3->x = 40 * 256;
+            v3->y = 246 * 256;
         }
         v4 = sprite_create_scripted(MOBD_45, v2, script_main_menu_kaos_enemies, SCRIPT_COROUTINE, 0);
         if (v4)
         {
-            v4->x = (176 + KAOS_CENTER_X) * 256;
-            v4->y = (246 + KAOS_CENTER_Y) * 256;
+            v4->x = 176 * 256;
+            v4->y = 246 * 256;
         }
         v5 = sprite_create_scripted(MOBD_45, v2, script_main_menu_kaos_difficulty, SCRIPT_COROUTINE, 0);
         if (v5)
         {
-            v5->x = (328 + KAOS_CENTER_X) * 256;
-            v5->y = (246 + KAOS_CENTER_Y) * 256;
+            v5->x = 328 * 256;
+            v5->y = 246 * 256;
         }
     }
     else if (netz_47C6BC_mapd_idx != 4)
@@ -912,14 +912,14 @@ void script_main_menu_create_kaos_dialog(Script *a1)
     v11 = sprite_create_scripted(MOBD_45, v2, script_main_menu_kaos_starting_cash, SCRIPT_COROUTINE, 0);
     if (v11)
     {
-        v11->x = (294 + KAOS_CENTER_X) * 256;
-        v11->y = (67 + KAOS_CENTER_Y) * 256;
+        v11->x = 294 * 256;
+        v11->y = 67 * 256;
     }
     v12 = sprite_create_scripted(MOBD_45, v2, script_main_menu_kaos_color, SCRIPT_COROUTINE, 0);
     if (v12)
     {
-        v12->x = (55 + KAOS_CENTER_X) * 256;
-        v12->y = (109 + KAOS_CENTER_Y) * 256;
+        v12->x = 55 * 256;
+        v12->y = 109 * 256;
         v13 = v12->script;
         if (v13)
             v13->script_type = v1->script_type;
@@ -927,8 +927,8 @@ void script_main_menu_create_kaos_dialog(Script *a1)
     v14 = sprite_create_scripted(MOBD_45, v2, script_main_menu_kaos_map, SCRIPT_COROUTINE, 0);
     if (v14)
     {
-        v14->x = (276 + KAOS_CENTER_X) * 256;
-        v14->y = (109 + KAOS_CENTER_Y) * 256;
+        v14->x = 276 * 256;
+        v14->y = 109 * 256;
     }
     if (netz_47C6C0_mapd_idx == 15)
     {
@@ -939,21 +939,21 @@ void script_main_menu_create_kaos_dialog(Script *a1)
         v15 = sprite_create_scripted(MOBD_45, v2, script_main_menu_kaos_max_tech_level, SCRIPT_COROUTINE, 0);
         if (v15)
         {
-            v15->x = (380 + KAOS_CENTER_X) * 256;
-            v15->y = (150 + KAOS_CENTER_Y) * 256;
+            v15->x = 380 * 256;
+            v15->y = 150 * 256;
         }
     }
     v16 = sprite_create_scripted(MOBD_45, v2, script_main_menu_kaos_bunkers_toggle, SCRIPT_COROUTINE, 0);
     if (v16)
     {
-        v16->x = (228 + KAOS_CENTER_X) * 256;
-        v16->y = (150 + KAOS_CENTER_Y) * 256;
+        v16->x = 228 * 256;
+        v16->y = 150 * 256;
     }
     v17 = sprite_create_scripted(MOBD_45, v2, script_main_menu_kaos_team, SCRIPT_COROUTINE, 0);
     if (v17)
     {
-        v17->x = (32 + KAOS_CENTER_X) * 256;
-        v17->y = (150 + KAOS_CENTER_Y) * 256;
+        v17->x = 32 * 256;
+        v17->y = 150 * 256;
         v18 = v17->script;
         if (v18)
             v18->script_type = v1->script_type;
@@ -1029,8 +1029,8 @@ void script_main_menu_kaos_allies(Script *a1)
     v9 = sprite_create_scripted(MOBD_45, v5, (void(*)(Script *))script_main_menu_kaos_color, SCRIPT_COROUTINE, 0);
     if (v9)
     {
-        v9->x = (55 + KAOS_CENTER_X) * 256;
-        v9->y = (109 + KAOS_CENTER_Y) * 256;
+        v9->x = 55 * 256;
+        v9->y = 109 * 256;
         v10 = v9->script;
         if (v10)
             v10->script_type = a1->script_type;
@@ -1038,8 +1038,8 @@ void script_main_menu_kaos_allies(Script *a1)
     v11 = sprite_create_scripted(MOBD_45, v5, (void(*)(Script *))script_main_menu_kaos_team, SCRIPT_COROUTINE, 0);
     if (v11)
     {
-        v11->x = (32 + KAOS_CENTER_X) * 256;
-        v11->y = (150 + KAOS_CENTER_Y) * 256;
+        v11->x = 32 * 256;
+        v11->y = 150 * 256;
         v12 = v11->script;
         if (v12)
             v12->script_type = a1->script_type;
@@ -1047,26 +1047,26 @@ void script_main_menu_kaos_allies(Script *a1)
     v13 = sprite_create_scripted(MOBD_45, v5, (void(*)(Script *))script_441550_mobd45_evt8, SCRIPT_COROUTINE, 0);
     if (v13)
     {
-        v13->x = (294 + KAOS_CENTER_X) * 256;
-        v13->y = (67 + KAOS_CENTER_Y) * 256;
+        v13->x = 294 * 256;
+        v13->y = 67 * 256;
     }
     v14 = sprite_create_scripted(MOBD_45, v5, (void(*)(Script *))script_441340_mobd45_evt8, SCRIPT_COROUTINE, 0);
     if (v14)
     {
-        v14->x = (228 + KAOS_CENTER_X) * 256;
-        v14->y = (150 + KAOS_CENTER_Y) * 256;
+        v14->x = 228 * 256;
+        v14->y = 150 * 256;
     }
     v15 = sprite_create_scripted(MOBD_45, v5, (void(*)(Script *))script_441150_mobd45_evt8, SCRIPT_COROUTINE, 0);
     if (v15)
     {
-        v15->x = (276 + KAOS_CENTER_X) * 256;
-        v15->y = (109 + KAOS_CENTER_Y) * 256;
+        v15->x = 276 * 256;
+        v15->y = 109 * 256;
     }
     v16 = sprite_create_scripted(MOBD_45, v5, (void(*)(Script *))script_main_menu_kaos_enemies, SCRIPT_COROUTINE, 0);
     if (v16)
     {
-        v16->x = (380 + KAOS_CENTER_X) * 256;
-        v16->y = (150 + KAOS_CENTER_Y) * 256;
+        v16->x = 380 * 256;
+        v16->y = 150 * 256;
     }
     sprite_list_remove(v5);
     script_terminate(a1);
@@ -1654,7 +1654,7 @@ void script_main_menu_kaos_player_name(Script *a1)
     }
     _47C664_ingame_menu_sprite->x = (v3->drawjob->job_details.x - menu_offset_x) << 8;
     _47C664_ingame_menu_sprite->field_88_unused = 1;
-    _47C664_ingame_menu_sprite->y = (88 + KAOS_CENTER_Y) * 256;
+    _47C664_ingame_menu_sprite->y = 88 * 256;
     v2->parent = _47C664_ingame_menu_sprite;
     v5 = v1->sprite;
     v6 = _47C65C_render_string;
@@ -1662,9 +1662,9 @@ void script_main_menu_kaos_player_name(Script *a1)
     v1->script_type = SCRIPT_TYPE_18;
     stru29_list_4439F0(v5, v6, 0, 0, 0);
     sprite_load_mobd(v5, 1368);
-    v2->x = (160 + KAOS_CENTER_X) * 256;
+    v2->x = 160 * 256;
     v2->field_88_unused = 1;
-    v2->y = (88 + KAOS_CENTER_Y) * 256;
+    v2->y = 88 * 256;
     while (1)
     {
         if (netz_47C6C0_mapd_idx != 15)
@@ -1698,9 +1698,9 @@ void script_main_menu_kaos_player_name(Script *a1)
             }
         } while (!v8);
         _47C664_ingame_menu_sprite->field_88_unused = 1;
-        _47C664_ingame_menu_sprite->x = (160 + KAOS_CENTER_X) * 256;
+        _47C664_ingame_menu_sprite->x = 160 * 256;
         _47C664_ingame_menu_sprite->field_88_unused = 1;
-        _47C664_ingame_menu_sprite->y = (88 + KAOS_CENTER_Y) * 256;
+        _47C664_ingame_menu_sprite->y = 88 * 256;
         _47C664_ingame_menu_sprite->z_index = 10;
         sprite_load_mobd(_47C664_ingame_menu_sprite, 1096);
         dword_47C6C4 = 1;
@@ -1723,9 +1723,9 @@ void script_main_menu_kaos_player_name(Script *a1)
         } while (v15 < 7);
         LOBYTE_HEXRAYS(dword_468CE8) = 0;
         _47C664_ingame_menu_sprite->field_88_unused = 1;
-        _47C664_ingame_menu_sprite->x = (160 + KAOS_CENTER_X) * 256;
+        _47C664_ingame_menu_sprite->x = 160 * 256;
         _47C664_ingame_menu_sprite->field_88_unused = 1;
-        _47C664_ingame_menu_sprite->y = (88 + KAOS_CENTER_Y) * 256;
+        _47C664_ingame_menu_sprite->y = 88 * 256;
         sprite_release_mobd_item(_47C664_ingame_menu_sprite);
         if (netz_47C6C0_mapd_idx != 15 && netz_47A834)
         {
@@ -1749,7 +1749,7 @@ void script_main_menu_kaos_player_name(Script *a1)
         }
         _47C664_ingame_menu_sprite->x = (v18->drawjob->job_details.x - menu_offset_x) << 8;
         _47C664_ingame_menu_sprite->field_88_unused = 1;
-        _47C664_ingame_menu_sprite->y = (88 + KAOS_CENTER_Y) * 256;
+        _47C664_ingame_menu_sprite->y = 88 * 256;
         if (netz_47C6C0_mapd_idx != 15)
             netz_42E450((void *)netz_47C6C0_mapd_idx, 0, 65);
         v1 = a1;
