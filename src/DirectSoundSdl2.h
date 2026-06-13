@@ -75,10 +75,19 @@ struct IDirectSoundBuffer
     {
         if (volume_dsb >= 0) return;
         unsigned short cw, safe_cw;
+#ifdef _MSC_VER
+        __asm { fnstcw cw }
+#else
         __asm__ __volatile__ ("fnstcw %0" : "=m" (cw) : : "memory");
+#endif
         safe_cw = cw | 0x3F; // mask all x87 exceptions
+#ifdef _MSC_VER
+        __asm { fnclex }
+        __asm { fldcw safe_cw }
+#else
         __asm__ __volatile__ ("fnclex" : : : "memory");
         __asm__ __volatile__ ("fldcw %0" : : "m" (safe_cw) : "memory");
+#endif
 
         double factor = pow(10.0, volume_dsb / 2000.0);
         if (wBitsPerSample == 16)
@@ -104,8 +113,13 @@ struct IDirectSoundBuffer
             }
         }
 
+#ifdef _MSC_VER
+        __asm { fnclex }
+        __asm { fldcw cw }
+#else
         __asm__ __volatile__ ("fnclex" : : : "memory");
         __asm__ __volatile__ ("fldcw %0" : : "m" (cw) : "memory");
+#endif
     }
 
     int Lock(unsigned int dwOffset, unsigned int dwBytes,
