@@ -32,10 +32,18 @@ typedef unsigned __int64 ull;
 // GCC compatibility: MSVC-specific keywords
 #if defined(__GNUC__)
 #define __declspec_align_1 __attribute__((packed))
+#ifndef __declspec
 #define __declspec(x)
+#endif
+#ifndef __stdcall
 #define __stdcall
+#endif
+#ifndef __cdecl
 #define __cdecl
+#endif
+#if !defined(__MINGW32__) && !defined(__MINGW64__)
 #define __debugbreak() __builtin_trap()
+#endif
 #else
 #define __declspec_align_1 __declspec(align(1))
 #endif

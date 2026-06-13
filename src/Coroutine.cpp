@@ -3,11 +3,26 @@
 #include <cstdlib>
 #include <iterator>
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !defined(__MINGW32__) && !defined(__MINGW64__)
 #include <cstdint>
 #include <ucontext.h>
 #include <map>
 static std::map<Coroutine*, ucontext_t> g_coro_ctx;
+#elif defined(__MINGW32__) || defined(__MINGW64__)
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <map>
+static std::map<Coroutine*, LPVOID> g_coro_fibers;
+static LPVOID g_main_fiber = nullptr;
+static bool g_main_fiber_ready = false;
+
+static LPVOID get_main_fiber() {
+    if (!g_main_fiber_ready) {
+        g_main_fiber = ConvertThreadToFiber(NULL);
+        g_main_fiber_ready = true;
+    }
+    return g_main_fiber;
+}
 #endif
 
 Coroutine::Coroutine() 
@@ -64,8 +79,14 @@ void coroutine_list_remove(Coroutine *coroutine)
         free(coroutine->context);
     }
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !defined(__MINGW32__) && !defined(__MINGW64__)
     g_coro_ctx.erase(coroutine);
+#elif defined(__MINGW32__) || defined(__MINGW64__)
+    auto it = g_coro_fibers.find(coroutine);
+    if (it != g_coro_fibers.end()) {
+        DeleteFiber(it->second);
+        g_coro_fibers.erase(it);
+    }
 #endif
 
     coroutine_list.remove(coroutine);
@@ -82,8 +103,14 @@ void coroutine_list_clear(Coroutine *coroutine)
         free(coroutine->context);
     }
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !defined(__MINGW32__) && !defined(__MINGW64__)
     g_coro_ctx.erase(coroutine);
+#elif defined(__MINGW32__) || defined(__MINGW64__)
+    auto it = g_coro_fibers.find(coroutine);
+    if (it != g_coro_fibers.end()) {
+        DeleteFiber(it->second);
+        g_coro_fibers.erase(it);
+    }
 #endif
 }
 
@@ -100,7 +127,7 @@ Coroutine *coroutine_list_get_head()
 
 void nullsub() {}
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !defined(__MINGW32__) && !defined(__MINGW64__)
 
 static ucontext_t g_main_ctx;
 static bool g_main_ctx_ready = false;
@@ -165,6 +192,65 @@ Coroutine *couroutine_create(void(*function)(), const char *debug_handler_name)
 
     g_coro_ctx[coroutine] = ctx;
     return coroutine;
+}
+
+#elif defined(__MINGW32__) || defined(__MINGW64__)
+
+// MinGW implementation using Windows Fibers
+
+static void fiber_entry_wrapper(LPVOID lpParameter) {
+    void (*func)() = (void (*)())lpParameter;
+    func();
+}
+
+Coroutine *couroutine_create(void(*function)(), const char *debug_handler_name)
+{
+    Coroutine *coroutine = new Coroutine();
+    if (coroutine == nullptr) {
+        return nullptr;
+    }
+    coroutine_list.push_back(coroutine);
+
+    LPVOID fiber = CreateFiber(1048576, fiber_entry_wrapper, (LPVOID)function);
+    if (fiber == nullptr) {
+        return nullptr;
+    }
+
+    coroutine->context = nullptr;
+    coroutine->stack = (intptr_t)fiber;
+    coroutine->debug_handler_name = debug_handler_name;
+
+    g_coro_fibers[coroutine] = fiber;
+    return coroutine;
+}
+
+int Coroutine::resume() 
+{
+    if (!g_main_fiber_ready) {
+        g_main_fiber = ConvertThreadToFiber(NULL);
+        g_main_fiber_ready = true;
+    }
+
+    auto it = g_coro_fibers.find(this);
+    if (it == g_coro_fibers.end()) {
+        // Switching to idle/main coroutine
+        Coroutine *prev = coroutine_current;
+        if (prev && g_coro_fibers.count(prev)) {
+            this->yield_to = prev;
+            coroutine_current = this;
+            SwitchToFiber(get_main_fiber());
+        }
+        return 0;
+    }
+
+    // Switching to a script coroutine
+    Coroutine *prev = coroutine_current;
+    this->yield_to = prev;
+    coroutine_current = this;
+
+    LPVOID target = it->second;
+    SwitchToFiber(target);
+    return 0;
 }
 
 #else // MSVC original implementation

@@ -18,7 +18,7 @@ project("OpenKKND")
 set(PROJECT_VERSION "0.2.0")
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32 -std=gnu++17 -fpermissive -fno-strict-aliasing")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32 -std=gnu++17 -fpermissive -fno-strict-aliasing -Wno-narrowing -Wno-int-to-pointer-cast")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32 -fno-strict-aliasing")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -m32")
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -83,7 +83,7 @@ add_subdirectory(src)
 
 message("-------------------------")
 
-if(WIN32)
+if(MSVC)
   add_executable(OpenKKND ./src/Application/Game.cpp)
 
   target_link_libraries(OpenKKND
@@ -93,6 +93,19 @@ if(WIN32)
     Audio
     Video
     Unsorted
+    ${SDL2_LIBRARY} ${SDL2_MAIN}
+  )
+elseif(MINGW)
+  add_executable(OpenKKND "")
+
+  target_link_libraries(OpenKKND
+    -Wl,--whole-archive Application -Wl,--no-whole-archive
+    -Wl,--whole-archive ApplicationScripts -Wl,--no-whole-archive
+    -Wl,--whole-archive Engine -Wl,--no-whole-archive
+    -Wl,--whole-archive Infrastructure -Wl,--no-whole-archive
+    -Wl,--whole-archive Audio -Wl,--no-whole-archive
+    -Wl,--whole-archive Video -Wl,--no-whole-archive
+    -Wl,--whole-archive Unsorted -Wl,--no-whole-archive
     ${SDL2_LIBRARY} ${SDL2_MAIN}
   )
 else()
@@ -119,7 +132,7 @@ target_compile_options(OpenKKND PUBLIC "$<$<CONFIG:RELEASE>:${COMPILE_OPTIONS_RE
 
 # ----------------------
 # copy assets
-if(WIN32)
+if(MSVC)
   file(TO_NATIVE_PATH "${PROJECT_SOURCE_DIR}/assets" ASSETS_SRC_DIR)
   file(TO_NATIVE_PATH "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets" ASSETS_OUT_DIR)
   add_custom_command(TARGET OpenKKND
