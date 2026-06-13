@@ -54,7 +54,11 @@ add_library(Audio ${CMAKE_CURRENT_LIST_DIR}/Sound.h ${CMAKE_CURRENT_LIST_DIR}/So
 add_library(Video ${CMAKE_CURRENT_LIST_DIR}/Video.h ${CMAKE_CURRENT_LIST_DIR}/Video.cpp)
 
 if(WIN32)
-  target_link_libraries(Audio winmm.lib dsound.lib)
+  if(MSVC)
+    target_link_libraries(Audio winmm.lib dsound.lib)
+  else()
+    target_link_libraries(Audio -lwinmm -ldsound)
+  endif()
 endif()
 
 target_link_libraries(Audio ${SDL2_LIBRARY})

@@ -2100,15 +2100,21 @@ struct Sprite
 #if defined(__GNUC__)
 #include <cstring>
 #define _stricmp strcasecmp
+#if !defined(__MINGW32__) && !defined(__MINGW64__)
 static inline char *_itoa(int value, char *buffer, int radix) {
     snprintf(buffer, 32, "%d", value);
     return buffer;
 }
+#endif
+#if !defined(__MINGW32__) && !defined(__MINGW64__)
 static inline unsigned char _BitScanReverse(unsigned long *index, unsigned long mask) {
     if (mask == 0) { *index = 0; return 0; }
     *index = (unsigned long)(sizeof(mask) * 8 - 1 - __builtin_clzl(mask));
     return 1;
 }
 #define _byteswap_ulong __builtin_bswap32
+#else
+#include <intrin.h>
+#endif
 #define _strcmpi strcasecmp
 #endif
