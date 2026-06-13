@@ -1173,8 +1173,6 @@ Script *script_create_function(enum SCRIPT_TYPE type, void(*function)(Script *))
 void script_execute_function(Script *s)
 {
     if (s->routine_type == SCRIPT_FUNCTION) {
-        fprintf(stderr, "script_execute_function: Script=%p handler=%p name=%s\n",
-            s, s->handler, s->debug_handler_name ? s->debug_handler_name : "null");
         s->handler(s);
     }
 }
@@ -1339,7 +1337,6 @@ void script_list_update()
     int yield_flags; // ecx@15
     int flags; // eax@16
 
-    fprintf(stderr, "script_list_update: enter, list_size=%zu\n", script_execute_list.size());
     std::vector<Script *> remove_list;
     for (auto script : script_execute_list)
     {
