@@ -3,6 +3,7 @@
 using Engine::Infrastructure::EntityRepository;
 
 #include <algorithm>
+#include <iterator>
 
 #include "_unsorted_data.h"
 #include "kknd.h"
