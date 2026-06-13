@@ -267,7 +267,7 @@ extern char aModem_lst[]; // idb
 extern char aSS_2[]; // idb
 extern char aD_2[]; // idb
 extern char aS_0[4]; // idb
-extern char aCLevelsMute1_wav[20]; // weak
+extern char aCLevelsMute1_wav[22]; // weak
 
 extern char asc_470198[]; // idb
 
