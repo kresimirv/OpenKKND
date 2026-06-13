@@ -2581,7 +2581,7 @@ char aModem_lst[] = "modem.lst"; // idb
 char aSS_2[] = "%s-%s"; // idb
 char aD_2[] = "%d\n"; // idb
 char aS_0[4] = "%s\n"; // idb
-char aCLevelsMute1_wav[20] = "C://LEVELS//MUTE1.WAV"; // weak
+char aCLevelsMute1_wav[22] = "C://LEVELS//MUTE1.WAV"; // weak
 
 char asc_470198[] = "        0"; // idb
 int _4701B8_mobd_lookups_per_ProductionGroup_field44[8] = { 146, 2016, 174, 2028, 169, 2004, 172, 2040 };
