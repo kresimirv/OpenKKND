@@ -1042,7 +1042,7 @@ _BYTE *sub_45D3B8(unsigned __int16 tile_cols, __int16 tile_rows, _BYTE *data, in
             memcpy((void *)(front_buf - byte_offset_16), (void *)back_buf, copy_size);
     }
 
-    unsigned char *in = data;
+    unsigned char *in = (unsigned char *)data;
     unsigned char *out = (unsigned char *)front_buf;
     unsigned char *ref = (unsigned char *)front_buf + dword_476DD8;
     int stride = 2 * width;
@@ -1157,7 +1157,7 @@ _BYTE *sub_45D3B8(unsigned __int16 tile_cols, __int16 tile_rows, _BYTE *data, in
         out += 3 * stride;
     }
 
-    return in;
+    return (_BYTE *)in;
 }
 
 //----- (0045A110) --------------------------------------------------------
