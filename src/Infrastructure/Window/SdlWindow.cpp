@@ -370,12 +370,23 @@ int SdlWindow::GetMouseY() const {
 
 void SdlWindow::SetMousePos(int x, int y) {
     unsigned short cw;
+#ifdef _MSC_VER
+    __asm { fnstcw cw }
+    __asm { fnclex }
+#else
     __asm__ __volatile__ ("fnstcw %0" : "=m" (cw) : : "memory");
     __asm__ __volatile__ ("fnclex" : : : "memory");
+#endif
     unsigned short safe_cw = (cw & 0xFFC0) | 0x003F;
+#ifdef _MSC_VER
+    __asm { fldcw safe_cw }
+    SDL_WarpMouseInWindow(window, x, y);
+    __asm { fldcw cw }
+#else
     __asm__ __volatile__ ("fldcw %0" : : "m" (safe_cw) : "memory");
     SDL_WarpMouseInWindow(window, x, y);
     __asm__ __volatile__ ("fldcw %0" : : "m" (cw) : "memory");
+#endif
 }
 
 bool SdlWindow::GetMousePressed(int button) const {
