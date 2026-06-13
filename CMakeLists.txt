@@ -30,6 +30,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -stdlib=libc++")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+  set(CMAKE_CXX_FLAGS " /std:c++17 ${CMAKE_CXX_FLAGS} ")
   #debug include files
   set(CMAKE_CXX_FLAGS " /showIncludes ${CMAKE_CXX_FLAGS} ")
   #disable pesky warnings
