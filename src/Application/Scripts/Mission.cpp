@@ -1534,7 +1534,7 @@ LABEL_28:
                     }
                 }
                 v36 = (Sprite *)v38;
-            } while (v38 != &sprite_list_sentinel);
+            } while (v38 != (Sprite **)&sprite_list_sentinel);
         }
         v44 = 0;
         v45 = 0;
@@ -1589,7 +1589,7 @@ LABEL_28:
                         sprite_list_remove_scripted(v50);
                 }
                 v50 = (Sprite *)v52;
-            } while (v52 != &sprite_list_sentinel);
+            } while (v52 != (Sprite **)&sprite_list_sentinel);
         }
         _47C6DC_dont_execute_unit_handlers = 0;
         v55 = SURVIVORS;
