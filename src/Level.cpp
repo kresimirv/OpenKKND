@@ -5,7 +5,11 @@
 #include "src/Pathfind.h"
 #include "src/Sprite.h"
 #include "src/stru31.h"
+#ifdef _WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 
 #include "src/Infrastructure/Log.h"
 #include "src/Infrastructure/PlatformSpecific/OsTools.h"
@@ -316,19 +320,19 @@ bool on_level_finished()
         {
             char _b[256];
             int _n = snprintf(_b, sizeof(_b), "on_level_finished: about to free current_level_lvl=%p\n", current_level_lvl);
-            write(STDERR_FILENO, _b, _n > 0 ? _n : 0);
+            fwrite(_b, 1, _n > 0 ? _n : 0, stderr);
         }
         free(current_level_lvl);
         current_level_lvl = 0;
         {
             char _b[256];
             int _n = snprintf(_b, sizeof(_b), "on_level_finished: about to free sprites_lvl=%p\n", sprites_lvl);
-            write(STDERR_FILENO, _b, _n > 0 ? _n : 0);
+            fwrite(_b, 1, _n > 0 ? _n : 0, stderr);
         }
         if (sprites_lvl && sprites_lvl < (void*)0x100000) {
             char _b[256];
             int _n = snprintf(_b, sizeof(_b), "on_level_finished: sprites_lvl=%p INVALID, SKIPPING free!\n", sprites_lvl);
-            write(STDERR_FILENO, _b, _n > 0 ? _n : 0);
+            fwrite(_b, 1, _n > 0 ? _n : 0, stderr);
             sprites_lvl = 0;
         } else {
             free(sprites_lvl);

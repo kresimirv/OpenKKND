@@ -8,7 +8,7 @@
       "inheritEnvironments": [ "msvc_x86" ],
       "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
       "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
-      "cmakeCommandArgs": "",
+      "cmakeCommandArgs": "-DSDL2_INCLUDE_DIR=C:/SDL2-2.32.10/include -DSDL2_LIBRARY=C:/SDL2-2.32.10/lib/x86/SDL2d.lib -DSDL2_MAIN=C:/SDL2-2.32.10/lib/x86/SDL2maind.lib",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
       "variables": [
@@ -25,7 +25,7 @@
       "inheritEnvironments": [ "msvc_x86" ],
       "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
       "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
-      "cmakeCommandArgs": "",
+      "cmakeCommandArgs": "-DSDL2_INCLUDE_DIR=C:/SDL2-2.32.10/include -DSDL2_LIBRARY=C:/SDL2-2.32.10/lib/x86/SDL2.lib -DSDL2_MAIN=C:/SDL2-2.32.10/lib/x86/SDL2main.lib",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
       "variables": [

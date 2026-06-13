@@ -52,8 +52,9 @@ std::shared_ptr<Window> gWindow = nullptr;
 
 bool is_mission_running = false;
 
-#include <execinfo.h>
 #include <signal.h>
+#ifndef _WIN32
+#include <execinfo.h>
 static void crash_handler(int sig) {
     void *array[64];
     size_t size = backtrace(array, 64);
@@ -63,6 +64,13 @@ static void crash_handler(int sig) {
     signal(sig, SIG_DFL);
     raise(sig);
 }
+#else
+static void crash_handler(int sig) {
+    fprintf(stderr, "\n*** CRASH: signal %d ***\n", sig);
+    signal(sig, SIG_DFL);
+    raise(sig);
+}
+#endif
 
 //----- (00423460) --------------------------------------------------------
 void Game::Run() {
