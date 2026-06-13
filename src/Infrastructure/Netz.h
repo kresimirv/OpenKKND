@@ -1,9 +1,9 @@
 #pragma once
 
-#ifndef __stdcall
+#if !defined(_MSC_VER) && !defined(__stdcall)
 #define __stdcall
 #endif
-#ifndef __int32
+#if !defined(_MSC_VER) && !defined(__int32)
 #define __int32 int
 #endif
 
