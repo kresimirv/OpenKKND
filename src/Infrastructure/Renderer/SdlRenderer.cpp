@@ -40,12 +40,23 @@ bool SdlRenderer::Initialize() {
 void SdlRenderer::ClearTarget(int r, int g, int b) {
     SDL_SetRenderDrawColor(renderer, r, g, b, 255);
     unsigned short cw;
+#ifdef _MSC_VER
+    __asm { fnstcw cw }
+    __asm { fnclex }
+#else
     __asm__ __volatile__ ("fnstcw %0" : "=m" (cw) : : "memory");
     __asm__ __volatile__ ("fnclex" : : : "memory");
+#endif
     unsigned short safe_cw = (cw & 0xFFC0) | 0x003F;
+#ifdef _MSC_VER
+    __asm { fldcw safe_cw }
+    SDL_RenderClear(renderer);
+    __asm { fldcw cw }
+#else
     __asm__ __volatile__ ("fldcw %0" : : "m" (safe_cw) : "memory");
     SDL_RenderClear(renderer);
     __asm__ __volatile__ ("fldcw %0" : : "m" (cw) : "memory");
+#endif
 }
 
 void SdlRenderer::Present() {
