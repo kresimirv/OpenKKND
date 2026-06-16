@@ -102,10 +102,17 @@ git clone https://github.com/kresimir/OpenKKND.git
 cd OpenKKND
 git checkout hd_resolution
 mkdir -p build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Debug -DSDL2_CUSTOM_PREFIX=$HOME/.local/SDL2-install
+cmake .. -DCMAKE_BUILD_TYPE=Release -DSDL2_CUSTOM_PREFIX=$HOME/.local/SDL2-install
 cmake --build . -j$(nproc)
 cd ../bin && ./OpenKKND
 ```
+
+### Package
+
+Copy `/bin/OpenKKND` to your KKnD installation folder.
+
+Create `config.txt` file in the game directory to set your desired resolution (see [Configuration](#configuration)).
+
 
 ## 🚀 Purpose
 
