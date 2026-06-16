@@ -64,7 +64,7 @@ pacman -Su mingw-w64-i686-gcc mingw-w64-i686-SDL2 mingw-w64-i686-dsound make cma
 
 ```sh
 cd /home/
-git clone https://github.com/kresimir/OpenKKND.git
+git clone https://github.com/kresimirv/OpenKKND.git
 cd OpenKKND
 git checkout hd_resolution
 rm -rf build
@@ -98,7 +98,7 @@ cd $HOME/.local/SDL2-install/lib && ln -sf libSDL2-2.0.so.0 libSDL2-2.0.so
 
 ### Build project
 ```sh
-git clone https://github.com/kresimir/OpenKKND.git
+git clone https://github.com/kresimirv/OpenKKND.git
 cd OpenKKND
 git checkout hd_resolution
 mkdir -p build && cd build
