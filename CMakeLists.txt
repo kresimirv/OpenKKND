@@ -43,7 +43,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
 endif()
 
-set(SDL2_CUSTOM_PREFIX "/tmp/SDL2-install")
+set(SDL2_CUSTOM_PREFIX "/tmp/SDL2-install" CACHE PATH "SDL2 installation prefix")
 message("-------------------------")
 message("SDL2:")
 if(WIN32)
