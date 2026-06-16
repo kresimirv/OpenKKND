@@ -10,27 +10,14 @@ All features are working except multiplayer which is not tested.
 ![Main Menu](screenshots/main_menu.png)
 ![Gameplay](screenshots/gameplay.png)
 
+# HD Resolution
+
 ### 🖥️ Supported Resolutions
 
 The engine now supports any custom resolution.
 
-# Build
 
-Clone the repository and checkout the desired branch:
-
-```sh
-git clone <repo_url>
-git checkout master
-```
-
-For HD resolution support use `hd_resolution` branch instead:
-
-```sh
-git checkout hd_resolution
-```
-
-# HD Resolution
-
+### Configuration
 Create `config.txt` in the game folder (same directory as `OpenKKND` executable) with any of the following options:
 
 | Option | Description |
@@ -45,6 +32,21 @@ Example `config.txt`:
 vga_resolution_width=1280
 vga_resolution_height=1024
 vga_fullscreen=1
+```
+
+# Build
+
+Clone the repository and checkout the desired branch:
+
+```sh
+git clone <repo_url>
+git checkout master
+```
+
+For HD resolution support use `hd_resolution` branch instead:
+
+```sh
+git checkout hd_resolution
 ```
 
 ## Windows (MSYS2 MINGW32)
@@ -64,6 +66,7 @@ pacman -Su mingw-w64-i686-gcc mingw-w64-i686-SDL2 mingw-w64-i686-dsound make cma
 cd /home/
 git clone https://github.com/kresimir/OpenKKND.git
 cd OpenKKND
+git checkout hd_resolution
 rm -rf build
 cmake -B build -S . -G "Unix Makefiles" \
   -DCMAKE_BUILD_TYPE=Release \
@@ -74,8 +77,11 @@ cmake -B build -S . -G "Unix Makefiles" \
 cmake --build build -j$(nproc)
 ```
 
-5. Copy `build/bin/OpenKKND.exe` and `SDLDIR/bin/SDL2.dll` to your KKnD installation folder
-6. Run `OpenKKND.exe`
+### Package
+
+Copy `/bin/OpenKKND.exe` and all `.dll` files from `C:\msys64\mingw32\bin` to your KKnD installation folder.
+
+Create `config.txt` file in the game directory to set your desired resolution (see [Configuration](#configuration)).
 
 ## Linux
 
@@ -92,6 +98,9 @@ cd $HOME/.local/SDL2-install/lib && ln -sf libSDL2-2.0.so.0 libSDL2-2.0.so
 
 ### Build project
 ```sh
+git clone https://github.com/kresimir/OpenKKND.git
+cd OpenKKND
+git checkout hd_resolution
 mkdir -p build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Debug -DSDL2_CUSTOM_PREFIX=$HOME/.local/SDL2-install
 cmake --build . -j$(nproc)
