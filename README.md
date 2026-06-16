@@ -47,14 +47,35 @@ vga_resolution_height=1024
 vga_fullscreen=1
 ```
 
-## Windows
-1. Install & configure vcpkg (https://github.com/Microsoft/vcpkg)
-2. Make sure VCPKG_ROOT env variable is set to vcpkg folder
-3. Make sure dumpbin.exe (part of the Visual Studio installation) is on the PATH (windows-only) to copy dependant libraries dlls via applocal.ps1
-4. Install sdl2 with vcpkg (vcpkg install sdl2:x86-windows)
-5. Set project output to your KKnD installation folder
-6. Build using any CMake-compatible IDE or command line (Visual Studio will do)
-7. Run
+## Windows (MSYS2 MINGW32)
+
+1. Install [MSYS2](https://www.msys2.org/)
+2. Open **MSYS2 MINGW32** (not MINGW64!)
+3. Install dependencies:
+
+```sh
+pacman -Syu              # update (close terminal after, reopen MINGW32)
+pacman -Su mingw-w64-i686-gcc mingw-w64-i686-SDL2 mingw-w64-i686-dsound make cmake git
+```
+
+4. Build:
+
+```sh
+cd /home/
+git clone https://github.com/kresimir/OpenKKND.git
+cd OpenKKND
+rm -rf build
+cmake -B build -S . -G "Unix Makefiles" \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DWIN32=TRUE \
+  -DSDL2_INCLUDE_DIR=/mingw32/include \
+  -DSDL2_LIBRARY=/mingw32/lib/libSDL2.dll.a \
+  -DSDL2_MAIN=/mingw32/lib/libSDL2main.a
+cmake --build build -j$(nproc)
+```
+
+5. Copy `build/bin/OpenKKND.exe` and `SDLDIR/bin/SDL2.dll` to your KKnD installation folder
+6. Run `OpenKKND.exe`
 
 ## Linux
 

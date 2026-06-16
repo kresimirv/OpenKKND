@@ -254,14 +254,15 @@ void VIDEO_40D090(VideoFile *video)
     int bits_per_sample = (video->header.field_18 & 0xFF) != 8 ? 16 : 8;
     int channels = (video->header.field_18 & 0x100) ? 2 : 1;
 
-    SDL_AudioSpec desired;
+    SDL_AudioSpec desired, obtained;
     SDL_zero(desired);
+    SDL_zero(obtained);
     desired.freq = video->header._14_looks_like_fps;
     desired.format = (bits_per_sample == 8) ? AUDIO_U8 : AUDIO_S16SYS;
     desired.channels = channels;
     desired.samples = 4096;
 
-    sdl_video_audio_dev = SDL_OpenAudioDevice(nullptr, 0, &desired, nullptr, SDL_AUDIO_ALLOW_ANY_CHANGE);
+    sdl_video_audio_dev = SDL_OpenAudioDevice(nullptr, 0, &desired, &obtained, 0);
     if (!sdl_video_audio_dev)
     {
         fprintf(stderr, "VIDEO_40D090: SDL_OpenAudioDevice failed: %s\n", SDL_GetError());
@@ -533,7 +534,6 @@ void VIDEO_Clean(VideoFile *video)
 //----- (0045A070) --------------------------------------------------------
 int VIDEO_ReadNextFrame(VideoFile *a1)
 {
-    VideoFileFrame *v1; // edi@3
     int v2; // edx@6
     int result; // eax@8
 
@@ -542,12 +542,10 @@ int VIDEO_ReadNextFrame(VideoFile *a1)
         fseek(a1->file, a1->data_offset, 0);
         a1->header.current_frame = 0;
     }
-    v1 = &a1->_744_frame;
     if (a1->header.current_frame)
-        v1->frame_size = *(int *)((char *)&a1->_744_frame.frame_size + v1->frame_size);
-    else
-        fread(&a1->_744_frame, 4u, 1u, a1->file);
-    v2 = v1->frame_size;
+        fseek(a1->file, -4, SEEK_CUR);
+    fread(&a1->_744_frame, 4u, 1u, a1->file);
+    v2 = a1->_744_frame.frame_size;
     if (a1->header.current_frame == a1->header.num_frames - 1)
         v2 -= 4;
     fread(&a1->_744_frame.field_4, v2, 1u, a1->file);
