@@ -553,3 +553,9 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
           _47C380_mapd.mapd_cplc_render_y = cmax_y << 8;
   }
   ```
+
+### Video Audio Fix — FMV Sound Now Plays
+
+- **Root cause 1** (`VIDEO_ReadNextFrame`, `Video.cpp:534-554`): frames 1+ read `frame_size` from the buffer linked list (`*(int *)(_744_frame + old_frame_size)`) instead of from the file. Although functionally correct, this fragile approach was eliminated for consistency: `frame_size` is now read from the file for ALL frames, using `fseek(file, -4, SEEK_CUR)` before each frame 1+ to compensate for the file position being 4 bytes past the next frame_size header after the previous frame's data read.
+
+- **Root cause 2** (`VIDEO_40D090`, `Video.cpp:252-274`): `SDL_OpenAudioDevice` was called with `SDL_AUDIO_ALLOW_ANY_CHANGE` and a null obtained spec, allowing SDL to silently change the audio format (sample rate, bit depth, channels) without the caller knowing. `SDL_QueueAudio` then sent data in the desired format while the device expected a different format, producing silence. **Fix**: removed `SDL_AUDIO_ALLOW_ANY_CHANGE` (use `0`) and pass a real `obtained` spec. If SDL cannot match the format exactly, `SDL_OpenAudioDevice` returns 0 (failure). A format mismatch warning is logged to stderr if the obtained spec differs from desired.
