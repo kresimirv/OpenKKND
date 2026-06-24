@@ -39,13 +39,16 @@ vga_fullscreen=1
 Clone the repository and checkout the desired branch:
 
 ```sh
-git clone <repo_url>
+git clone https://github.com/kresimirv/OpenKKND.git
+cd OpenKKND
 git checkout master
 ```
 
 For HD resolution support use `hd_resolution` branch instead:
 
 ```sh
+git clone https://github.com/kresimirv/OpenKKND.git
+cd OpenKKND
 git checkout hd_resolution
 ```
 
@@ -60,7 +63,7 @@ pacman -Syu              # update (close terminal after, reopen MINGW32)
 pacman -Su mingw-w64-i686-gcc mingw-w64-i686-SDL2 mingw-w64-i686-dsound make cmake git
 ```
 
-4. Build:
+4. Clone & Build:
 
 ```sh
 cd /home/
@@ -96,7 +99,7 @@ make install
 cd $HOME/.local/SDL2-install/lib && ln -sf libSDL2-2.0.so.0 libSDL2-2.0.so
 ```
 
-### Build project
+### Clone & Build project
 ```sh
 git clone https://github.com/kresimirv/OpenKKND.git
 cd OpenKKND
