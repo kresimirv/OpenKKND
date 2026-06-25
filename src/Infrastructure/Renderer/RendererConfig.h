@@ -13,5 +13,6 @@ namespace Infrastructure {
         int width = 640;
         int height = 480;
         bool fullscreen = false;
+        bool stretch = true;
     };
 };

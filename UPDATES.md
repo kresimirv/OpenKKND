@@ -559,3 +559,11 @@ Root cause: `IDirectSoundBuffer::Play()` (`DirectSoundSdl2.h:263-264`) performed
 - **Root cause 1** (`VIDEO_ReadNextFrame`, `Video.cpp:534-554`): frames 1+ read `frame_size` from the buffer linked list (`*(int *)(_744_frame + old_frame_size)`) instead of from the file. Although functionally correct, this fragile approach was eliminated for consistency: `frame_size` is now read from the file for ALL frames, using `fseek(file, -4, SEEK_CUR)` before each frame 1+ to compensate for the file position being 4 bytes past the next frame_size header after the previous frame's data read.
 
 - **Root cause 2** (`VIDEO_40D090`, `Video.cpp:252-274`): `SDL_OpenAudioDevice` was called with `SDL_AUDIO_ALLOW_ANY_CHANGE` and a null obtained spec, allowing SDL to silently change the audio format (sample rate, bit depth, channels) without the caller knowing. `SDL_QueueAudio` then sent data in the desired format while the device expected a different format, producing silence. **Fix**: removed `SDL_AUDIO_ALLOW_ANY_CHANGE` (use `0`) and pass a real `obtained` spec. If SDL cannot match the format exactly, `SDL_OpenAudioDevice` returns 0 (failure). A format mismatch warning is logged to stderr if the obtained spec differs from desired.
+
+### Config — vga_stretch Property
+
+- **Config** (`Config.h:8`, `Config.cpp:8,33-34`): Added `static bool vga_stretch` defaulting to `true`. Parsed from `config.txt` as `vga_stretch=0` or `vga_stretch=1`.
+- **RendererConfig** (`RendererConfig.h:16`): Added `bool stretch = true` field.
+- **RendererConfigFactory** (`RendererConfigFactory.h`): Added `stretch` parameter to `Create()`.
+- **SdlRenderer** (`SdlRenderer.cpp:25-31,66-91`): When `stretch` is true, `DrawImageCentered` fills the entire window instead of centering the image at original size. The `Initialize` method preserves the `stretch` flag when recreating the config for fullscreen mode.
+- **Game startup** (`Game.cpp:90,100`): Passes `Config::vga_stretch` to `RendererConfigFactory::Create`.

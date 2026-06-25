@@ -87,6 +87,7 @@ void Game::Run() {
     int window_width = Config::vga_width;
     int window_height = Config::vga_height;
     bool fullscreen = Config::vga_fullscreen;
+    bool stretch = Config::vga_stretch;
 
     auto windowObserver = std::make_shared<GameWindowObserver>(shared_from_this());
     auto windowConfig = WindowConfigFactory().Create(
@@ -95,7 +96,7 @@ void Game::Run() {
     window = WindowFactory().CreateSdlWindow(windowConfig, windowObserver);
     ::gWindow = window;
 
-    auto rendererConfig = RendererConfigFactory().Create("SDL2", window, window_width, window_height, fullscreen);
+    auto rendererConfig = RendererConfigFactory().Create("SDL2", window, window_width, window_height, fullscreen, stretch);
     renderer = RendererFactory().CreateSdl2(rendererConfig);
     ::gRenderer = renderer;
 

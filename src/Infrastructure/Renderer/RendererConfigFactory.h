@@ -13,7 +13,8 @@ namespace Infrastructure {
             std::shared_ptr<Window> window,
             int width,
             int height,
-            bool fullscreen
+            bool fullscreen,
+            bool stretch = true
         ) {
             auto config = std::make_shared<RendererConfig>();
             
@@ -23,6 +24,7 @@ namespace Infrastructure {
                 config->width = width;
                 config->height = height;
                 config->fullscreen = fullscreen;
+                config->stretch = stretch;
             }
 
             return config;

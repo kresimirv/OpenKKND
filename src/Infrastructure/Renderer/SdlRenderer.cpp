@@ -27,7 +27,8 @@ bool SdlRenderer::Initialize() {
             config->window,
             config->window->GetWidth(),
             config->window->GetHeight(),
-            config->fullscreen
+            config->fullscreen,
+            config->stretch
         );
     } else {
         config->window->SetWidth(config->width);
@@ -66,8 +67,6 @@ void SdlRenderer::Present() {
 void SdlRenderer::DrawImageCentered(int imageWidth, int imageHeight, const void *imagePixels) {
     int windowWidth = config->window->GetWidth();
     int windowHeight = config->window->GetHeight();
-    int draw_x = windowWidth / 2 - imageWidth / 2;
-    int draw_y = windowHeight / 2 - imageHeight / 2;
 
     auto surface = SDL_CreateRGBSurfaceFrom(
         (void *)imagePixels, imageWidth, imageHeight, 32, 4 * imageWidth,
@@ -82,7 +81,14 @@ void SdlRenderer::DrawImageCentered(int imageWidth, int imageHeight, const void 
         if (texture == nullptr) {
             log->Info("SdlRenderer::DrawImageCentered: Creating texture failed: %s", SDL_GetError());
         } else {
-            SDL_Rect dstRect = { draw_x, draw_y, imageWidth, imageHeight };
+            SDL_Rect dstRect;
+            if (config->stretch) {
+                dstRect = { 0, 0, windowWidth, windowHeight };
+            } else {
+                int draw_x = windowWidth / 2 - imageWidth / 2;
+                int draw_y = windowHeight / 2 - imageHeight / 2;
+                dstRect = { draw_x, draw_y, imageWidth, imageHeight };
+            }
             SDL_RenderCopy(renderer, texture, nullptr, &dstRect);
 
             SDL_DestroyTexture(texture);
