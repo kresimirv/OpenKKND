@@ -25,6 +25,7 @@ Create `config.txt` in the game folder (same directory as `OpenKKND` executable)
 | `vga_resolution_width` | Resolution width |
 | `vga_resolution_height` | Resolution height |
 | `vga_fullscreen` | Fullscreen mode (1 = fullscreen, 0 = window mode) |
+| `vga_stretch` | Stretch VGA resolution to full window (1 = stretch, 0 = centered) |
 
 Example `config.txt`:
 
