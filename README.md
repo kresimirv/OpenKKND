@@ -55,12 +55,12 @@ git checkout hd_resolution
 ## Windows (MSYS2 MINGW32)
 
 1. Install [MSYS2](https://www.msys2.org/)
-2. Open **MSYS2 MINGW32** (not MINGW64!)
+2. Open **MSYS2 MINGW32** (not MINGW64!) - run C:\msys64\mingw32.exe
 3. Install dependencies:
 
 ```sh
 pacman -Syu              # update (close terminal after, reopen MINGW32)
-pacman -Su mingw-w64-i686-gcc mingw-w64-i686-SDL2 mingw-w64-i686-dsound make cmake git
+pacman -Su mingw-w64-i686-gcc mingw-w64-i686-SDL2 make cmake git
 ```
 
 4. Clone & Build:

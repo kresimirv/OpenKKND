@@ -53,9 +53,9 @@ add_library(Video ${CMAKE_CURRENT_LIST_DIR}/Video.h ${CMAKE_CURRENT_LIST_DIR}/Vi
 
 if(WIN32)
   if(MSVC)
-    target_link_libraries(Audio winmm.lib dsound.lib)
+    target_link_libraries(Audio winmm.lib)
   else()
-    target_link_libraries(Audio -lwinmm -ldsound)
+    target_link_libraries(Audio -lwinmm)
   endif()
 endif()
 
