@@ -5,6 +5,12 @@ All features are working except multiplayer which is not tested.
 - `master` branch — original game
 - `hd_resolution` branch — HD resolution supported game
 
+## Windows Install (Pre-built Release)
+
+Download the latest Winx86_64 release from https://github.com/kresimirv/OpenKKND/releases and extract it to your KKND Xtreme folder.
+
+Edit `config.txt` in the game directory to set your desired resolution (see [Configuration](#configuration)).
+
 ## Screenshots
 
 ![Main Menu](screenshots/main_menu.png)
