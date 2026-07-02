@@ -1312,7 +1312,7 @@ int VIDEO_Play(int id)
     {
         draw_list_alloc();
         gRenderer->ClearTarget(64, 64, 64);
-        sprintf(a1, (const char *)aSFmvMh_fmv_vbc, app_root_dir);
+        sprintf(a1, (const char *)aSFmvMh_fmv_vbc, game_data_installation_dir);
         if (VIDEO_ReadAndAllocDrawJob(a1, 0, 0, 100) == 1 && !VIDEO_IsVideoInvalid())
         {
             video_477978_draw_job->job_details.x = (render_width - 640) / 2;
@@ -1333,7 +1333,7 @@ int VIDEO_Play(int id)
         }
     LABEL_37:
         stru1_set_animation(0, 0, 0x80000000, 0);
-        sprintf(a1, (const char *)aSFmvS, app_root_dir, intro_vbc);
+        sprintf(a1, (const char *)aSFmvS, game_data_installation_dir, intro_vbc);
         if (VIDEO_ReadAndAllocDrawJob(a1, 0, 0, 100) != 1 || VIDEO_IsVideoInvalid())
             goto LABEL_43;
         video_477978_draw_job->job_details.x = (render_width - 640) / 2;
@@ -1361,7 +1361,7 @@ int VIDEO_Play(int id)
             v2 = (char **)aEvolvout_vbc;
         strcpy(v14, (const char *)v2);
         draw_list_alloc();
-        sprintf(a1, (const char *)aSFmvS, app_root_dir, v14);
+        sprintf(a1, (const char *)aSFmvS, game_data_installation_dir, v14);
         if (VIDEO_ReadAndAllocDrawJob(a1, 0, 0, 100) != 1 || VIDEO_IsVideoInvalid())
         {
         LABEL_43:
@@ -1428,7 +1428,7 @@ int VIDEO_Play(int id)
                 _47C380_mapd.mapd_cplc_render_y = -(briefing_oy << 8);
                 __47C380_mapd_cplc_item0_ptr_field_4_minus_3FFF = _47C380_mapd.mapd_cplc_render_x - 0x3FFF;
                 _47C384_mapd_cplc_item0_ptr_field_8_minus_3FFF = _47C380_mapd.mapd_cplc_render_y - 0x3FFF;
-                sprintf(v14, (const char *)aSFmvS, app_root_dir, levels[current_level_idx].vbc_filename);
+                sprintf(v14, (const char *)aSFmvS, game_data_installation_dir, levels[current_level_idx].vbc_filename);
                 v9 = render_create_stru1(0, 38 + briefing_ox, 31 + briefing_oy, 320, 240);
                 v10 = render_create_stru1(0, 240 + briefing_ox, 313 + briefing_oy, 160, 128);
                 v11 = render_string_create(0, currently_running_lvl_mobd[26].items, 400 + briefing_ox, 40 + briefing_oy, 25, 28, 90, 8, 8);

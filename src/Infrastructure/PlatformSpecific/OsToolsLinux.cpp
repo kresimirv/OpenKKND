@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <time.h>
 #include <thread>
 
@@ -84,7 +85,14 @@ void OsGetApplicationConfig(
 ) {
     *installation_drive_letter = '.';
     *is_minimal_install = 1;
-    std::string exe_dir = OsGetExecutableDirectory();
-    strncpy(game_data_installation_dir, exe_dir.c_str(), 255);
-    game_data_installation_dir[255] = '\0';
+
+    const char *env_data_dir = getenv("OPENKKND_DATA_DIR");
+    if (env_data_dir && env_data_dir[0]) {
+        strncpy(game_data_installation_dir, env_data_dir, 255);
+        game_data_installation_dir[255] = '\0';
+    } else {
+        std::string exe_dir = OsGetExecutableDirectory();
+        strncpy(game_data_installation_dir, exe_dir.c_str(), 255);
+        game_data_installation_dir[255] = '\0';
+    }
 }

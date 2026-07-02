@@ -1,5 +1,7 @@
 #include <assert.h>
 #include <time.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include "src/kknd.h"
 
@@ -15349,6 +15351,13 @@ int main(int argc, char* argv[])
 {
     OsInitConsole();
     OsInitTimer();
+
+    for (int i = 1; i < argc - 1; i++) {
+        if (!strcmp(argv[i], "--data-path")) {
+            setenv("OPENKKND_DATA_DIR", argv[i + 1], 1);
+            break;
+        }
+    }
 
     GameFactory gameFactory;
     auto game = gameFactory.Create();

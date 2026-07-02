@@ -53,6 +53,7 @@ std::shared_ptr<Window> gWindow = nullptr;
 bool is_mission_running = false;
 
 #include <signal.h>
+#include <stdlib.h>
 #ifndef _WIN32
 #include <execinfo.h>
 static void crash_handler(int sig) {
@@ -80,8 +81,13 @@ void Game::Run() {
     signal(SIGILL, crash_handler);
 
     {
-        std::string exe_dir = OsGetExecutableDirectory();
-        Config::load(exe_dir.c_str());
+        const char *env_data_dir = getenv("OPENKKND_DATA_DIR");
+        if (env_data_dir && env_data_dir[0]) {
+            Config::load(env_data_dir);
+        } else {
+            std::string exe_dir = OsGetExecutableDirectory();
+            Config::load(exe_dir.c_str());
+        }
     }
 
     int window_width = Config::vga_width;
