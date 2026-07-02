@@ -11,6 +11,23 @@ Download the latest Winx86_64 release from https://github.com/kresimirv/OpenKKND
 
 Edit `config.txt` in the game directory to set your desired resolution (see [Configuration](#configuration)).
 
+## Linux Install (Pre-built Release)
+
+Download the latest `OpenKKND_Linux_x86_64_v*.AppImage` from Releases.
+
+Make executable and run:
+
+```sh
+chmod +x OpenKKND_Linux_x86_64_v*.AppImage
+OPENKKND_DATA_DIR=/path/to/KKND ./OpenKKND_Linux_x86_64_v*.AppImage
+```
+
+Set `OPENKKND_DATA_DIR` to your KKnD installation folder containing `FMV/` and `LEVELS/` directories.
+
+Edit `config.txt` in that same folder (if folder or file doesn't exist, create them) to set your desired resolution (see [Configuration](#configuration)).
+
+No dependencies needed — everything is bundled inside the AppImage.
+
 ## Screenshots
 
 ![Main Menu](screenshots/main_menu.png)
@@ -123,6 +140,30 @@ Copy `/bin/OpenKKND` to your KKnD installation folder.
 
 Create `config.txt` file in the game directory to set your desired resolution (see [Configuration](#configuration)).
 
+### AppImage
+
+Build a portable self-contained AppImage (no dependencies needed at runtime):
+
+**Debian/Ubuntu-based:**
+
+```sh
+sudo apt install build-essential cmake patchelf squashfs-tools
+```
+
+**Arch-based:**
+
+```sh
+sudo pacman -S base-devel cmake patchelf squashfs-tools
+```
+
+Then run:
+
+```sh
+git clone https://github.com/kresimirv/OpenKKND.git
+cd OpenKKND
+git checkout hd_resolution
+./build-linux-appimage.sh
+```
 
 ## 🚀 Purpose
 
