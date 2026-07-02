@@ -15354,7 +15354,11 @@ int main(int argc, char* argv[])
 
     for (int i = 1; i < argc - 1; i++) {
         if (!strcmp(argv[i], "--data-path")) {
+#ifdef _WIN32
+            _putenv_s("OPENKKND_DATA_DIR", argv[i + 1]);
+#else
             setenv("OPENKKND_DATA_DIR", argv[i + 1], 1);
+#endif
             break;
         }
     }
