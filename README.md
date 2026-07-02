@@ -110,23 +110,6 @@ Copy `/bin/OpenKKND.exe` and all `.dll` files from `C:\msys64\mingw32\bin` to yo
 
 Create `config.txt` file in the game directory to set your desired resolution (see [Configuration](#configuration)).
 
-### Linux Install (Pre-built Release)
-
-Download the latest `OpenKKND_Linux_x86_64_v*.AppImage` from Releases.
-
-Make executable and run:
-
-```sh
-chmod +x OpenKKND_Linux_x86_64_v*.AppImage
-OPENKKND_DATA_DIR=/path/to/KKND ./OpenKKND_Linux_x86_64_v*.AppImage
-```
-
-Set `OPENKKND_DATA_DIR` to your KKnD installation folder containing `FMV/` and `LEVELS/` directories.
-
-Create a `config.txt` in that same folder to set your desired resolution (see [Configuration](#configuration)).
-
-No dependencies needed — everything is bundled inside the AppImage.
-
 ## Linux
 
 ### Build SDL2 (32-bit)
